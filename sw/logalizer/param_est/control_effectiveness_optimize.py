@@ -93,7 +93,7 @@ def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_
         exit(1)
 
     if p0 is None:
-        p0 = np.hstack((np.array([1., 1.]), np.zeros(order))) # start from random non-zero value
+        p0 = np.hstack((np.array([0.035, .018]), np.zeros(order))) # start from random non-zero value
 
     ddy = diff_signal(y, freq, order, filt)
     p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(x, ddy[-1]), full_output=1)
