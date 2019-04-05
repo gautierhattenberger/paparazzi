@@ -59,8 +59,7 @@ def diff_signal(signal, freq, order=1, filt=None):
     res = [signal]
     nb = np.shape(signal)[1]
     for i in range(order):
-        print(res[-1])
-        sigd = np.vstack((np.zeros((1,nb), np.diff(res[-1], 1, axis=0)))) * freq
+        sigd = np.vstack((np.zeros((1,nb)), np.diff(res[-1], 1, axis=0))) * freq
         res.append(sigd)
     return res
 
@@ -70,7 +69,7 @@ def cmd_model(c, p, freq, actuator_model, filt=None):
     '''
     ca = actuator_model(c, p[0])
     dca = diff_signal(ca, freq, 1, filt)
-    return (p[1] * dca + p[2]*np.ones(np.shape(dca)))
+    return (p[1] * dca[1] + p[2]*np.ones(np.shape(dca[1])))
 
 def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_order_model):
     '''
@@ -97,7 +96,7 @@ def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_
         p0 = np.hstack((np.array([1., 1.]), np.zeros(order))) # start from random non-zero value
 
     ddy = diff_signal(y, freq, order, filt)
-    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(x, ddy), full_output=1)
+    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(x, ddy[-1]), full_output=1)
     print(p1, success)
     return p1
 
@@ -106,6 +105,7 @@ def plot_results(x, y, t, label):
     '''
     plot two curves for comparison
     '''
+    print(np.shape(x), np.shape(y), np.shape(t))
     plt.figure()
     plt.plot(t, x)
     plt.plot(t, y)
@@ -142,10 +142,10 @@ def process_data(f_name, start, end, freq, fo_c=None):
 
     # Optimization for each channels
     p_gyro = optimize_axis(cmd[start:end,[CMD_ROLL]], gyro[start:end,[GYRO_P]], freq, 1, filt)
-    roll_cmd = cmd_model(cmd, p_gyro, freq, first_order_model, filt)
+    roll_cmd = cmd_model(cmd[:,[CMD_ROLL]], p_gyro, freq, first_order_model, filt)
 
     # Plot
-    plot_results(roll_cmd, gyro_df, t, 'p dot dot [rad/s^3]')
+    plot_results(roll_cmd, gyro_df[-1][:,[CMD_ROLL]], t, 'p dot dot [rad/s^3]')
 
     # Show all plots
     plt.show()
