@@ -59,6 +59,7 @@ def diff_signal(signal, freq, order=1, filt=None):
     res = [signal]
     nb = np.shape(signal)[1]
     for i in range(order):
+        print(res[-1])
         sigd = np.vstack((np.zeros((1,nb), np.diff(res[-1], 1, axis=0)))) * freq
         res.append(sigd)
     return res
