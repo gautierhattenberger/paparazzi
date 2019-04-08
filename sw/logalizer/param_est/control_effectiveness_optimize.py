@@ -63,13 +63,18 @@ def diff_signal(signal, freq, order=1, filt=None):
         res.append(sigd)
     return res
 
-def cmd_model(c, p, freq, actuator_model, filt=None):
+def cmd_model(c, p, freq, actuator_model, filt=None, order=1):
     '''
     apply actuator model, derivate and scale
     '''
     ca = actuator_model(c, p[0])
-    dca = diff_signal(ca, freq, 1, filt)
-    return (p[1] * dca[1] + p[2]*np.ones(np.shape(dca[1])))
+    if order == 1:
+        dca = diff_signal(ca, freq, 1, filt)
+        return (p[1] * dca[1] + p[2]*np.ones(np.shape(dca[1])))
+    elif order == 2:
+        dca = diff_signal(ca, freq, 2, filt)
+        return ((p[3] * dca[2]) + p[1] * dca[1] + p[2]*np.ones(np.shape(dca[1])))
+
 
 def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_order_model):
     '''
@@ -84,8 +89,9 @@ def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_
 
         computes the error between the scaled command derivate and the measurements
         '''
-        mdl = cmd_model(c, p, freq, actuator_model, filt)
-        err = np.hstack((mdl,mdl,mdl)) - m
+        mdl = cmd_model(c, p, freq, actuator_model, filt, order)
+        #err = np.hstack((mdl,mdl,mdl)) - m
+        err = mdl - m
         #print("e",np.shape(mdl),np.shape(m),np.shape(err))
         #print(p,np.shape(m),np.shape(mdl))
         #plt.figure()
@@ -113,7 +119,7 @@ def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_
     return p1
 
 
-def plot_results(x, y, t, label):
+def plot_results(x, y, t, start, end, label):
     '''
     plot two curves for comparison
     '''
@@ -122,6 +128,10 @@ def plot_results(x, y, t, label):
     plt.plot(t, y)
     plt.plot(t, x)
     plt.xlabel('t [s]')
+    plt.ylabel(label)
+    plt.figure()
+    plt.plot(x[start:end], y[start:end])
+    plt.xlabel('command [pprz]')
     plt.ylabel(label)
 
 
@@ -152,7 +162,7 @@ def process_data(f_name, start, end, freq, fo_c=None):
     # Measurements derivates + filter
     gyro_df = diff_signal(gyro, freq, 2, filt)
     accel_df = diff_signal(accel, freq, 1, filt)
-    print("g", np.shape(gyro_df))
+    #print("g", np.shape(gyro_df))
 
     # Optimization for each channels
     p_roll = optimize_axis(cmd[start:end,[CMD_ROLL]], gyro_df[-1][start:end,[GYRO_P]], freq, 1, filt)
@@ -161,17 +171,18 @@ def process_data(f_name, start, end, freq, fo_c=None):
     p_pitch = optimize_axis(cmd[start:end,[CMD_PITCH]], gyro_df[-1][start:end,[GYRO_Q]], freq, 1, filt)
     pitch_cmd = cmd_model(cmd[:,[CMD_PITCH]], p_pitch, freq, first_order_model, filt)
 
-    p_yaw = optimize_axis(cmd[start:end,[CMD_YAW]], gyro_df[-1][start:end,[GYRO_R]], freq, 1, filt)
-    yaw_cmd = cmd_model(cmd[:,[CMD_YAW]], p_yaw, freq, first_order_model, filt)
+    p_yaw = optimize_axis(cmd[start:end,[CMD_YAW]], gyro_df[-1][start:end,[GYRO_R]], freq, 2, filt)
+    yaw_cmd = cmd_model(cmd[:,[CMD_YAW]], p_yaw, freq, first_order_model, filt, 2)
 
     p_thrust = optimize_axis(cmd[start:end,[CMD_THRUST]], accel_df[-1][start:end,[ACCEL_Z]], freq, 1, filt)
-    thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], [0.01682614, -2.36359587/1000, 0], freq, first_order_model, filt)
+    thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], p_thrust, freq, first_order_model, filt)
+    #thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], [0.01682614, -2.36359587/1000, 0], freq, first_order_model, filt)
 
     # Plot
-    plot_results(roll_cmd, gyro_df[-1][:,[GYRO_P]], t, 'p dot dot [rad/s^3]')
-    plot_results(pitch_cmd, gyro_df[-1][:,[GYRO_Q]], t, 'p dot dot [rad/s^3]')
-    plot_results(yaw_cmd, gyro_df[-1][:,[GYRO_R]], t, 'q dot dot [rad/s^3]')
-    plot_results(thrust_cmd, accel_df[-1][:,[ACCEL_Z]], t, 'az dot [m/s^3]')
+    plot_results(roll_cmd, gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
+    plot_results(pitch_cmd, gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
+    plot_results(yaw_cmd, gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
+    plot_results(thrust_cmd, accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [m/s^3]')
 
     # Show all plots
     plt.show()
@@ -216,70 +227,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-## Do a linear least squares fit of the data
-#def fit_axis(x,y,t, axis, start, end):
-#    c = np.linalg.lstsq(x[start:end], y[start:end])[0]
-#    print('Fit of axis ' + axis + ': ' + str(c*1000))
-#    plt.figure()
-#    plt.plot(t,y)
-#    plt.plot(t,np.dot(x,c))
-#    plt.ylabel(axis + ' dotdot[rad/s^3]')
-#    plt.xlabel('t [s]')
-#    return c
-
-    #p1, cov, info, msg, success = optimize.leastsq(err_func, np.array([0.035, 0.018]), args=(cmd, meas), full_output=1, factor=0.1) #, bounds=([-np.inf, np.inf, 0.01],[np.inf,np.inf,1.]))
-
-    #dcmd_af, ddmeas_f = deriv_signals(p1, x, y)
-    #plt.figure()
-    #c = p1[0]*dcmd_af + p1[1]*np.ones(np.shape(dcmd_af))
-    ##print(np.shape(c), np.shape(t))
-    #plt.plot(t,ddmeas_f)
-    #plt.plot(t,c)
-    #plt.ylabel(axis + ' dotdot[rad/s^3] (optim)')
-    #plt.xlabel('t [s] (optim)')
-
-    #def deriv_signals(p, cmd, meas):
-    #    cmd_a = sp.signal.lfilter([p[2]], [1, -(1-p[2])], cmd, axis=0)
-    #    cmd_af = sp.signal.lfilter(filt[0], filt[1], cmd_a, axis=0)
-    #    dcmd_af = np.vstack((np.zeros((1,1)), np.diff(cmd_af,1,axis=0)))*freq
-    #    meas_f = sp.signal.lfilter(filt[0], filt[1], meas, axis=0)
-    #    dmeas_f = np.vstack((np.zeros((1,1)), np.diff(meas_f,1,axis=0)))*freq
-    #    ddmeas_f = np.vstack((np.zeros((1,1)), np.diff(dmeas_f,1,axis=0)))*freq
-    #    return (dcmd_af, ddmeas_f)
-
-    ### Actuator dynamics
-    ##cmd_a = sp.signal.lfilter([fo_c], [1, -(1-fo_c)], cmd, axis=0)
-    ###servotest_a = sp.signal.lfilter([fo_c], [1, -(1-fo_c)], servotest, axis=0)
-
-    ### b, a = signal.butter(2, 7/(sf/2), 'low', analog=False)
-    ### servotest_a = sp.signal.lfilter(b, a, servotest, axis=0)
-    ### servotest_a = actuator_dyn_2nd(servotest, 0.8, 70, 1/sf, 60000, 10000000)
-
-    ##gyro_f = sp.signal.lfilter(b, a, gyro, axis=0)
-    ##cmd_af = sp.signal.lfilter(b, a, cmd_a, axis=0)
-    ##accel_f = sp.signal.lfilter(b, a, accel, axis=0)
-
-    ### derivatives
-    ##dgyro_f = np.vstack((np.zeros((1,3)), np.diff(gyro_f,1,axis=0)))*freq
-    ##ddgyro_f = np.vstack((np.zeros((1,3)), np.diff(dgyro_f,1,axis=0)))*freq
-    ##daccel_f = np.vstack((np.zeros((1,3)), np.diff(accel_f,1,axis=0)))*freq
-    ##dcmd_af = np.vstack((np.zeros((1,4)), np.diff(cmd_af,1,axis=0)))*freq
-    ##ddcmd_af = np.vstack((np.zeros((1,4)), np.diff(dcmd_af,1,axis=0)))*freq
-
-    ### Estimation of the control effectiveness
-    ###c = fit_axis(dcmd_af[:,0:4], ddgyro_f[:,[0]], t, 'p', start, end) # 0, N)
-    ###c = fit_axis(dcmd_af[:,0:4], ddgyro_f[:,[1]], t, 'q', start, end) # 0, N)
-    ###c = fit_axis(dcmd_af[:,0:4], daccel_f[:,[2]], t, 'accel', start, end)
-    ### Use all commands, to see if there is crosstalk
-    ###c = fit_axis(np.hstack((dcmd_af[:,0:4], ddcmd_af[:,0:4]/freq)), ddgyro_f[:,[2]], t, 'r', start, end) # 0, end)
-
-    #plt.figure()
-    #plt.plot(t,cmd[:,1:2])
-    #plt.plot(t,cmd_af[:,1:2])
-    #plt.plot(t,dcmd_af[:,1:2])
-    #plt.plot(t,dcmd_af[:,1:2]*0.035)
-    #plt.plot(t,ddgyro_f[:,0:1])
-    #plt.xlabel('t [s]')
-    #plt.ylabel('command [PPRZ]')
 
