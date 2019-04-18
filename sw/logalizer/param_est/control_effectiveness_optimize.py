@@ -78,7 +78,7 @@ def cmd_model(c, p, freq, actuator_model, filt=None, order=1):
 
 def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_order_model):
     '''
-    global optimization function
+    global optimization function (single axis)
     '''
 
     def err_func(p, c, m):
@@ -116,6 +116,60 @@ def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_
     #plt.plot(ddy[2])
     p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(x, y), full_output=1)
     print(p1, success)
+    return p1
+
+def optimize_full(xs, ys, freq, filt=None, p0=None, actuator_model=first_order_model):
+    '''
+    global optimization for all axis (full effectiveness)
+    '''
+    nb_cmd = xs.shape[1]
+    nb_meas = ys.shape[1]
+
+    def err_func(p, c, m):
+        '''
+        p vector of parameters to optimize
+        c command vector
+        m measurement vector
+
+        computes the error between the scaled command derivate and the measurements
+        '''
+        tau = p[0]
+        m_eff = np.reshape(p[1:], (nb_meas, nb_cmd))
+        ca = actuator_model(c, tau)
+        dca = diff_signal(ca, freq, 1, filt)
+        #print(m_eff.shape,c.shape, m.shape, ca.shape, dca[-1].shape)
+
+        err = np.zeros((m.shape[0],1))
+        #print(err.shape)
+        for i in range(m.shape[0]):
+            #print(m_eff.shape,np.reshape(dca[-1][i,:].T,(4,1)).shape, m[i,:].shape)
+            r = m_eff * np.reshape(dca[-1][i,:],(nb_cmd,1)) - np.reshape(m[i,:],(nb_meas,1))
+            err[i] = sum(r.T[0])
+
+        #print(err)
+        #print(p)
+        #exit(0)
+
+        #plt.figure()
+        #plt.plot(m)
+        #plt.plot(mdl)
+        #plt.show()
+        return err[:,0]
+
+    if p0 is None:
+        p0 = np.hstack((np.array([.01]), np.zeros(nb_cmd*nb_meas))) # start from random non-zero value
+
+    #ddy = diff_signal(y, freq, order+1, filt)
+    #print(np.shape(ddy))
+    #plt.figure()
+    #plt.plot(y)
+    #plt.plot(ddy[0])
+    #plt.plot(ddy[1])
+    #plt.plot(ddy[2])
+    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(xs, ys), full_output=1)
+    print(p1[0])
+    print(np.reshape(p1[1:],(nb_meas,nb_cmd)))
+    print(success)
     return p1
 
 
@@ -165,18 +219,21 @@ def process_data(f_name, start, end, freq, fo_c=None):
     #print("g", np.shape(gyro_df))
 
     # Optimization for each channels
-    p_roll = optimize_axis(cmd[start:end,[CMD_ROLL]], gyro_df[-1][start:end,[GYRO_P]], freq, 1, filt)
-    roll_cmd = cmd_model(cmd[:,[CMD_ROLL]], p_roll, freq, first_order_model, filt)
+    #p_roll = optimize_axis(cmd[start:end,[CMD_ROLL]], gyro_df[-1][start:end,[GYRO_P]], freq, 1, filt)
+    #roll_cmd = cmd_model(cmd[:,[CMD_ROLL]], p_roll, freq, first_order_model, filt)
 
-    p_pitch = optimize_axis(cmd[start:end,[CMD_PITCH]], gyro_df[-1][start:end,[GYRO_Q]], freq, 1, filt)
-    pitch_cmd = cmd_model(cmd[:,[CMD_PITCH]], p_pitch, freq, first_order_model, filt)
+    #p_pitch = optimize_axis(cmd[start:end,[CMD_PITCH]], gyro_df[-1][start:end,[GYRO_Q]], freq, 1, filt)
+    #pitch_cmd = cmd_model(cmd[:,[CMD_PITCH]], p_pitch, freq, first_order_model, filt)
 
-    p_yaw = optimize_axis(cmd[start:end,[CMD_YAW]], gyro_df[-1][start:end,[GYRO_R]], freq, 2, filt)
-    yaw_cmd = cmd_model(cmd[:,[CMD_YAW]], p_yaw, freq, first_order_model, filt, 2)
+    #p_yaw = optimize_axis(cmd[start:end,[CMD_YAW]], gyro_df[-1][start:end,[GYRO_R]], freq, 2, filt)
+    #yaw_cmd = cmd_model(cmd[:,[CMD_YAW]], p_yaw, freq, first_order_model, filt, 2)
 
-    p_thrust = optimize_axis(cmd[start:end,[CMD_THRUST]], accel_df[-1][start:end,[ACCEL_Z]], freq, 1, filt)
-    thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], p_thrust, freq, first_order_model, filt)
-    #thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], [0.01682614, -2.36359587/1000, 0], freq, first_order_model, filt)
+    #p_thrust = optimize_axis(cmd[start:end,[CMD_THRUST]], accel_df[-1][start:end,[ACCEL_Z]], freq, 1, filt)
+    #thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], p_thrust, freq, first_order_model, filt)
+    ##thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], [0.01682614, -2.36359587/1000, 0], freq, first_order_model, filt)
+
+    # Full optimization
+    res = optimize_full(cmd[start:end,:], np.hstack((gyro_df[-1][start:end,:], accel_df[-1][start:end,[ACCEL_Z]])), freq, filt)
 
     # Plot
     plot_results(roll_cmd, gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
