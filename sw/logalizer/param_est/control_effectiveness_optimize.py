@@ -75,6 +75,15 @@ def cmd_model(c, p, freq, actuator_model, filt=None, order=1):
         dca = diff_signal(ca, freq, 2, filt)
         return ((p[3] * dca[2]) + p[1] * dca[1] + p[2]*np.ones(np.shape(dca[1])))
 
+def cmd_model_full(c, tau, eff, freq, actuator_model, filt=None):
+    nb_cmd = c.shape[1]
+    ca = actuator_model(c, tau)
+    dca = diff_signal(ca, freq, 1, filt)
+    res = np.zeros(np.shape(c))
+    for i in range(c.shape[0]):
+        #print(np.reshape(dca[-1][i,:],(nb_cmd,1)))
+        res[i,:] = np.dot(eff, np.reshape(dca[-1][i,:],(nb_cmd,1)))[0]
+    return res
 
 def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_order_model):
     '''
@@ -138,15 +147,23 @@ def optimize_full(xs, ys, freq, filt=None, p0=None, actuator_model=first_order_m
         ca = actuator_model(c, tau)
         dca = diff_signal(ca, freq, 1, filt)
         #print(m_eff.shape,c.shape, m.shape, ca.shape, dca[-1].shape)
+        #print(m_eff)
 
         err = np.zeros((m.shape[0],1))
         #print(err.shape)
         for i in range(m.shape[0]):
             #print(m_eff.shape,np.reshape(dca[-1][i,:].T,(4,1)).shape, m[i,:].shape)
-            r = m_eff * np.reshape(dca[-1][i,:],(nb_cmd,1)) - np.reshape(m[i,:],(nb_meas,1))
-            err[i] = sum(r.T[0])
+            #print('cmd',np.reshape(dca[-1][i,:],(nb_cmd,1)))
+            #print('meas',np.reshape(m[i,:],(nb_meas,1)))
+            #print('eff',m_eff)
+            #print('dot',np.dot(m_eff,np.reshape(dca[-1][i,:],(nb_cmd,1))))
+            r = np.dot(m_eff, np.reshape(dca[-1][i,:],(nb_cmd,1))) - np.reshape(m[i,:],(nb_meas,1))
+            #err[i] = sum(r.T[0])
+            o = np.dot(r.T,r)
+            #print(r.shape, o, o.shape)
+            err[i] = o
 
-        #print(err)
+        #print('err',err)
         #print(p)
         #exit(0)
 
@@ -157,7 +174,7 @@ def optimize_full(xs, ys, freq, filt=None, p0=None, actuator_model=first_order_m
         return err[:,0]
 
     if p0 is None:
-        p0 = np.hstack((np.array([.01]), np.zeros(nb_cmd*nb_meas))) # start from random non-zero value
+        p0 = np.hstack((np.array([.01]), 0.1*np.ones(nb_cmd*nb_meas))) # start from random non-zero value
 
     #ddy = diff_signal(y, freq, order+1, filt)
     #print(np.shape(ddy))
@@ -167,10 +184,10 @@ def optimize_full(xs, ys, freq, filt=None, p0=None, actuator_model=first_order_m
     #plt.plot(ddy[1])
     #plt.plot(ddy[2])
     p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(xs, ys), full_output=1)
-    print(p1[0])
-    print(np.reshape(p1[1:],(nb_meas,nb_cmd)))
+    print('tau',p1[0])
+    print('eff',np.reshape(p1[1:],(nb_meas,nb_cmd)))
     print(success)
-    return p1
+    return (p1[0], np.reshape(p1[1:],(nb_meas,nb_cmd)))
 
 
 def plot_results(x, y, t, start, end, label):
@@ -232,14 +249,22 @@ def process_data(f_name, start, end, freq, fo_c=None):
     #thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], p_thrust, freq, first_order_model, filt)
     ##thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], [0.01682614, -2.36359587/1000, 0], freq, first_order_model, filt)
 
+    # Plot
+    #plot_results(roll_cmd, gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
+    #plot_results(pitch_cmd, gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
+    #plot_results(yaw_cmd, gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
+    #plot_results(thrust_cmd, accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [m/s^3]')
+
     # Full optimization
-    res = optimize_full(cmd[start:end,:], np.hstack((gyro_df[-1][start:end,:], accel_df[-1][start:end,[ACCEL_Z]])), freq, filt)
+    tau, eff = optimize_full(cmd[start:end,:], np.hstack((gyro_df[-1][start:end,:], accel_df[-1][start:end,[ACCEL_Z]])), freq, filt)
+    res_cmd = cmd_model_full(cmd, tau, eff, freq, first_order_model, filt)
+    #print(res_cmd[:,CMD_ROLL])
 
     # Plot
-    plot_results(roll_cmd, gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
-    plot_results(pitch_cmd, gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
-    plot_results(yaw_cmd, gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
-    plot_results(thrust_cmd, accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [m/s^3]')
+    plot_results(res_cmd[:,CMD_ROLL], gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
+    plot_results(res_cmd[:,CMD_PITCH], gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
+    plot_results(res_cmd[:,CMD_YAW], gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
+    plot_results(res_cmd[:,CMD_THRUST], accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [rad/s^3]')
 
     # Show all plots
     plt.show()
