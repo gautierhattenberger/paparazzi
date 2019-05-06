@@ -127,6 +127,32 @@ def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=first_
     print(p1, success)
     return p1
 
+
+def optimize_mixed(xs, ys, freq, filt=None, p0=None, actuator_model=first_order_model):
+    '''
+    mixed optimization function
+    '''
+
+    def err_func(p, c, m):
+        '''
+        p vector of parameters to optimize
+        c command vector
+        m measurement vector
+
+        computes the error between the scaled command derivate and the measurements
+        '''
+        tau = p[0]
+        ca = actuator_model(c, tau)
+        dca = diff_signal(ca, freq, 1, filt)
+        res = np.linalg.lstsq(dca, m)
+        print(res)
+        return 0.
+
+    if p0 is None:
+        p0 = np.array([1.])
+
+    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(xs, ys), full_output=1)
+
 def optimize_full(xs, ys, freq, filt=None, p0=None, actuator_model=first_order_model):
     '''
     global optimization for all axis (full effectiveness)
@@ -206,7 +232,7 @@ def plot_results(x, y, t, start, end, label):
     plt.ylabel(label)
 
 
-def process_data(f_name, start, end, freq, fo_c=None):
+def process_data(f_name, start, end, freq, opt="axis", fo_c=None):
 
     # Read data from log file
     data = genfromtxt(f_name, delimiter=',', skip_header=1)
@@ -235,36 +261,45 @@ def process_data(f_name, start, end, freq, fo_c=None):
     accel_df = diff_signal(accel, freq, 1, filt)
     #print("g", np.shape(gyro_df))
 
-    # Optimization for each channels
-    #p_roll = optimize_axis(cmd[start:end,[CMD_ROLL]], gyro_df[-1][start:end,[GYRO_P]], freq, 1, filt)
-    #roll_cmd = cmd_model(cmd[:,[CMD_ROLL]], p_roll, freq, first_order_model, filt)
+    if opt == "axis":
+        # Optimization for each channels
+        p_roll = optimize_axis(cmd[start:end,[CMD_ROLL]], gyro_df[-1][start:end,[GYRO_P]], freq, 1, filt)
+        roll_cmd = cmd_model(cmd[:,[CMD_ROLL]], p_roll, freq, first_order_model, filt)
 
-    #p_pitch = optimize_axis(cmd[start:end,[CMD_PITCH]], gyro_df[-1][start:end,[GYRO_Q]], freq, 1, filt)
-    #pitch_cmd = cmd_model(cmd[:,[CMD_PITCH]], p_pitch, freq, first_order_model, filt)
+        p_pitch = optimize_axis(cmd[start:end,[CMD_PITCH]], gyro_df[-1][start:end,[GYRO_Q]], freq, 1, filt)
+        pitch_cmd = cmd_model(cmd[:,[CMD_PITCH]], p_pitch, freq, first_order_model, filt)
 
-    #p_yaw = optimize_axis(cmd[start:end,[CMD_YAW]], gyro_df[-1][start:end,[GYRO_R]], freq, 2, filt)
-    #yaw_cmd = cmd_model(cmd[:,[CMD_YAW]], p_yaw, freq, first_order_model, filt, 2)
+        p_yaw = optimize_axis(cmd[start:end,[CMD_YAW]], gyro_df[-1][start:end,[GYRO_R]], freq, 2, filt)
+        yaw_cmd = cmd_model(cmd[:,[CMD_YAW]], p_yaw, freq, first_order_model, filt, 2)
 
-    #p_thrust = optimize_axis(cmd[start:end,[CMD_THRUST]], accel_df[-1][start:end,[ACCEL_Z]], freq, 1, filt)
-    #thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], p_thrust, freq, first_order_model, filt)
-    ##thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], [0.01682614, -2.36359587/1000, 0], freq, first_order_model, filt)
+        p_thrust = optimize_axis(cmd[start:end,[CMD_THRUST]], accel_df[-1][start:end,[ACCEL_Z]], freq, 1, filt)
+        thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], p_thrust, freq, first_order_model, filt)
+        #thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], [0.01682614, -2.36359587/1000, 0], freq, first_order_model, filt)
 
-    # Plot
-    #plot_results(roll_cmd, gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
-    #plot_results(pitch_cmd, gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
-    #plot_results(yaw_cmd, gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
-    #plot_results(thrust_cmd, accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [m/s^3]')
+        # Plot
+        plot_results(roll_cmd, gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
+        plot_results(pitch_cmd, gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
+        plot_results(yaw_cmd, gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
+        plot_results(thrust_cmd, accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [m/s^3]')
 
-    # Full optimization
-    tau, eff = optimize_full(cmd[start:end,:], np.hstack((gyro_df[-1][start:end,:], accel_df[-1][start:end,[ACCEL_Z]])), freq, filt)
-    res_cmd = cmd_model_full(cmd, tau, eff, freq, first_order_model, filt)
-    #print(res_cmd[:,CMD_ROLL])
+    elif opt == "mixed":
+        pass # TODO
 
-    # Plot
-    plot_results(res_cmd[:,CMD_ROLL], gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
-    plot_results(res_cmd[:,CMD_PITCH], gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
-    plot_results(res_cmd[:,CMD_YAW], gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
-    plot_results(res_cmd[:,CMD_THRUST], accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [rad/s^3]')
+    elif opt == "full":
+        # Full optimization
+        tau, eff = optimize_full(cmd[start:end,:], np.hstack((gyro_df[-1][start:end,:], accel_df[-1][start:end,[ACCEL_Z]])), freq, filt)
+        res_cmd = cmd_model_full(cmd, tau, eff, freq, first_order_model, filt)
+        #print(res_cmd[:,CMD_ROLL])
+
+        # Plot
+        plot_results(res_cmd[:,CMD_ROLL], gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
+        plot_results(res_cmd[:,CMD_PITCH], gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
+        plot_results(res_cmd[:,CMD_YAW], gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
+        plot_results(res_cmd[:,CMD_THRUST], accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [rad/s^3]')
+
+    else:
+        print("Unknown optimization type: ", opt)
+        exit(1)
 
     # Show all plots
     plt.show()
@@ -273,6 +308,9 @@ def process_data(f_name, start, end, freq, fo_c=None):
 def main():
     usage = "usage: %prog [options] log_filename.csv" + "\n" + "Run %prog --help to list the options."
     parser = OptionParser(usage)
+    parser.add_option("-o", "--opt", dest="opt",
+                      action="store", default="axis",
+                      help="Optimization type (axis, mixed, full)")
     parser.add_option("-f", "--freq", dest="freq",
                       action="store", default=512,
                       help="Sampling frequency")
@@ -304,7 +342,7 @@ def main():
     start = int(options.start) * freq
     end = int(options.end) * freq
 
-    process_data(filename, start, end, freq, float(options.dyn))
+    process_data(filename, start, end, freq, options.opt, float(options.dyn))
 
 
 if __name__ == "__main__":
