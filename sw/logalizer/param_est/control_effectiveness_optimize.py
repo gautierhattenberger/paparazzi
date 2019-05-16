@@ -144,14 +144,23 @@ def optimize_mixed(xs, ys, freq, filt=None, p0=None, actuator_model=first_order_
         tau = p[0]
         ca = actuator_model(c, tau)
         dca = diff_signal(ca, freq, 1, filt)
-        res = np.linalg.lstsq(dca, m)
-        print(res)
-        return 0.
+        print(dca[-1].shape,p)
+        #print(dca[0][:,[CMD_ROLL]])
+        plt.figure()
+        plt.plot(m[:,GYRO_P])
+        plt.plot(dca[-1][:,[CMD_ROLL]])
+        plt.show()
+        res = np.linalg.lstsq(dca[-1][:,[CMD_ROLL]], m)
+        print(p, res[0], res[1])
+        return res[1]
 
     if p0 is None:
-        p0 = np.array([1.])
+        p0 = np.array([0.1])
 
+    print(np.shape(xs), np.shape(ys), np.shape(p0))
     p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(xs, ys), full_output=1)
+    print(p1, success)
+    return p1
 
 def optimize_full(xs, ys, freq, filt=None, p0=None, actuator_model=first_order_model):
     '''
@@ -283,7 +292,7 @@ def process_data(f_name, start, end, freq, opt="axis", fo_c=None):
         plot_results(thrust_cmd, accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [m/s^3]')
 
     elif opt == "mixed":
-        pass # TODO
+        tau = optimize_mixed(cmd[start:end,:], np.hstack((gyro_df[-1][start:end,:], accel_df[-1][start:end,[ACCEL_Z]])), freq, filt)
 
     elif opt == "full":
         # Full optimization
