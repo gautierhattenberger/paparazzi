@@ -149,7 +149,7 @@ static struct EnuCoor_f process_new_point_rosette(struct EnuCoor_f *position, fl
 
 static bool nav_rosette_mission(uint8_t nb, float *params, enum MissionRunFlag flag)
 {
-  if (nb != 5) {
+  if (nb != 8) {
     return false; // wrong number of parameters
   }
   if (flag == MissionInit) {

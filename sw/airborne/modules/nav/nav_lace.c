@@ -92,7 +92,7 @@ static struct EnuCoor_f process_new_point_lace(struct EnuCoor_f *position, float
 
 static bool nav_lace_mission(uint8_t nb, float *params, enum MissionRunFlag flag)
 {
-  if (nb != 5) {
+  if (nb != 8) {
     return false; // wrong number of parameters
   }
   if (flag == MissionInit) {
