@@ -84,16 +84,19 @@ bool mission_insert(enum MissionInsertMode insert, struct _mission_element *elem
       if (tmp == mission.insert_idx) { return false; } // no room to inser element
       mission.elements[tmp] = *element; // add element
       mission.current_idx = tmp; // move current index
+      mission.element_time = 0.;
       break;
     case ReplaceCurrent:
       // current element can always be modified, index are not changed
       mission.elements[mission.current_idx] = *element;
+      mission.element_time = 0.;
       break;
     case ReplaceAll:
       // reset queue and index
       mission.elements[0] = *element;
       mission.current_idx = 0;
       mission.insert_idx = 1;
+      mission.element_time = 0.;
       break;
     case ReplaceNexts:
       tmp = (mission.current_idx + 1) % MISSION_ELEMENT_NB;
@@ -293,6 +296,7 @@ int mission_parse_SEGMENT_LLA(void)
 {
   if (DL_MISSION_SEGMENT_LLA_ac_id(dl_buffer) != AC_ID) { return false; } // not for this aircraft
 
+  mission.element_time = 0.;
   struct LlaCoor_i from_lla, to_lla;
   from_lla.lat = DL_MISSION_SEGMENT_LLA_segment_lat_1(dl_buffer);
   from_lla.lon = DL_MISSION_SEGMENT_LLA_segment_lon_1(dl_buffer);
