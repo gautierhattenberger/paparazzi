@@ -25,15 +25,18 @@
  *
  */
 
+// FIXME conf accel with correct address
+
 #include "peripherals/bmi088_i2c.h"
 
-void bmi088_i2c_init(struct Bmi088_I2c *bmi, struct i2c_periph *i2c_p, uint8_t addr)
+void bmi088_i2c_init(struct Bmi088_I2c *bmi, struct i2c_periph *i2c_p, uint8_t gyro_addr, uint8_t accel_addr)
 {
   /* set i2c_peripheral */
   bmi->i2c_p = i2c_p;
 
   /* slave address */
-  bmi->i2c_trans.slave_addr = addr;
+  bmi->i2c_trans.slave_addr = gyro_addr;
+  bmi->acc_trans.slave_addr = accel_addr;
   /* set inital status: Success or Done */
   bmi->i2c_trans.status = I2CTransDone;
   bmi->acc_trans.status = I2CTransDone;

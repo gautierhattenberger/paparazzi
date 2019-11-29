@@ -52,7 +52,7 @@ struct Bmi088_I2c {
 };
 
 // Functions
-extern void bmi088_i2c_init(struct Bmi088_I2c *bmi, struct i2c_periph *i2c_p, uint8_t addr);
+extern void bmi088_i2c_init(struct Bmi088_I2c *bmi, struct i2c_periph *i2c_p, uint8_t gyro_addr, uint8_t accel_addr);
 extern void bmi088_i2c_start_configure(struct Bmi088_I2c *bmi);
 extern void bmi088_i2c_read(struct Bmi088_I2c *bmi);
 extern void bmi088_i2c_event(struct Bmi088_I2c *bmi);

@@ -71,22 +71,22 @@ void bmi088_send_config(Bmi088ConfigSet bmi_set, void *bmi, struct Bmi088Config 
   switch (config->init_status) {
     case BMI088_CONF_ACCEL_RANGE:
       /* configure accelerometer range */
-      bmi_set(bmi, BMI088_ACC_RANGE, config->accel_range);
+      bmi_set(bmi, BMI088_ACCEL_RANGE, config->accel_range);
       config->init_status++;
       break;
     case BMI088_CONF_ACCEL_ODR:
       /* configure accelerometer odr */
-      bmi_set(bmi, BMI088_ACC_CONF, config->accel_odr);
+      bmi_set(bmi, BMI088_ACCEL_CONF, config->accel_odr);
       config->init_status++;
       break;
     case BMI088_CONF_ACCEL_PWR_CONF:
       /* switch on accel */
-      bmi_set(bmi, BMI088_ACC_PWR_CONF, BMI088_ACCEL_ACTIVE);
+      bmi_set(bmi, BMI088_ACCEL_PWR_CONF, BMI088_ACCEL_ACTIVE);
       config->init_status++;
       break;
     case BMI088_CONF_ACCEL_PWR_CTRL:
       /* switch on accel */
-      bmi_set(bmi, BMI088_ACC_PWR_CTRl, BMI088_ACCEL_POWER_ON);
+      bmi_set(bmi, BMI088_ACCEL_PWR_CTRl, BMI088_ACCEL_POWER_ON);
       config->init_status++;
       break;
     case BMI088_CONF_GYRO_RANGE:

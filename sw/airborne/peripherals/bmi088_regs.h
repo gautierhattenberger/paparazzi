@@ -28,42 +28,42 @@
 #define BMI088_REGS_H
 
 /* default I2C address */
-#define BMI088_ACC_ADDR             0x18
-#define BMI088_ACC_ADDR_ALT         0x19
+#define BMI088_ACCEL_ADDR             0x18
+#define BMI088_ACCEL_ADDR_ALT         0x19
 
-#define BMI088_ACC_CHIP_ID          0x00 // Default value 0x1E
-#define BMI088_ACC_ERR_REG          0x02
-#define BMI088_ACC_STATUS           0x03
+#define BMI088_ACCEL_CHIP_ID          0x00 // Default value 0x1E
+#define BMI088_ACCEL_ERR_REG          0x02
+#define BMI088_ACCEL_STATUS           0x03
 
-#define BMI088_ACC_X_LSB            0x12
-#define BMI088_ACC_X_MSB            0x13
-#define BMI088_ACC_Y_LSB            0x14
-#define BMI088_ACC_Y_MSB            0x15
-#define BMI088_ACC_Z_LSB            0x16
-#define BMI088_ACC_Z_MSB            0x17
+#define BMI088_ACCEL_X_LSB            0x12
+#define BMI088_ACCEL_X_MSB            0x13
+#define BMI088_ACCEL_Y_LSB            0x14
+#define BMI088_ACCEL_Y_MSB            0x15
+#define BMI088_ACCEL_Z_LSB            0x16
+#define BMI088_ACCEL_Z_MSB            0x17
 
-#define BMI088_ACC_SENSOR_TIME_0    0x18
-#define BMI088_ACC_SENSOR_TIME_1    0x19
-#define BMI088_ACC_SENSOR_TIME_2    0x1A
+#define BMI088_ACCEL_SENSOR_TIME_0    0x18
+#define BMI088_ACCEL_SENSOR_TIME_1    0x19
+#define BMI088_ACCEL_SENSOR_TIME_2    0x1A
 
-#define BMI088_ACC_INT_STAT_1       0x1D
+#define BMI088_ACCEL_INT_STAT_1       0x1D
 
-#define BMI088_ACC_TEMP_MSB         0x22
-#define BMI088_ACC_TEMP_LSB         0x23
+#define BMI088_ACCEL_TEMP_MSB         0x22
+#define BMI088_ACCEL_TEMP_LSB         0x23
 
-#define BMI088_ACC_CONF             0x40
-#define BMI088_ACC_RANGE            0x41
+#define BMI088_ACCEL_CONF             0x40
+#define BMI088_ACCEL_RANGE            0x41
 
-#define BMI088_ACC_INT1_IO_CTRL     0x53
-#define BMI088_ACC_INT2_IO_CTRL     0x54
-#define BMI088_ACC_INT_MAP_DATA     0x58
+#define BMI088_ACCEL_INT1_IO_CTRL     0x53
+#define BMI088_ACCEL_INT2_IO_CTRL     0x54
+#define BMI088_ACCEL_INT_MAP_DATA     0x58
 
-#define BMI088_ACC_SELF_TEST        0x6D
+#define BMI088_ACCEL_SELF_TEST        0x6D
 
-#define BMI088_ACC_PWR_CONF         0x7C
-#define BMI088_ACC_PWR_CTRl         0x7D
+#define BMI088_ACCEL_PWR_CONF         0x7C
+#define BMI088_ACCEL_PWR_CTRl         0x7D
 
-#define BMI088_ACC_SOFT_RESET       0x7E
+#define BMI088_ACCEL_SOFT_RESET       0x7E
 
 #define BMI088_GYRO_ADDR                0x68
 #define BMI088_GYRO_ADDR_ALT            0x69
