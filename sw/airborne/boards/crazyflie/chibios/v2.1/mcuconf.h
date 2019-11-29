@@ -85,16 +85,8 @@
 /*
  * CAN driver system settings.
  */
-#if USE_CAN1
-#define STM32_CAN_USE_CAN1                  TRUE
-#else
 #define STM32_CAN_USE_CAN1                  FALSE
-#endif
-#if USE_CAN2
-#define STM32_CAN_USE_CAN2                  TRUE
-#else
 #define STM32_CAN_USE_CAN2                  FALSE
-#endif
 #define STM32_CAN_CAN1_IRQ_PRIORITY         11
 #define STM32_CAN_CAN2_IRQ_PRIORITY         11
 
@@ -165,11 +157,7 @@
 #else
 #define STM32_I2C_USE_I2C1                  FALSE
 #endif
-#if USE_I2C2
-#define STM32_I2C_USE_I2C2                  TRUE
-#else
 #define STM32_I2C_USE_I2C2                  FALSE
-#endif
 #if USE_I2C3
 #define STM32_I2C_USE_I2C3                  TRUE
 #else
@@ -193,7 +181,7 @@
 /*
  * ICU driver system settings.
  */
-#define STM32_ICU_USE_TIM1                  TRUE
+#define STM32_ICU_USE_TIM1                  FALSE
 #define STM32_ICU_USE_TIM2                  FALSE
 #define STM32_ICU_USE_TIM3                  FALSE
 #define STM32_ICU_USE_TIM4                  FALSE
@@ -223,16 +211,14 @@
  * PWM driver system settings.
  */
 #define STM32_PWM_USE_ADVANCED              FALSE
-#ifndef STM32_PWM_USE_TIM1
 #define STM32_PWM_USE_TIM1                  FALSE  // enable for WS2812
-#endif
 #ifndef STM32_PWM_USE_TIM2
 #define STM32_PWM_USE_TIM2                  TRUE
 #endif
-#ifndef STM32_PWM_USE_TIM3
-#define STM32_PWM_USE_TIM3                  TRUE
+#define STM32_PWM_USE_TIM3                  FALSE
+#ifndef STM32_PWM_USE_TIM4
+#define STM32_PWM_USE_TIM4                  TRUE
 #endif
-#define STM32_PWM_USE_TIM4                  FALSE
 #define STM32_PWM_USE_TIM5                  FALSE
 #define STM32_PWM_USE_TIM8                  FALSE
 #define STM32_PWM_USE_TIM9                  FALSE
@@ -244,29 +230,10 @@
 #define STM32_PWM_TIM8_IRQ_PRIORITY         7
 #define STM32_PWM_TIM9_IRQ_PRIORITY         7
 
-#define STM32_PWM1_UP_DMA_STREAM            STM32_DMA_STREAM_ID(2, 5) // incompatible with SPI1_TX
-#define STM32_PWM1_UP_DMA_CHANNEL           6
-#define STM32_PWM1_UP_DMA_IRQ_PRIORITY      6
-#define STM32_PWM1_UP_DMA_PRIORITY          2
-
-#define STM32_PWM2_UP_DMA_STREAM            STM32_DMA_STREAM_ID(1, 1)
-#define STM32_PWM2_UP_DMA_CHANNEL           3
-#define STM32_PWM2_UP_DMA_IRQ_PRIORITY      6
-#define STM32_PWM2_UP_DMA_PRIORITY          2
-
-#define STM32_PWM3_UP_DMA_STREAM            STM32_DMA_STREAM_ID(1, 2)
-#define STM32_PWM3_UP_DMA_CHANNEL           5
-#define STM32_PWM3_UP_DMA_IRQ_PRIORITY      6
-#define STM32_PWM3_UP_DMA_PRIORITY          2
-
 /*
  * SERIAL driver system settings.
  */
-#if USE_UART1
-#define STM32_SERIAL_USE_USART1             TRUE
-#else
 #define STM32_SERIAL_USE_USART1             FALSE
-#endif
 #if USE_UART2
 #define STM32_SERIAL_USE_USART2             TRUE
 #else
@@ -277,16 +244,8 @@
 #else
 #define STM32_SERIAL_USE_USART3             FALSE
 #endif
-#if USE_UART4
-#define STM32_SERIAL_USE_UART4              TRUE
-#else
 #define STM32_SERIAL_USE_UART4              FALSE
-#endif
-#if USE_UART5
-#define STM32_SERIAL_USE_UART5              TRUE
-#else
 #define STM32_SERIAL_USE_UART5              FALSE
-#endif
 #if USE_UART6
 #define STM32_SERIAL_USE_USART6             TRUE
 #else
@@ -307,16 +266,8 @@
 #else
 #define STM32_SPI_USE_SPI1                  FALSE
 #endif
-#if USE_SPI2
-#define STM32_SPI_USE_SPI2                  TRUE
-#else
 #define STM32_SPI_USE_SPI2                  FALSE
-#endif
-#if USE_SPI3
-#define STM32_SPI_USE_SPI3                  TRUE
-#else
 #define STM32_SPI_USE_SPI3                  FALSE
-#endif
 #define STM32_SPI_SPI1_RX_DMA_STREAM        STM32_DMA_STREAM_ID(2, 0)
 #define STM32_SPI_SPI1_TX_DMA_STREAM        STM32_DMA_STREAM_ID(2, 5)
 #define STM32_SPI_SPI2_RX_DMA_STREAM        STM32_DMA_STREAM_ID(1, 3)
@@ -407,6 +358,5 @@
 #define SDLOG_ALL_BUFFERS_SIZE (SDLOG_NUM_FILES*8*1024)
 
 
-
-
 #endif /* _MCUCONF_H_ */
+
