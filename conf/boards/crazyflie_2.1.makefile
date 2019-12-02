@@ -45,8 +45,8 @@ FLASH_MODE ?= DFU-UTIL
 
 # while the crazyflie doesn't have luftboot, it has a bootloader until same offset
 # see also https://wiki.bitcraze.io/projects:crazyflie2:development:dfu
-HAS_BOOTLOADER ?= 1
-ifeq (,$(findstring $(HAS_BOOTLOADER),0 FALSE))
+HAS_LUFTBOOT ?= 1
+ifeq (,$(findstring $(HAS_LUFTBOOT),0 FALSE))
 $(TARGET).CFLAGS+=-DLUFTBOOT
 $(TARGET).LDFLAGS+=-Wl,-Ttext=0x8004000
 DFU_ADDR = 0x8004000
