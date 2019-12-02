@@ -77,7 +77,7 @@ void bmi088_i2c_read(struct Bmi088_I2c *bmi)
     bmi->i2c_trans.buf[0] = BMI088_GYRO_INT_STAT_1;
     i2c_transceive(bmi->i2c_p, &(bmi->i2c_trans), bmi->i2c_trans.slave_addr, 1, 9);
     /* read accel */
-    bmi->acc_trans.buf[0] = BMI088_ACC_INT_STAT_1;
+    bmi->acc_trans.buf[0] = BMI088_ACCEL_INT_STAT_1;
     i2c_transceive(bmi->i2c_p, &(bmi->i2c_trans), bmi->i2c_trans.slave_addr, 1, 12);
   }
 }

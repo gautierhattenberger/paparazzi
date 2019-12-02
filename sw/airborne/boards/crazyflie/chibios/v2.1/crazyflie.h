@@ -225,6 +225,41 @@
 #ifndef I2C3_CLOCK_SPEED
 #define I2C3_CLOCK_SPEED 400000
 #endif
+#if I2C3_CLOCK_SPEED == 400000
+#define I2C3_DUTY_CYCLE FAST_DUTY_CYCLE_2
+#elif I2C3_CLOCK_SPEED == 100000
+#define I2C3_DUTY_CYCLE STD_DUTY_CYCLE
+#else
+#error "Invalid I2C3 clock speed"
+#endif
+#define I2C3_CFG_DEF {        \
+           OPMODE_I2C,        \
+           I2C3_CLOCK_SPEED,  \
+           I2C3_DUTY_CYCLE,   \
+           }
+
+// External I2C
+
+#ifndef I2C1_CLOCK_SPEED
+#define I2C1_CLOCK_SPEED 400000
+#endif
+#if I2C1_CLOCK_SPEED == 400000
+#define I2C1_DUTY_CYCLE FAST_DUTY_CYCLE_2
+#elif I2C1_CLOCK_SPEED == 100000
+#define I2C1_DUTY_CYCLE STD_DUTY_CYCLE
+#else
+#error "Invalid I2C1 clock speed"
+#endif
+#define I2C1_CFG_DEF {        \
+           OPMODE_I2C,        \
+           I2C1_CLOCK_SPEED,  \
+           I2C1_DUTY_CYCLE,   \
+           }
+
+/*
+#ifndef I2C3_CLOCK_SPEED
+#define I2C3_CLOCK_SPEED 400000
+#endif
 
 #if I2C3_CLOCK_SPEED == 400000
 #define I2C3_CFG_DEF { \
@@ -263,6 +298,7 @@
 #else
 #error "Unknown I2C2 clock speed"
 #endif
+*/
 
 /**
  * SPI Config
