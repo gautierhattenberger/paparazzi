@@ -103,8 +103,10 @@ enum Bmi088ConfStatus {
   BMI088_CONF_DONE
 };
 
+#define BMI088_CONFIG_ACCEL 0
+#define BMI088_CONFIG_GYRO  1
 /// Configuration function prototype
-typedef void (*Bmi088ConfigSet)(void *bmi, uint8_t _reg, uint8_t _val);
+typedef void (*Bmi088ConfigSet)(void *bmi, uint8_t _reg, uint8_t _val, uint8_t _type);
 
 struct Bmi088Config {
   enum Bmi088GyroRanges gyro_range;     ///< deg/s Range

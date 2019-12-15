@@ -71,37 +71,37 @@ void bmi088_send_config(Bmi088ConfigSet bmi_set, void *bmi, struct Bmi088Config 
   switch (config->init_status) {
     case BMI088_CONF_ACCEL_RANGE:
       /* configure accelerometer range */
-      bmi_set(bmi, BMI088_ACCEL_RANGE, config->accel_range);
+      bmi_set(bmi, BMI088_ACCEL_RANGE, config->accel_range, BMI088_CONFIG_ACCEL);
       config->init_status++;
       break;
     case BMI088_CONF_ACCEL_ODR:
       /* configure accelerometer odr */
-      bmi_set(bmi, BMI088_ACCEL_CONF, config->accel_odr);
+      bmi_set(bmi, BMI088_ACCEL_CONF, config->accel_odr, BMI088_CONFIG_ACCEL);
       config->init_status++;
       break;
     case BMI088_CONF_ACCEL_PWR_CONF:
       /* switch on accel */
-      bmi_set(bmi, BMI088_ACCEL_PWR_CONF, BMI088_ACCEL_ACTIVE);
+      bmi_set(bmi, BMI088_ACCEL_PWR_CONF, BMI088_ACCEL_ACTIVE, BMI088_CONFIG_ACCEL);
       config->init_status++;
       break;
     case BMI088_CONF_ACCEL_PWR_CTRL:
       /* switch on accel */
-      bmi_set(bmi, BMI088_ACCEL_PWR_CTRl, BMI088_ACCEL_POWER_ON);
+      bmi_set(bmi, BMI088_ACCEL_PWR_CTRl, BMI088_ACCEL_POWER_ON, BMI088_CONFIG_ACCEL);
       config->init_status++;
       break;
     case BMI088_CONF_GYRO_RANGE:
       /* configure gyro range */
-      bmi_set(bmi, BMI088_GYRO_RANGE, config->gyro_range);
+      bmi_set(bmi, BMI088_GYRO_RANGE, config->gyro_range, BMI088_CONFIG_GYRO);
       config->init_status++;
       break;
     case BMI088_CONF_GYRO_ODR:
       /* configure gyro odr */
-      bmi_set(bmi, BMI088_GYRO_BAND_WIDTH, config->gyro_odr);
+      bmi_set(bmi, BMI088_GYRO_BAND_WIDTH, config->gyro_odr, BMI088_CONFIG_GYRO);
       config->init_status++;
       break;
     case BMI088_CONF_GYRO_PWR:
       /* switch on gyro */
-      bmi_set(bmi, BMI088_GYRO_LPM_1, BMI088_GYRO_NORMAL);
+      bmi_set(bmi, BMI088_GYRO_LPM_1, BMI088_GYRO_NORMAL, BMI088_CONFIG_GYRO);
       config->init_status++;
       break;
     case BMI088_CONF_DONE:
@@ -111,3 +111,4 @@ void bmi088_send_config(Bmi088ConfigSet bmi_set, void *bmi, struct Bmi088Config 
       break;
   }
 }
+

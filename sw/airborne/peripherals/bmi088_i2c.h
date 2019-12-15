@@ -36,17 +36,17 @@
 
 struct Bmi088_I2c {
   struct i2c_periph *i2c_p;
-  struct i2c_transaction i2c_trans; ///< i2c transaction for conf and gyro
-  struct i2c_transaction acc_trans; ///< i2c transaction for accel
-  volatile bool gyro_available;     ///< gyro data ready flag
-  volatile bool accel_available;    ///< accel data ready flag
+  struct i2c_transaction gyro_trans;  ///< i2c transaction for gyro
+  struct i2c_transaction accel_trans; ///< i2c transaction for accel
+  volatile bool gyro_available;       ///< gyro data ready flag
+  volatile bool accel_available;      ///< accel data ready flag
   union {
-    struct Int16Vect3 vect;         ///< accel data vector in accel coordinate system
-    int16_t value[3];               ///< accel data values accessible by channel index
+    struct Int16Vect3 vect;           ///< accel data vector in accel coordinate system
+    int16_t value[3];                 ///< accel data values accessible by channel index
   } data_accel;
   union {
-    struct Int16Rates rates;        ///< rates data as angular rates in gyro coordinate system
-    int16_t value[3];               ///< rates data values accessible by channel index
+    struct Int16Rates rates;          ///< rates data as angular rates in gyro coordinate system
+    int16_t value[3];                 ///< rates data values accessible by channel index
   } data_rates;
   struct Bmi088Config config;
 };
