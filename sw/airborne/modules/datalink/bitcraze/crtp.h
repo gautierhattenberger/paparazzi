@@ -19,7 +19,7 @@
  */
 
 /**
- * @file modules/datalink/crtp.h
+ * @file modules/datalink/bitcraze/crtp.h
  *
  * CRTP protocol for communication with bitcraze/crazyflie modems
  *

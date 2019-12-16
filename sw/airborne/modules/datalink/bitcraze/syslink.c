@@ -19,7 +19,7 @@
  */
 
 /**
- * @file modules/datalink/syslink.c
+ * @file modules/datalink/bitcraze/syslink.c
  *
  * Syslink protocol for communication with bitcraze/crazyflie NRF mcu
  *
