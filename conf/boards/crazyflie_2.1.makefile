@@ -68,7 +68,7 @@ SYS_TIME_LED       ?= 1
 #
 
 # NRF port ????
-MODEM_PORT ?= UART6
+MODEM_PORT ?= UART3
 MODEM_BAUD ?= B57600
 
 

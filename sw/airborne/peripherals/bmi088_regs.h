@@ -28,8 +28,8 @@
 #define BMI088_REGS_H
 
 /* default I2C address */
-#define BMI088_ACCEL_ADDR             0x18
-#define BMI088_ACCEL_ADDR_ALT         0x19
+#define BMI088_ACCEL_ADDR             (0x18<<1)
+#define BMI088_ACCEL_ADDR_ALT         (0x19<<1)
 
 #define BMI088_ACCEL_CHIP_ID          0x00 // Default value 0x1E
 #define BMI088_ACCEL_ERR_REG          0x02
@@ -65,8 +65,8 @@
 
 #define BMI088_ACCEL_SOFT_RESET       0x7E
 
-#define BMI088_GYRO_ADDR                0x68
-#define BMI088_GYRO_ADDR_ALT            0x69
+#define BMI088_GYRO_ADDR                (0x68<<1)
+#define BMI088_GYRO_ADDR_ALT            (0x69<<1)
 
 #define BMI088_GYRO_CHIP_ID             0x00 // Default value 0x0F
 

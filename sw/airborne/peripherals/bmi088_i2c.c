@@ -52,11 +52,13 @@ void bmi088_i2c_init(struct Bmi088_I2c *bmi, struct i2c_periph *i2c_p, uint8_t g
 static void bmi088_i2c_write_to_reg(void *bmi, uint8_t _reg, uint8_t _val, uint8_t _type)
 {
   struct Bmi088_I2c *bmi_i2c = (struct Bmi088_I2c *)(bmi);
-  bmi_i2c->gyro_trans.buf[0] = _reg;
-  bmi_i2c->gyro_trans.buf[1] = _val;
   if (_type == BMI088_CONFIG_ACCEL) {
+    bmi_i2c->accel_trans.buf[0] = _reg;
+    bmi_i2c->accel_trans.buf[1] = _val;
     i2c_transmit(bmi_i2c->i2c_p, &(bmi_i2c->accel_trans), bmi_i2c->accel_trans.slave_addr, 2);
   } else if (_type == BMI088_CONFIG_GYRO) {
+    bmi_i2c->gyro_trans.buf[0] = _reg;
+    bmi_i2c->gyro_trans.buf[1] = _val;
     i2c_transmit(bmi_i2c->i2c_p, &(bmi_i2c->gyro_trans), bmi_i2c->gyro_trans.slave_addr, 2);
   }
 }
@@ -66,7 +68,7 @@ void bmi088_i2c_start_configure(struct Bmi088_I2c *bmi)
 {
   if (bmi->config.init_status == BMI088_CONF_UNINIT) {
     bmi->config.init_status++;
-    if (bmi->gyro_trans.status == I2CTransSuccess || bmi->gyro_trans.status == I2CTransDone) {
+    if (bmi->accel_trans.status == I2CTransSuccess || bmi->accel_trans.status == I2CTransDone) {
       bmi088_send_config(bmi088_i2c_write_to_reg, (void *)bmi, &(bmi->config));
     }
   }
@@ -74,17 +76,19 @@ void bmi088_i2c_start_configure(struct Bmi088_I2c *bmi)
 
 void bmi088_i2c_read(struct Bmi088_I2c *bmi)
 {
-  if (bmi->config.initialized && bmi->gyro_trans.status == I2CTransDone) {
+  if (bmi->config.initialized &&
+      bmi->gyro_trans.status == I2CTransDone &&
+      bmi->accel_trans.status == I2CTransDone) {
     /* read gyro */
-    bmi->gyro_trans.buf[0] = BMI088_GYRO_INT_STAT_1;
-    i2c_transceive(bmi->i2c_p, &(bmi->gyro_trans), bmi->gyro_trans.slave_addr, 1, 9);
+    bmi->gyro_trans.buf[0] = BMI088_GYRO_RATE_X_LSB;
+    i2c_transceive(bmi->i2c_p, &(bmi->gyro_trans), bmi->gyro_trans.slave_addr, 1, 6); //9);
     /* read accel */
-    bmi->accel_trans.buf[0] = BMI088_ACCEL_INT_STAT_1;
-    i2c_transceive(bmi->i2c_p, &(bmi->accel_trans), bmi->accel_trans.slave_addr, 1, 12);
+    bmi->accel_trans.buf[0] = BMI088_ACCEL_X_LSB;
+    i2c_transceive(bmi->i2c_p, &(bmi->accel_trans), bmi->accel_trans.slave_addr, 1, 6); // 12);
   }
 }
 
-#define Int16FromBuf(_buf,_idx) ((int16_t)((_buf[_idx]<<8) | _buf[_idx+1]))
+#define Int16FromBuf(_buf,_idx) ((int16_t)((_buf[_idx+1]<<8) | _buf[_idx]))
 
 void bmi088_i2c_event(struct Bmi088_I2c *bmi)
 {
@@ -94,13 +98,13 @@ void bmi088_i2c_event(struct Bmi088_I2c *bmi)
       bmi->gyro_trans.status = I2CTransDone;
     } else if (bmi->gyro_trans.status == I2CTransSuccess) {
       // Successfull reading
-      if (bit_is_set(bmi->gyro_trans.buf[0], 7)) {
+      //if (bit_is_set(bmi->gyro_trans.buf[8], 7)) {
         // new data
-        bmi->data_rates.rates.p = Int16FromBuf(bmi->gyro_trans.buf, 7);
-        bmi->data_rates.rates.q = Int16FromBuf(bmi->gyro_trans.buf, 5);
-        bmi->data_rates.rates.r = Int16FromBuf(bmi->gyro_trans.buf, 3);
+        bmi->data_rates.rates.p = Int16FromBuf(bmi->gyro_trans.buf, 0);
+        bmi->data_rates.rates.q = Int16FromBuf(bmi->gyro_trans.buf, 2);
+        bmi->data_rates.rates.r = Int16FromBuf(bmi->gyro_trans.buf, 4);
         bmi->gyro_available = true;
-      }
+      //}
       bmi->gyro_trans.status = I2CTransDone;
     }
     // Check accel read
@@ -108,14 +112,14 @@ void bmi088_i2c_event(struct Bmi088_I2c *bmi)
       bmi->accel_trans.status = I2CTransDone;
     } else if (bmi->accel_trans.status == I2CTransSuccess) {
       // Successfull reading
-      if (bit_is_set(bmi->accel_trans.buf[0], 7)) {
+      //if (bit_is_set(bmi->accel_trans.buf[11], 7)) {
         // new data
-        bmi->data_accel.vect.x = Int16FromBuf(bmi->accel_trans.buf, 10);
-        bmi->data_accel.vect.y = Int16FromBuf(bmi->accel_trans.buf, 8);
-        bmi->data_accel.vect.z = Int16FromBuf(bmi->accel_trans.buf, 6);
+        bmi->data_accel.vect.x = Int16FromBuf(bmi->accel_trans.buf, 0);
+        bmi->data_accel.vect.y = Int16FromBuf(bmi->accel_trans.buf, 2);
+        bmi->data_accel.vect.z = Int16FromBuf(bmi->accel_trans.buf, 4);
         bmi->accel_available = true;
-      }
-      bmi->gyro_trans.status = I2CTransDone;
+      //}
+      bmi->accel_trans.status = I2CTransDone;
     }
   } else if (bmi->config.init_status != BMI088_CONF_UNINIT) { // Configuring but not yet initialized
     if (bmi->config.init_status <= BMI088_CONF_ACCEL_PWR_CTRL) {
