@@ -37,7 +37,7 @@
 #define CRTP_PORT_MEM       0x04
 #define CRTP_PORT_LOG       0x05
 
-#define CRTP_PORT_MAVLINK   0x09 // Non-standard port for transmitting pprzlink messages
+#define CRTP_PORT_PPRZLINK  0x09 // Non-standard port for transmitting pprzlink messages
 
 #define CRTP_PORT_PLATFORM  0x0D
 #define CRTP_PORT_DEBUG     0x0E

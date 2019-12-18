@@ -1,0 +1,28 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="syslink" dir="datalink/bitcraze">
+  <doc>
+    <description>
+      Bitcraze syslink module
+    </description>
+    <configure name="SYSLINK_PORT" value="UARTX" description="Select syslink port"/>
+    <configure name="SYSLINK_BAUD" value="B57600" description="Baudrate"/>
+  </doc>
+  <header>
+    <file name="syslink_dl.h"/>
+  </header>
+  <init fun="syslink_dl_init()"/>
+  <periodic fun="syslink_dl_periodic()" freq="2"/>
+  <event fun="syslink_dl_event()"/>
+
+  <makefile target="ap">
+    <configure name="SYSLINK_PORT" default="uart6" case="upper|lower"/>
+    <configure name="SYSLINK_BAUD" default="B1000000" case="upper|lower"/>
+    <define name="SYSLINK_DEV" value="$(SYSLINK_PORT_LOWER)"/>
+    <define name="USE_$(SYSLINK_PORT_UPPER)"/>
+    <define name="$(SYSLINK_PORT_UPPER)_BAUD" value="$(SYSLINK_BAUD)"/>
+    <file name="syslink_dl.c"/>
+    <file name="syslink.c"/>
+    <!--file name="pprz_transport.c" dir="pprzlink/src"/-->
+  </makefile>
+</module>

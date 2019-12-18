@@ -26,8 +26,7 @@
  * based on PX4 implementation
  */
 
-#include "modules/datalink/syslink.h"
-
+#include "syslink.h"
 
 const char *syslink_stx = "\xbc\xcf";
 
@@ -37,8 +36,7 @@ void syslink_parse_init(syslink_parse_state *state)
   state->index = 0;
 }
 
-
-bool syslink_parse_char(syslink_parse_state *state, char c, syslink_message_t *msg)
+bool syslink_parse_char(syslink_parse_state *state, uint8_t c, syslink_message_t *msg)
 {
 
   switch (state->state) {
