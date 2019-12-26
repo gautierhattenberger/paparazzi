@@ -29,18 +29,20 @@
 #include "subsystems/electrical.h"
 #include "mcu_periph/uart.h"
 #include <string.h>
+#include "led.h"
 
 struct syslink_dl syslink;
 
-/** Init function */
-void syslink_dl_init(void)
+/** Send a syslink message
+ */
+static void send_message(syslink_message_t *msg)
 {
-  syslink_parse_init(&syslink.state);
-}
-
-void syslink_dl_periodic(void)
-{
-  // LED blinking (charge) ?
+  syslink_compute_cksum(msg);
+  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)syslink_stx, 2);
+  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->type), sizeof(msg->type));
+  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->length), sizeof(msg->length));
+  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->data), msg->length);
+  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->cksum), sizeof(msg->cksum));
 }
 
 /**
@@ -68,6 +70,94 @@ static void handle_battery(syslink_message_t *msg)
 }
 
 /**
+ * Handle various raw messages
+ */
+static void handle_raw_other(syslink_message_t *msg)
+{
+	// This function doesn't actually do anything
+	// It is just here to return null responses to most standard messages
+  // Setup order from the cflib-python is
+  //  - platform link source (name, protocol version)
+  //  - log TOC
+  //  - mem update
+  //  - param TOC
+  // -> call connected callback and start getting data
+  //  - update param if needed
+  // In order to improve the chance to get a successful init sequence
+  // the transmission is stopped during this phase
+
+  //LED_TOGGLE(4);
+  crtp_message_t *c = (crtp_message_t *) &msg->length;
+
+  if (c->port == CRTP_PORT_LOG) {
+    if (c->channel == 0) { // Table of Contents Access
+      uint8_t cmd = c->data[0];
+      if (cmd == 0) { // GET_ITEM
+        //int id = c->data[1];
+        memset(&c->data[2], 0, 3);
+        c->data[2] = 1; // type
+        c->size = 1 + 5;
+        send_message(msg);
+      } else if (cmd == 1) { // GET_INFO
+        memset(&c->data[1], 0, 7);
+        c->size = 1 + 8;
+        send_message(msg);
+      }
+    }
+    else if (c->channel == 1) { // Log control
+      c->data[2] = 0; // Success
+      c->size = 3 + 1;
+      // resend message
+      send_message(msg);
+    }
+    else if (c->channel == 2) { // Log data
+      // nothing
+    }
+  }
+  else if (c->port == CRTP_PORT_MEM) {
+    if (c->channel == 0) { // Info
+      int cmd = c->data[0];
+      if (cmd == 1) { // GET_NBR_OF_MEMS
+        c->data[1] = 0;
+        c->size = 2 + 1;
+        // resend message
+        send_message(msg);
+      }
+    }
+  }
+  else if (c->port == CRTP_PORT_PARAM) {
+    if (c->channel == 0) { // TOC Access
+      c->data[1] = 0; // Last parameter (id = 0)
+      memset(&c->data[2], 0, 10);
+      c->size = 1 + 8;
+      send_message(msg);
+    }
+    else if (c->channel == 1) { // Param read
+      // 0 is ok
+      c->data[1] = 0; // value
+      c->size = 1 + 2;
+      send_message(msg);
+      //syslink.init_phase = false; // assume end of init phase
+    }
+  }
+  else if (c->port == CRTP_PORT_LINK) {
+    if (c->channel == 0) { // Echo
+      send_message(msg);
+    }
+    else if (c->channel == 1) { // Reply platform name
+      //syslink.init_phase = true; // we assume a start of init phase
+      c->size = CRTP_MAX_DATA_SIZE;
+      bzero(c->data, CRTP_MAX_DATA_SIZE);
+      strcpy((char *)c->data, "Bitcraze PPRZ");
+      send_message(msg);
+    }
+  }
+  else {
+    // TODO handle error ?
+  }
+}
+
+/**
  * Handle raw datalink
  *
  * From Bitcraze documentation:
@@ -88,6 +178,7 @@ static void handle_raw(syslink_message_t *msg)
   crtp_message_t *c = (crtp_message_t *) &msg->length;
 
   if (CRTP_NULL(*c)) {
+  LED_TOGGLE(4);
     if (c->size >= 3) {
       //handle_bootloader(sys);
     }
@@ -100,11 +191,22 @@ static void handle_raw(syslink_message_t *msg)
     // TODO send to pprzlink parser
   }
   else {
+    handle_raw_other(msg);
     // TODO ACK for other messages ?
   }
 
-  // TODO send next raw message
-
+  // send next raw message if fifo is not empty
+  if ((syslink.tx_extract_idx != syslink.tx_insert_idx) && !syslink.init_phase) {
+    syslink_message_t msg;
+    msg.type = SYSLINK_RADIO_RAW;
+    memcpy(&msg.length, &syslink.msg_tx[syslink.tx_extract_idx], sizeof(crtp_message_t));
+    send_message(&msg);
+    // move fifo indexes
+    syslink.tx_extract_idx++;
+    if (syslink.tx_extract_idx == CRTP_BUF_LEN) {
+      syslink.tx_extract_idx = 0;
+    }
+  }
 
 }
 
@@ -130,6 +232,7 @@ static void handle_radio(syslink_message_t *msg)
  */
 static void handle_new_msg(syslink_message_t *msg)
 {
+  //LED_TOGGLE(4);
 	if (msg->type == SYSLINK_PM_ONOFF_SWITCHOFF) {
 		// power button is hit
     // don't do anything for now ?
@@ -152,6 +255,122 @@ static void handle_new_msg(syslink_message_t *msg)
 	}
 
   // TODO prepare next message to send ?
+}
+
+
+/**
+ * Implementation of syslink as generic device
+ */
+
+// check free space: nb of CRTP slots x space in a slot
+static bool syslink_check_free_space(struct syslink_dl *s, long *fd UNUSED, uint16_t len)
+{
+  int16_t slots = s->tx_extract_idx - s->tx_insert_idx;
+  if (slots <= 0) {
+    slots += CRTP_BUF_LEN;
+  }
+  return (uint16_t)(CRTP_MAX_DATA_SIZE * (slots - 1)) >= len;
+}
+
+// implementation of put_buffer, fill CRTP slots
+static void syslink_put_buffer(struct syslink_dl *s, long fd UNUSED, const uint8_t *data, uint16_t len)
+{
+  uint16_t buf_rem = len;
+  // fill slots until they are full
+  // we assume that the available space have been check before
+  while (buf_rem > 0) {
+    // get current slot
+    crtp_message_t *c = &s->msg_tx[s->tx_insert_idx];
+    if (c->size < CRTP_MAX_DATA_SIZE) {
+      // fill current buffer
+      uint16_t data_size = Min(buf_rem, CRTP_MAX_DATA_SIZE - c->size);
+      memcpy(&c->data[c->size - sizeof(c->header)], &data[len - buf_rem], data_size);
+      c->size += data_size;
+      buf_rem -= data_size;
+    }
+    else {
+      // start a new slot
+      uint8_t tmp = (s->tx_insert_idx + 1) % CRTP_BUF_LEN;
+      if (tmp == s->tx_extract_idx) {
+        // no more slots
+        // this should be be possible when check_free_space is called before
+        return;
+      }
+      crtp_message_t *c = &s->msg_tx[tmp];
+      uint16_t data_size = Min(buf_rem, CRTP_MAX_DATA_SIZE);
+      memcpy(c->data, &data[len - buf_rem], data_size);
+      c->size = sizeof(c->header) + data_size;
+      buf_rem -= data_size;
+      s->tx_insert_idx = tmp;
+    }
+  }
+}
+
+// implementation of put_byte using put_buffer
+// TODO for now, put_byte and put_buffer are not completing unfinished slots
+// but starts a new one. This should be improved for a better efficiency
+static void syslink_put_byte(struct syslink_dl *s, long fd, const uint8_t b)
+{
+  syslink_put_buffer(s, fd, &b, 1);
+}
+
+// send_message is not needed as messages are stored in a fifo
+static void syslink_send_message(struct syslink_dl *s UNUSED, long fd UNUSED)
+{
+}
+
+static uint8_t syslink_getch(struct syslink_dl *s)
+{
+  (void)s;
+  //uint8_t ret = p->rx_buf[p->rx_extract_idx];
+  //p->rx_extract_idx = (p->rx_extract_idx + 1) % UART_RX_BUFFER_SIZE;
+  return 0;
+}
+
+static uint16_t syslink_char_available(struct syslink_dl *s)
+{
+  (void)s;
+  return 0;
+  //int16_t available = p->rx_insert_idx - p->rx_extract_idx;
+  //if (available < 0) {
+  //  available += UART_RX_BUFFER_SIZE;
+  //}
+  //return (uint16_t)available;
+}
+
+
+/** Init function */
+void syslink_dl_init(void)
+{
+  syslink_parse_init(&syslink.state);
+  syslink.tx_insert_idx = 0;
+  syslink.tx_extract_idx = 0;
+  syslink.rssi = 0;
+  syslink.charging = false;
+  syslink.powered = false;
+  syslink.init_phase = true;
+
+  for (int i = 0; i < CRTP_BUF_LEN; i++) {
+    // prepare raw pprzlink datalink headers
+    syslink.msg_tx[i].header = 0;
+    syslink.msg_tx[i].port = CRTP_PORT_PPRZLINK;
+    syslink.msg_tx[i].size = sizeof(syslink.msg_tx[i].header);
+  }
+
+  // generic device
+  syslink.device.periph = (void *)(&syslink);
+  syslink.device.check_free_space = (check_free_space_t) syslink_check_free_space;
+  syslink.device.put_byte = (put_byte_t) syslink_put_byte;
+  syslink.device.put_buffer = (put_buffer_t) syslink_put_buffer;
+  syslink.device.send_message = (send_message_t) syslink_send_message;
+  syslink.device.char_available = (char_available_t) syslink_char_available;
+  syslink.device.get_byte = (get_byte_t) syslink_getch;
+}
+
+/** Periodic function */
+void syslink_dl_periodic(void)
+{
+  // LED blinking (charge) ?
 }
 
 /** Datalink event */

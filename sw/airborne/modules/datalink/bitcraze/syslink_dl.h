@@ -32,19 +32,24 @@
 #include "modules/datalink/bitcraze/crtp.h"
 #include "pprzlink/pprzlink_device.h"
 
+#define CRTP_BUF_LEN 8
+
 struct syslink_dl {
   // syslink structures
   syslink_parse_state state;
   syslink_message_t msg_rx;
-  syslink_message_t msg_tx;
+  crtp_message_t msg_tx[CRTP_BUF_LEN];
+  uint8_t tx_insert_idx;
+  uint8_t tx_extract_idx;
 
   // generic device to use pprzlink over syslink
   struct link_device device;
 
   // crazyflie state
   uint8_t rssi;
-  bool charging;  ///< battery charging
-  bool powered;   ///< USB powered
+  bool charging;    ///< battery charging
+  bool powered;     ///< USB powered
+  bool init_phase;  ///< reduce telemetry during init phase
 };
 
 extern struct syslink_dl syslink;

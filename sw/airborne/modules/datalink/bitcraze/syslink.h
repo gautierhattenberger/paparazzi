@@ -84,6 +84,7 @@ typedef struct  {
   int index;
 } syslink_parse_state;
 
+extern const char *syslink_stx;
 
 #ifdef __cplusplus
 extern "C" {

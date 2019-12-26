@@ -56,9 +56,9 @@ endif
 #
 # default LED configuration
 #
-RADIO_CONTROL_LED  ?= 4
+RADIO_CONTROL_LED  ?= none
 BARO_LED           ?= none
-AHRS_ALIGNER_LED   ?= 2
+AHRS_ALIGNER_LED   ?= none
 GPS_LED            ?= none
 SYS_TIME_LED       ?= 1
 
@@ -67,9 +67,12 @@ SYS_TIME_LED       ?= 1
 # default uart configuration
 #
 
-# NRF port ????
-MODEM_PORT ?= UART3
-MODEM_BAUD ?= B57600
+# Over NRF/Syslink
+MODEM_PORT ?= syslink
+
+# External port
+#MODEM_PORT ?= UART3
+#MODEM_BAUD ?= B57600
 
 
 #
