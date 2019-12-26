@@ -33,14 +33,18 @@
 #include "pprzlink/pprzlink_device.h"
 
 #define CRTP_BUF_LEN 8
+#define SYSLINK_RX_BUF_LEN 256
 
 struct syslink_dl {
   // syslink structures
-  syslink_parse_state state;
-  syslink_message_t msg_rx;
-  crtp_message_t msg_tx[CRTP_BUF_LEN];
-  uint8_t tx_insert_idx;
-  uint8_t tx_extract_idx;
+  syslink_parse_state state;            ///< syslink parser state
+  syslink_message_t msg_rx;             ///< last received syslink message
+  crtp_message_t msg_tx[CRTP_BUF_LEN];  ///< queued crtp packets to be send
+  uint8_t tx_insert_idx;                ///< tx insert index
+  uint8_t tx_extract_idx;               ///< tx extract index
+  uint8_t rx_buf[SYSLINK_RX_BUF_LEN];   ///< received pprzlink bytes from syslink/crtp
+  uint8_t rx_insert_idx;                ///< rx insert index
+  uint8_t rx_extract_idx;               ///< rx extract index
 
   // generic device to use pprzlink over syslink
   struct link_device device;

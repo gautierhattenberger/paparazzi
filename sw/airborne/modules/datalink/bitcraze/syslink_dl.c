@@ -188,7 +188,22 @@ static void handle_raw(syslink_message_t *msg)
     // TODO set RC from cmd message
   }
   else if (c->port == CRTP_PORT_PPRZLINK) {
-    // TODO send to pprzlink parser
+    // fill rx buffer with CRTP data
+    uint8_t data_size = c->size;
+    uint16_t available = SYSLINK_RX_BUF_LEN - syslink.device.char_available(&syslink);
+    if (available > data_size) {
+      // enough room to add new bytes
+      if ((uint16_t)syslink.rx_insert_idx + (uint16_t)data_size < SYSLINK_RX_BUF_LEN) {
+        // copy in one block
+        memcpy(&syslink.rx_buf[syslink.rx_insert_idx], c->data, data_size);
+      } else {
+        // copy in two parts
+        uint16_t split = SYSLINK_RX_BUF_LEN - syslink.rx_insert_idx;
+        memcpy(&syslink.rx_buf[syslink.rx_insert_idx], c->data, split);
+        memcpy(&syslink.rx_buf[0], &c->data[split], data_size - split);
+      }
+      syslink.rx_insert_idx = (syslink.rx_insert_idx + data_size) % SYSLINK_RX_BUF_LEN;
+    }
   }
   else {
     handle_raw_other(msg);
@@ -321,21 +336,18 @@ static void syslink_send_message(struct syslink_dl *s UNUSED, long fd UNUSED)
 
 static uint8_t syslink_getch(struct syslink_dl *s)
 {
-  (void)s;
-  //uint8_t ret = p->rx_buf[p->rx_extract_idx];
-  //p->rx_extract_idx = (p->rx_extract_idx + 1) % UART_RX_BUFFER_SIZE;
-  return 0;
+  uint8_t ret = s->rx_buf[s->rx_extract_idx];
+  s->rx_extract_idx = (s->rx_extract_idx + 1) % SYSLINK_RX_BUF_LEN;
+  return ret;
 }
 
 static uint16_t syslink_char_available(struct syslink_dl *s)
 {
-  (void)s;
-  return 0;
-  //int16_t available = p->rx_insert_idx - p->rx_extract_idx;
-  //if (available < 0) {
-  //  available += UART_RX_BUFFER_SIZE;
-  //}
-  //return (uint16_t)available;
+  int16_t available = s->rx_insert_idx - s->rx_extract_idx;
+  if (available < 0) {
+    available += SYSLINK_RX_BUF_LEN;
+  }
+  return (uint16_t)available;
 }
 
 
@@ -348,7 +360,7 @@ void syslink_dl_init(void)
   syslink.rssi = 0;
   syslink.charging = false;
   syslink.powered = false;
-  syslink.init_phase = true;
+  syslink.init_phase = false;
 
   for (int i = 0; i < CRTP_BUF_LEN; i++) {
     // prepare raw pprzlink datalink headers
