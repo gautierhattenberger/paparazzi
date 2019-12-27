@@ -86,11 +86,11 @@ class RadioBridge:
         messages_datalink = messages_xml_map.get_msgs("datalink")
         for msg in messages_datalink:
             self._ivy.subscribe(_forward_to_cf, PprzMessage("datalink", msg))
-        #self._ivy.subscribe(_forward_to_cf, regex_or_msg="(^{} .*)".format(ac_id))
 
 
     def shutdown(self):
-        print('closing interfaces')
+        if self.verbose:
+            print('closing cf2ivy interfaces')
         self._ivy.shutdown()
         self._cf.close_link()
 
@@ -110,13 +110,13 @@ class RadioBridge:
                     if self.verbose:
                         print("Got message {} from {}".format(msg.name, sender_id))
                     # Forward message to Ivy bus
-                    self._ivy.send(msg, sender_id=sender_id)
+                    if self.is_connected:
+                        self._ivy.send(msg, sender_id=sender_id)
 
     def _forward(self, data):
         pk = CRTPPacket()
         pk.port = CRTP_PORT_PPRZLINK
         pk.data = data
-        #print('forward crtp',pk)
         self._cf.send_packet(pk)
 
 
@@ -147,43 +147,57 @@ class RadioBridge:
 
 
 if __name__ == '__main__':
+    from argparse import ArgumentParser
+
+    parser = ArgumentParser(description="Crazyradio link for paparazzi")
+    parser.add_argument("--address", default=None, help="URI address of Crazyflie")
+    parser.add_argument("--chanel", default='80', help="URI chanel of Crazyflie (full URI will be 'radio://0/%(default)/2M'")
+    parser.add_argument("--uri", default=None, help="URI of Crazyflie (chanel option will not be effective)")
+    parser.add_argument("--bus", default=None, help="Ivy bus. [default to system IVY bus]")
+    parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help="display debug messages")
+    args = parser.parse_args()
+
     # Initialize the low-level drivers (don't list the debug drivers)
     cflib.crtp.radiodriver.set_retries_before_disconnect(1500)
     cflib.crtp.radiodriver.set_retries(3)
     cflib.crtp.init_drivers(enable_debug_driver=False)
+
     # Scan for Crazyflies and use the first one found
-    print('Scanning interfaces for Crazyflies...')
-    if len(sys.argv) > 2:
-        address = int(sys.argv[2], 16)  # address=0xE7E7E7E7E7
+    if args.verbose:
+        print('Scanning interfaces for Crazyflies...')
+    if args.address is not None:
+        address = int(sys.argv[2], 16)
     else:
-        address = None
-
+        address = None # equivalent to default 0xE7E7E7E7E7
     available = cflib.crtp.scan_interfaces(address)
-    print('Crazyflies found:')
-    for i in available:
-        print(' ',i[0])
+    if args.verbose:
+        print('Crazyflies found:')
+        for i in available:
+            print(' ',i[0])
 
-    bridge = None
     if len(available) > 0:
-        if len(sys.argv) > 1:
-            channel = str(sys.argv[1])
+        link_uri = None
+        if args.uri is not None:
+            link_uri = args.uri
         else:
-            channel = 80
+            link_uri = 'radio://0/' + args.chanel + '/2M'
 
-        link_uri = 'radio://0/' + str(channel) + '/2M'
-        bridge = RadioBridge(link_uri)  # (available[0][0])
-    else:
-        print("Leaving, no radio")
-        sys.exit()
+        # Start radio to ivy bridge
+        bridge = RadioBridge(link_uri)
 
-    # The Crazyflie lib doesn't contain anything to keep the application alive,
-    # so this is where your application should do something. In our case we
-    # are just waiting until we are disconnected.
-    try:
-        while bridge.is_connected:
+        # The Crazyflie lib doesn't contain anything to keep the application alive,
+        # so this is where your application should do something. In our case we
+        # are just waiting until we are disconnected.
+        try:
+            while bridge.is_connected:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            bridge.is_connected = False
+            bridge.shutdown()
             time.sleep(1)
-    except KeyboardInterrupt:
-        bridge.shutdown()
-        time.sleep(1)
-        print("Leaving from user")
+            sys.exit()
+    else:
+        if args.verbose:
+            print("Leaving, no radio")
         sys.exit(1)
+
