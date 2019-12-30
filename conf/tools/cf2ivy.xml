@@ -1,2 +1,2 @@
-<program command="sw/ground_segment/python/bitcraze/cf2ivy.py" name="Crazyradio/IVY bridge" />
+<program command="sw/ground_segment/python/bitcraze/crazyradio2ivy.py" name="Crazyradio/IVY bridge" />
 

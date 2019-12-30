@@ -22,7 +22,6 @@ import threading
 import time
 from collections import deque
 
-import cflib.crtp
 from cflib.crtp.crtpstack import CRTPPacket
 from cflib.crtp import RadioDriver
 from cflib.drivers.crazyradio import Crazyradio
@@ -74,6 +73,8 @@ class RadioBridge:
                     pk.port = CRTP_PORT_PPRZLINK
                     pk.data = data[i:(i+30)]
                     self._driver.send_packet(pk)
+                if self.verbose:
+                    print('Forward message', msg.name)
             except:
                 if self.verbose:
                     print('Forward error for', ac_id)
@@ -108,61 +109,64 @@ class RadioBridge:
         pass
 
     def _link_error_cb(self, msg):
-        pass
+        if self.verbose:
+            print("Link error: {}".format(msg))
 
 
 if __name__ == '__main__':
     from argparse import ArgumentParser
 
     parser = ArgumentParser(description="Crazyradio link for paparazzi")
-    parser.add_argument("--address", default=None, help="URI address of Crazyflie")
-    parser.add_argument("--chanel", default='80', help="URI chanel of Crazyflie (full URI will be 'radio://0/%(default)/2M'")
-    parser.add_argument("--uri", default=None, help="URI of Crazyflie (chanel option will not be effective)")
-    parser.add_argument("--bus", default=None, help="Ivy bus. [default to system IVY bus]")
+    parser.add_argument('-a','--address', default=None, help="URI address of Crazyflie")
+    parser.add_argument('-c','--chanel', default='80', help="URI chanel of Crazyflie (full URI will be 'radio://0/%(default)/2M'")
+    parser.add_argument('-u','--uri', default=None, help="URI of Crazyflie (chanel option will not be effective)")
+    parser.add_argument('-b','--bus', default=None, help="Ivy bus [default to system IVY bus]")
+    parser.add_argument('-s','--scan', action='store_true', help="Scan available Crazyflie at startup")
     parser.add_argument('-v', '--verbose', dest='verbose', action='store_true', help="display debug messages")
     args = parser.parse_args()
 
-    # Initialize the low-level drivers (don't list the debug drivers)
-    cflib.crtp.radiodriver.set_retries_before_disconnect(1500)
-    cflib.crtp.radiodriver.set_retries(3)
-    cflib.crtp.init_drivers(enable_debug_driver=False)
+    if args.scan:
+        import cflib.crtp
+        # Initialize the low-level drivers (don't list the debug drivers)
+        cflib.crtp.radiodriver.set_retries_before_disconnect(1500)
+        cflib.crtp.radiodriver.set_retries(3)
+        cflib.crtp.init_drivers(enable_debug_driver=False)
 
-    # Scan for Crazyflies and use the first one found
-    if args.verbose:
+        # Scan for Crazyflies and use the first one found
         print('Scanning interfaces for Crazyflies...')
-    if args.address is not None:
-        address = int(sys.argv[2], 16)
-    else:
-        address = None # equivalent to default 0xE7E7E7E7E7
-    available = cflib.crtp.scan_interfaces(address)
-    if args.verbose:
-        print('Crazyflies found:')
-        for i in available:
-            print(' ',i[0])
-
-    if len(available) > 0:
-        link_uri = None
-        if args.uri is not None:
-            link_uri = args.uri
+        if args.address is not None:
+            address = int(args.address, 16)
         else:
-            link_uri = 'radio://0/' + args.chanel + '/2M'
+            address = None # equivalent to default 0xE7E7E7E7E7
+        available = cflib.crtp.scan_interfaces(address)
+        if len(available) > 0:
+            print('Crazyflies found:')
+            for i in available:
+                print(' ',i[0])
+        else:
+            print('No radio. Leaving')
+            sys.exit(1)
 
+    bridge = None
+    link_uri = None
+    if args.uri is not None:
+        link_uri = args.uri
+    else:
+        link_uri = 'radio://0/' + args.chanel + '/2M'
+
+    try:
         # Start radio to ivy bridge
         bridge = RadioBridge(link_uri, verbose=args.verbose)
 
         # The Crazyflie lib doesn't contain anything to keep the application alive,
         # so this is where your application should do something. In our case we
         # are just waiting until we are disconnected.
-        try:
-            while bridge.is_connected:
-                bridge.run()
-        except KeyboardInterrupt:
+        while bridge.is_connected:
+            bridge.run()
+    except KeyboardInterrupt:
+        if bridge is not None:
             bridge.is_connected = False
             bridge.shutdown()
             time.sleep(1)
-            sys.exit()
-    else:
-        if args.verbose:
-            print("Leaving, no radio")
-        sys.exit(1)
+    sys.exit()
 
