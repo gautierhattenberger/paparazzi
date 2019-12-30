@@ -24,6 +24,7 @@ from collections import deque
 
 import cflib.crtp
 from cflib.crtp.crtpstack import CRTPPacket
+from cflib.crtp import RadioDriver
 from cflib.drivers.crazyradio import Crazyradio
 
 
@@ -55,12 +56,8 @@ class RadioBridge:
         self._transport = PprzTransport(msg_class)
 
         # Create a Crazyradio
-        self._cr = Crazyradio()
-        self._cr.set_channel(80)
-        self._cr.set_data_rate(self._cr.DR_2MPS)
-
-        # Input and output buffers
-        self._send_buf = deque([])
+        self._driver = RadioDriver()
+        self._driver.connect(link_uri, self._link_quality_cb, self._link_error_cb)
 
         if self.verbose:
             print('Connecting to %s' % link_uri)
@@ -76,7 +73,7 @@ class RadioBridge:
                     pk = CRTPPacket()
                     pk.port = CRTP_PORT_PPRZLINK
                     pk.data = data[i:(i+30)]
-                    self._send_buf.append(pk)
+                    self._driver.send_packet(pk)
             except:
                 if self.verbose:
                     print('Forward error for', ac_id)
@@ -89,34 +86,29 @@ class RadioBridge:
         if self.verbose:
             print('closing cf2ivy interfaces')
         self._ivy.shutdown()
-        self._cr.close()
+        self._driver.close()
 
     def run(self):
-        self._cr.set_address((0xe7,0xe7,0xe7,0xe7,0xe7))
-        self._cr.set_ack_enable(True)
-        if len(self._send_buf) > 0:
-            pk = self._send_buf.popleft()
-        else:
-            pk = CRTPPacket()
-            pk.port = CRTP_PORT_PPRZLINK
-            pk.data = [0]
-        ack = self._cr.send_packet((0xff, ))
-        if ack.ack and len(ack.data) > 0:
-            if ack.data[0] == 0x90:
-                #print(",".join("{:x}".format(i) for i in ack.data))
-                self._parse(ack.data[1:])
-        time.sleep(0.01)
+        pk = self._driver.receive_packet(0.1) # wait for next message with timeout
+        if pk is not None:
+            self._got_packet(pk)
 
-    def _parse(self, pk):
-        for c in pk:
-            if self._transport.parse_byte(bytes([c])):
-                (sender_id, _, _, msg) = self._transport.unpack()
-                if self.verbose:
-                    print("Got message {} from {}".format(msg.name, sender_id))
-                # Forward message to Ivy bus
-                if self.is_connected:
-                    self._ivy.send(msg, sender_id=sender_id)
+    def _got_packet(self, pk):
+        if pk.port == CRTP_PORT_PPRZLINK:
+            for c in pk.data:
+                if self._transport.parse_byte(bytes([c])):
+                    (sender_id, _, _, msg) = self._transport.unpack()
+                    if self.verbose:
+                        print("Got message {} from {}".format(msg.name, sender_id))
+                    # Forward message to Ivy bus
+                    if self.is_connected:
+                        self._ivy.send(msg, sender_id=sender_id)
 
+    def _link_quality_cb(self, quality):
+        pass
+
+    def _link_error_cb(self, msg):
+        pass
 
 
 if __name__ == '__main__':
