@@ -32,7 +32,7 @@
 #include "modules/datalink/bitcraze/crtp.h"
 #include "pprzlink/pprzlink_device.h"
 
-#define CRTP_BUF_LEN 8
+#define CRTP_BUF_LEN 16
 #define SYSLINK_RX_BUF_LEN 256
 
 struct syslink_dl {
@@ -53,7 +53,6 @@ struct syslink_dl {
   uint8_t rssi;
   bool charging;    ///< battery charging
   bool powered;     ///< USB powered
-  bool init_phase;  ///< reduce telemetry during init phase
 };
 
 extern struct syslink_dl syslink;

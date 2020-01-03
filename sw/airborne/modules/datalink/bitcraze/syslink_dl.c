@@ -25,24 +25,52 @@
  *
  */
 
+#pragma GCC push_options
+#pragma GCC optimize("O0")
+
 #include "modules/datalink/bitcraze/syslink_dl.h"
 #include "subsystems/electrical.h"
 #include "mcu_periph/uart.h"
 #include <string.h>
 #include "led.h"
 
+#include "mcu_periph/sys_time.h"
+uint32_t start_t = 0;
+uint32_t end_t = 0;
+uint32_t delta_t[100] = {0};
+uint8_t idx_t = 0;
+
 struct syslink_dl syslink;
+
+/** Protect syslink TX with Mutex when using RTOS */
+#include "pprz_mutex.h"
+PPRZ_MUTEX(syslink_tx_mtx);
 
 /** Send a syslink message
  */
 static void send_message(syslink_message_t *msg)
 {
   syslink_compute_cksum(msg);
-  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)syslink_stx, 2);
-  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->type), sizeof(msg->type));
-  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->length), sizeof(msg->length));
-  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->data), msg->length);
-  uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->cksum), sizeof(msg->cksum));
+  uint8_t buf[sizeof(syslink_message_t)];
+  buf[0] = syslink_stx[0];
+  buf[1] = syslink_stx[1];
+  buf[2] = msg->type;
+  buf[3] = msg->length;
+  for (int i = 0; i < msg->length; i++) {
+    buf[4+i] = msg->data[i];
+  }
+  buf[msg->length+4] = msg->cksum[0];
+  buf[msg->length+5] = msg->cksum[1];
+  uart_put_buffer(&(SYSLINK_DEV), 0, buf, msg->length+6);
+  //uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)syslink_stx, 2);
+  //uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->type), sizeof(msg->type));
+  //uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->length), sizeof(msg->length));
+  //uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->data), msg->length);
+  //uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->cksum), sizeof(msg->cksum));
+  end_t = get_sys_time_usec();
+  delta_t[idx_t] = end_t - start_t;
+  start_t = end_t;
+  idx_t = (idx_t+1)%100;
 }
 
 /**
@@ -83,10 +111,7 @@ static void handle_raw_other(syslink_message_t *msg)
   //  - param TOC
   // -> call connected callback and start getting data
   //  - update param if needed
-  // In order to improve the chance to get a successful init sequence
-  // the transmission is stopped during this phase
 
-  //LED_TOGGLE(4);
   crtp_message_t *c = (crtp_message_t *) &msg->length;
 
   if (c->port == CRTP_PORT_LOG) {
@@ -137,7 +162,6 @@ static void handle_raw_other(syslink_message_t *msg)
       c->data[1] = 0; // value
       c->size = 1 + 2;
       send_message(msg);
-      //syslink.init_phase = false; // assume end of init phase
     }
   }
   else if (c->port == CRTP_PORT_LINK) {
@@ -145,7 +169,6 @@ static void handle_raw_other(syslink_message_t *msg)
       send_message(msg);
     }
     else if (c->channel == 1) { // Reply platform name
-      //syslink.init_phase = true; // we assume a start of init phase
       c->size = CRTP_MAX_DATA_SIZE;
       bzero(c->data, CRTP_MAX_DATA_SIZE);
       strcpy((char *)c->data, "Bitcraze PPRZ");
@@ -177,8 +200,8 @@ static void handle_raw(syslink_message_t *msg)
 {
   crtp_message_t *c = (crtp_message_t *) &msg->length;
 
-  if (CRTP_NULL(*c)) {
   LED_TOGGLE(4);
+  if (CRTP_NULL(*c)) {
     if (c->size >= 3) {
       //handle_bootloader(sys);
     }
@@ -207,20 +230,22 @@ static void handle_raw(syslink_message_t *msg)
   }
   else {
     handle_raw_other(msg);
-    // TODO ACK for other messages ?
   }
 
   // send next raw message if fifo is not empty
-  if ((syslink.tx_extract_idx != syslink.tx_insert_idx) && !syslink.init_phase) {
-    syslink_message_t msg;
-    msg.type = SYSLINK_RADIO_RAW;
-    memcpy(&msg.length, &syslink.msg_tx[syslink.tx_extract_idx], sizeof(crtp_message_t));
-    send_message(&msg);
+  if (syslink.tx_extract_idx != syslink.tx_insert_idx) {
+    LED_TOGGLE(2);
+    PPRZ_MUTEX_LOCK(syslink_tx_mtx);
+    syslink_message_t msg_raw;
+    msg_raw.type = SYSLINK_RADIO_RAW;
+    memcpy(&msg_raw.length, &syslink.msg_tx[syslink.tx_extract_idx], sizeof(crtp_message_t));
+    send_message(&msg_raw);
     // move fifo indexes
     syslink.tx_extract_idx++;
     if (syslink.tx_extract_idx == CRTP_BUF_LEN) {
       syslink.tx_extract_idx = 0;
     }
+    PPRZ_MUTEX_UNLOCK(syslink_tx_mtx);
   }
 
 }
@@ -247,7 +272,6 @@ static void handle_radio(syslink_message_t *msg)
  */
 static void handle_new_msg(syslink_message_t *msg)
 {
-  //LED_TOGGLE(4);
 	if (msg->type == SYSLINK_PM_ONOFF_SWITCHOFF) {
 		// power button is hit
     // don't do anything for now ?
@@ -268,8 +292,6 @@ static void handle_new_msg(syslink_message_t *msg)
   else {
     // handle errors ?
 	}
-
-  // TODO prepare next message to send ?
 }
 
 
@@ -284,7 +306,15 @@ static bool syslink_check_free_space(struct syslink_dl *s, long *fd UNUSED, uint
   if (slots <= 0) {
     slots += CRTP_BUF_LEN;
   }
-  return (uint16_t)(CRTP_MAX_DATA_SIZE * (slots - 1)) >= len;
+  uint16_t space = (uint16_t)(CRTP_MAX_DATA_SIZE * (slots - 1)) >= len;
+  if (space > 0) {
+    PPRZ_MUTEX_LOCK(syslink_tx_mtx);
+  }
+  else {
+    LED_TOGGLE(3);
+  }
+
+  return space;
 }
 
 // implementation of put_buffer, fill CRTP slots
@@ -322,8 +352,6 @@ static void syslink_put_buffer(struct syslink_dl *s, long fd UNUSED, const uint8
 }
 
 // implementation of put_byte using put_buffer
-// TODO for now, put_byte and put_buffer are not completing unfinished slots
-// but starts a new one. This should be improved for a better efficiency
 static void syslink_put_byte(struct syslink_dl *s, long fd, const uint8_t b)
 {
   syslink_put_buffer(s, fd, &b, 1);
@@ -332,6 +360,7 @@ static void syslink_put_byte(struct syslink_dl *s, long fd, const uint8_t b)
 // send_message is not needed as messages are stored in a fifo
 static void syslink_send_message(struct syslink_dl *s UNUSED, long fd UNUSED)
 {
+  PPRZ_MUTEX_UNLOCK(syslink_tx_mtx); // release mutex
 }
 
 static uint8_t syslink_getch(struct syslink_dl *s)
@@ -360,12 +389,12 @@ void syslink_dl_init(void)
   syslink.rssi = 0;
   syslink.charging = false;
   syslink.powered = false;
-  syslink.init_phase = false;
 
   for (int i = 0; i < CRTP_BUF_LEN; i++) {
     // prepare raw pprzlink datalink headers
     syslink.msg_tx[i].header = 0;
     syslink.msg_tx[i].port = CRTP_PORT_PPRZLINK;
+    syslink.msg_tx[i].channel = i % 3;
     syslink.msg_tx[i].size = sizeof(syslink.msg_tx[i].header);
   }
 
@@ -377,6 +406,9 @@ void syslink_dl_init(void)
   syslink.device.send_message = (send_message_t) syslink_send_message;
   syslink.device.char_available = (char_available_t) syslink_char_available;
   syslink.device.get_byte = (get_byte_t) syslink_getch;
+
+  // init mutex if needed
+  PPRZ_MUTEX_INIT(syslink_tx_mtx);
 }
 
 /** Periodic function */
@@ -397,3 +429,4 @@ void syslink_dl_event(void)
 }
 
 
+#pragma GCC pop_options
