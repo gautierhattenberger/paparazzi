@@ -25,20 +25,11 @@
  *
  */
 
-#pragma GCC push_options
-#pragma GCC optimize("O0")
-
 #include "modules/datalink/bitcraze/syslink_dl.h"
 #include "subsystems/electrical.h"
 #include "mcu_periph/uart.h"
 #include <string.h>
 #include "led.h"
-
-#include "mcu_periph/sys_time.h"
-uint32_t start_t = 0;
-uint32_t end_t = 0;
-uint32_t delta_t[100] = {0};
-uint8_t idx_t = 0;
 
 struct syslink_dl syslink;
 
@@ -67,10 +58,6 @@ static void send_message(syslink_message_t *msg)
   //uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->length), sizeof(msg->length));
   //uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->data), msg->length);
   //uart_put_buffer(&(SYSLINK_DEV), 0, (uint8_t*)(&msg->cksum), sizeof(msg->cksum));
-  end_t = get_sys_time_usec();
-  delta_t[idx_t] = end_t - start_t;
-  start_t = end_t;
-  idx_t = (idx_t+1)%100;
 }
 
 /**
@@ -200,7 +187,6 @@ static void handle_raw(syslink_message_t *msg)
 {
   crtp_message_t *c = (crtp_message_t *) &msg->length;
 
-  LED_TOGGLE(4);
   if (CRTP_NULL(*c)) {
     if (c->size >= 3) {
       //handle_bootloader(sys);
@@ -234,7 +220,6 @@ static void handle_raw(syslink_message_t *msg)
 
   // send next raw message if fifo is not empty
   if (syslink.tx_extract_idx != syslink.tx_insert_idx) {
-    LED_TOGGLE(2);
     PPRZ_MUTEX_LOCK(syslink_tx_mtx);
     syslink_message_t msg_raw;
     msg_raw.type = SYSLINK_RADIO_RAW;
@@ -310,10 +295,6 @@ static bool syslink_check_free_space(struct syslink_dl *s, long *fd UNUSED, uint
   if (space > 0) {
     PPRZ_MUTEX_LOCK(syslink_tx_mtx);
   }
-  else {
-    LED_TOGGLE(3);
-  }
-
   return space;
 }
 
@@ -394,7 +375,7 @@ void syslink_dl_init(void)
     // prepare raw pprzlink datalink headers
     syslink.msg_tx[i].header = 0;
     syslink.msg_tx[i].port = CRTP_PORT_PPRZLINK;
-    syslink.msg_tx[i].channel = i % 3;
+    syslink.msg_tx[i].channel = i % 4;
     syslink.msg_tx[i].size = sizeof(syslink.msg_tx[i].header);
   }
 
@@ -429,4 +410,3 @@ void syslink_dl_event(void)
 }
 
 
-#pragma GCC pop_options
