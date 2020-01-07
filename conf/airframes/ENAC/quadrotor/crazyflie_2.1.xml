@@ -33,9 +33,9 @@
       <define name="IMU_BMI088_Z_SIGN" value="-1"/>
     </module>
     <module name="stabilization" type="int_quat"/>
-    <module name="ahrs"          type="int_cmpl_quat">
+    <module name="ahrs"          type="madgwick">
       <configure name="AHRS_PROPAGATE_FREQUENCY" value="400"/>
-      <configure name="USE_MAGNETOMETER" value="FALSE"/>
+      <!--configure name="USE_MAGNETOMETER" value="FALSE"/-->
     </module>
     <module name="ins"/>
     <module name="sys_mon"/>
