@@ -168,5 +168,13 @@ if __name__ == '__main__':
             bridge.is_connected = False
             bridge.shutdown()
             time.sleep(1)
+    except:
+        if bridge is None:
+            print("No crazyradio found")
+        else:
+            bridge.is_connected = False
+            bridge.shutdown()
+            time.sleep(1)
+
     sys.exit()
 
