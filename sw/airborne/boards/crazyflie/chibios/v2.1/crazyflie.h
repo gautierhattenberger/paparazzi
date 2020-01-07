@@ -149,8 +149,8 @@
   { \
     { PWM_SERVO_3_ACTIVE, NULL }, \
     { PWM_SERVO_1_ACTIVE, NULL }, \
-    { PWM_SERVO_2_ACTIVE, NULL }, \
     { PWM_OUTPUT_DISABLED, NULL }, \
+    { PWM_SERVO_2_ACTIVE, NULL }, \
   }, \
   0, \
   0 \

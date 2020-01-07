@@ -395,7 +395,17 @@ void syslink_dl_init(void)
 /** Periodic function */
 void syslink_dl_periodic(void)
 {
-  // LED blinking (charge) ?
+#ifdef CHARGING_LED
+  if (syslink.charging) {
+    LED_TOGGLE(CHARGING_LED);
+  }
+  else if (syslink.powered) {
+    LED_ON(CHARGING_LED);
+  }
+  else {
+    LED_OFF(CHARGING_LED);
+  }
+#endif
 }
 
 /** Datalink event */

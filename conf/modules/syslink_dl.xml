@@ -25,6 +25,7 @@
     <define name="$(SYSLINK_PORT_UPPER)_BAUD" value="$(SYSLINK_BAUD)"/>
     <define name="USE_UART_SOFT_FLOW_CONTROL"/>
     <define name="USE_SYSLINK"/>
+    <define name="CHARGING_LED" value="$(CHARGING_LED)" cond="ifneq ($(CHARGING_LED),none)"/>
     <file name="syslink_dl.c"/>
     <file name="syslink.c"/>
   </makefile>

@@ -41,8 +41,8 @@ CRTP_PORT_PPRZLINK = 9
 
 
 # Only output errors from the logging framework
-logging.basicConfig(level=logging.DEBUG)
-#logging.basicConfig(level=logging.ERROR)
+#logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.ERROR)
 
 
 class RadioBridge:
@@ -73,8 +73,8 @@ class RadioBridge:
                     pk.port = CRTP_PORT_PPRZLINK
                     pk.data = data[i:(i+30)]
                     self._driver.send_packet(pk)
-                #if self.verbose:
-                #    print('Forward message', msg.name)
+                if self.verbose:
+                    print('Forward message', msg.name)
             except:
                 if self.verbose:
                     print('Forward error for', ac_id)
@@ -95,13 +95,7 @@ class RadioBridge:
             self._got_packet(pk)
 
     def _got_packet(self, pk):
-        if len(pk.data) > 0:
-            print(",".join(["{:x}".format(i) for i in pk.data]))
-        #else:
-        #    print(pk)
         if pk.port == CRTP_PORT_PPRZLINK:
-            #print("CHANNEL", pk.channel)
-            #print("pprzlink")
             for c in pk.data:
                 if self._transport.parse_byte(bytes([c])):
                     (sender_id, _, _, msg) = self._transport.unpack()
