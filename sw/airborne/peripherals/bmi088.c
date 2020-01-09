@@ -64,6 +64,7 @@ void bmi088_set_default_config(struct Bmi088Config *c)
   c->gyro_odr = BMI088_DEFAULT_GYRO_ODR;
   c->accel_range = BMI088_DEFAULT_ACCEL_RANGE;
   c->accel_odr = BMI088_DEFAULT_ACCEL_ODR;
+  c->accel_bw = BMI088_DEFAULT_ACCEL_BW;
 }
 
 void bmi088_send_config(Bmi088ConfigSet bmi_set, void *bmi, struct Bmi088Config *config)
@@ -75,8 +76,8 @@ void bmi088_send_config(Bmi088ConfigSet bmi_set, void *bmi, struct Bmi088Config 
       config->init_status++;
       break;
     case BMI088_CONF_ACCEL_ODR:
-      /* configure accelerometer odr */
-      bmi_set(bmi, BMI088_ACCEL_CONF, config->accel_odr, BMI088_CONFIG_ACCEL);
+      /* configure accelerometer odr and bw */
+      bmi_set(bmi, BMI088_ACCEL_CONF, ((config->accel_bw << 4) | config->accel_odr), BMI088_CONFIG_ACCEL);
       config->init_status++;
       break;
     case BMI088_CONF_ACCEL_PWR_CONF:

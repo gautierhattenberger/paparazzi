@@ -137,14 +137,24 @@
 #define ACTUATORS_PWM_NB 5
 
 
+// PWM control of brushed motors
+// Freq = 84 MHz (corresponding to prescaler of 0)
+// Period = 256 (corresponding to 8bit resolution for command at ~328 kHz))
+// as indicated in Crazyflie source code, 328 kHz offers better natural filtering
+// than 128 kHz
+// It is also needed to redefined PWM_CMD_TO_US to get the proper converstion
+// from command to clock pulses number
+
+#define PWM_CMD_TO_US(_t) (_t)
+
 #ifdef STM32_PWM_USE_TIM2
 #define PWM_CONF_TIM2 STM32_PWM_USE_TIM2
 #else
 #define PWM_CONF_TIM2 1
 #endif
 #define PWM_CONF2_DEF { \
-  PWM_FREQUENCY, \
-  PWM_FREQUENCY/TIM2_SERVO_HZ, \
+  84000000, \
+  256, \
   NULL, \
   { \
     { PWM_SERVO_3_ACTIVE, NULL }, \
@@ -162,8 +172,8 @@
 #define PWM_CONF_TIM4 1
 #endif
 #define PWM_CONF4_DEF { \
-  PWM_FREQUENCY, \
-  PWM_FREQUENCY/TIM4_SERVO_HZ, \
+  84000000, \
+  256, \
   NULL, \
   { \
     { PWM_OUTPUT_DISABLED, NULL }, \

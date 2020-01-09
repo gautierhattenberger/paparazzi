@@ -116,6 +116,15 @@ enum Bmi088AccelODR
   BMI088_ACCEL_ODR_1600 = 0x0C,
 };
 
+/** Accel bandwith
+ */
+enum Bmi088AccelBW
+{
+  BMI088_ACCEL_BW_OSR4 = 0x08,
+  BMI088_ACCEL_BW_OSR2 = 0x09,
+  BMI088_ACCEL_BW_NORMAL = 0x0A,
+};
+
 /** Accel power type
  */
 enum Bmi088AccelPowerType

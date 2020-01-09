@@ -40,6 +40,8 @@
 #define BMI088_DEFAULT_ACCEL_RANGE BMI088_ACCEL_RANGE_6G
 /// Default accel output rate
 #define BMI088_DEFAULT_ACCEL_ODR BMI088_ACCEL_ODR_400
+/// Default accel bandwidth
+#define BMI088_DEFAULT_ACCEL_BW BMI088_ACCEL_BW_NORMAL
 
 /** default gyro sensitivy from the datasheet
  * sens = 1/ [LSB/(deg/s)] * pi/180 * 2^INT32_RATE_FRAC
@@ -113,6 +115,7 @@ struct Bmi088Config {
   enum Bmi088GyroODR gyro_odr;          ///< output data rate
   enum Bmi088AccelRanges accel_range;   ///< g Range
   enum Bmi088AccelODR accel_odr;        ///< output data rate
+  enum Bmi088AccelBW accel_bw;          ///< bandwidth
   enum Bmi088ConfStatus init_status;    ///< init status
   bool initialized;                     ///< config done flag
 };

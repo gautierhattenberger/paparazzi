@@ -5,7 +5,7 @@
 <airframe name="Crazyflie2">
 
   <firmware name="rotorcraft">
-    <configure name="PERIODIC_FREQUENCY" value="400"/>
+    <configure name="PERIODIC_FREQUENCY" value="1000"/>
     <configure name="RTOS_DEBUG" value="0"/>
 
     <target name="ap" board="crazyflie_2.1">
@@ -18,10 +18,7 @@
     </target>
 
     <module name="motor_mixing"/>
-    <module name="actuators"     type="pwm">
-      <define name="SERVO_HZ" value="10000"/>
-      <define name="PWM_FREQUENCY" value="10000000"/>
-    </module>
+    <module name="actuators"     type="pwm"/>
 
     <module name="syslink_dl"/>
     <module name="radio_control" type="datalink"/>
@@ -34,7 +31,7 @@
     </module>
     <module name="stabilization" type="int_quat"/>
     <module name="ahrs"          type="madgwick">
-      <configure name="AHRS_PROPAGATE_FREQUENCY" value="400"/>
+      <configure name="AHRS_PROPAGATE_FREQUENCY" value="1000"/>
       <!--configure name="USE_MAGNETOMETER" value="FALSE"/-->
     </module>
     <module name="ins"/>
@@ -62,10 +59,10 @@
   </commands>
 
   <servos driver="Pwm">
-    <servo name="FRONT_LEFT" no="4" min="0" neutral="1" max="100"/>
-    <servo name="FRONT_RIGHT" no="1" min="0" neutral="1" max="100"/>
-    <servo name="BACK_RIGHT" no="2" min="0" neutral="1" max="100"/>
-    <servo name="BACK_LEFT" no="3" min="0" neutral="1" max="100"/>
+    <servo name="FRONT_LEFT"  no="4" min="0" neutral="20" max="255"/>
+    <servo name="FRONT_RIGHT" no="1" min="0" neutral="20" max="255"/>
+    <servo name="BACK_RIGHT"  no="2" min="0" neutral="20" max="255"/>
+    <servo name="BACK_LEFT"   no="3" min="0" neutral="20" max="255"/>
   </servos>
 
   <section name="MIXING" prefix="MOTOR_MIXING_">
