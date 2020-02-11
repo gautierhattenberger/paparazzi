@@ -1,0 +1,96 @@
+{
+  "data" : {
+    "0" : {
+      "name" : "time",
+      "type" : "timestamp",
+      "format" : "float",
+      "unit" : "s"
+    },
+    "1" : {
+      "name" : "rate.x",
+      "type" : "input",
+      "index" : 0,
+      "format" : "bfp",
+      "scale" : 12,
+      "filter" : ["diff_signal", 2]
+    },
+    "2" : {
+      "name" : "rate.y",
+      "type" : "input",
+      "index" : 1,
+      "format" : "bfp",
+      "scale" : 12,
+      "filter" : ["diff_signal", 2]
+    },
+    "3" : {
+      "name" : "rate.z",
+      "type" : "input",
+      "index" : 2,
+      "format" : "bfp",
+      "scale" : 12,
+      "filter" : ["diff_signal", 2]
+    },
+    "4" : {
+      "name" : "accel.x",
+      "type" : "input",
+      "index" : -1,
+      "format" : "bfp",
+      "scale" : 10,
+      "filter" : []
+    },
+    "5" : {
+      "name" : "accel.y",
+      "type" : "input",
+      "index" : -1,
+      "format" : "bfp",
+      "scale" : 10,
+      "filter" : []
+    },
+    "6" : {
+      "name" : "accel.z",
+      "type" : "input",
+      "index" : 4,
+      "format" : "bfp",
+      "scale" : 10,
+      "filter" : ["diff_signal", 1]
+    },
+    "7" : {
+      "name" : "roll",
+      "type" : "command",
+      "index" : 0,
+      "format" : "pprz",
+      "scale" : 1.0,
+      "filter" : ["1st_order", 0.08 ]
+    },
+    "8" : {
+      "name" : "pitch",
+      "type" : "command",
+      "index" : 1,
+      "format" : "pprz",
+      "scale" : 1.0,
+      "filter" : ["1st_order", 0.08 ]
+    },
+    "9" : {
+      "name" : "yaw",
+      "type" : "command",
+      "index" : 2,
+      "format" : "pprz",
+      "scale" : 1.0,
+      "filter" : ["1st_order", 0.08 ]
+    },
+    "10" : {
+      "name" : "throttle",
+      "type" : "command",
+      "index" : 3,
+      "format" : "pprz",
+      "scale" : 1.0,
+      "filter" : ["1st_order", 0.08 ]
+    }
+  },
+  "mixing" : [
+    [ 1.0, 0.0, 0.0, 0.0 ],
+    [ 0.0, 1.0, 0.0, 0.0 ],
+    [ 0.0, 0.0, 1.0, 0.0 ],
+    [ 0.0, 0.0, 0.0, 1.0 ]
+  ]
+}

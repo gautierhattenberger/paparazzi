@@ -21,6 +21,7 @@
 
 
 import os
+import sys
 import scipy as sp
 from scipy import signal, optimize
 import csv
@@ -28,7 +29,6 @@ import numpy as np
 from numpy import genfromtxt
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure, show
-from optparse import ArgumentParser
 
 import control_effectiveness_utils as ut
 
@@ -43,21 +43,6 @@ CMD_ROLL = 1
 CMD_PITCH = 2
 CMD_YAW = 3
 
-
-def diff_signal(signal, freq, order=1, filt=None):
-    '''
-    compute the nth-order derivative of a signal of fixed freq
-    and by applying a filter if necessary
-    '''
-    if filt is not None:
-        signal = sp.signal.lfilter(filt[0], filt[1], signal, axis=0)
-
-    res = [signal]
-    nb = np.shape(signal)[1]
-    for i in range(order):
-        sigd = np.vstack((np.zeros((1,nb)), np.diff(res[-1], 1, axis=0))) * freq
-        res.append(sigd)
-    return res
 
 def cmd_model(c, p, freq, actuator_model, filt=None, order=1):
     '''
@@ -81,152 +66,32 @@ def cmd_model_full(c, tau, eff, freq, actuator_model, filt=None):
         res[i,:] = np.dot(eff, np.reshape(dca[-1][i,:],(nb_cmd,1)))[0]
     return res
 
-def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=ut.first_order_model):
-    '''
-    global optimization function (single axis)
-    '''
 
-    def err_func(p, c, m):
-        '''
-        p vector of parameters to optimize
-        c command vector
-        m measurement vector
-
-        computes the error between the scaled command derivate and the measurements
-        '''
-        mdl = cmd_model(c, p, freq, actuator_model, filt, order)
-        #err = np.hstack((mdl,mdl,mdl)) - m
-        err = mdl - m
-        #print("e",np.shape(mdl),np.shape(m),np.shape(err))
-        #print(p,np.shape(m),np.shape(mdl))
-        #plt.figure()
-        #plt.plot(m)
-        #plt.plot(mdl)
-        #plt.show()
-        return err[:,0]
-
-    if order <= 0:
-        print("order should be > 0")
-        exit(1)
-
-    if p0 is None:
-        p0 = np.hstack((np.array([.01, .01]), np.zeros(order))) # start from random non-zero value
-
-    #ddy = diff_signal(y, freq, order+1, filt)
-    #print(np.shape(ddy))
-    #plt.figure()
-    #plt.plot(y)
-    #plt.plot(ddy[0])
-    #plt.plot(ddy[1])
-    #plt.plot(ddy[2])
-    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(x, y), full_output=1)
-    print(p1, success)
-    return p1
-
-
-def optimize_mixed(xs, ys, freq, filt=None, p0=None, actuator_model=ut.first_order_model):
-    '''
-    mixed optimization function
-    '''
-
-    def err_func(p, c, m):
-        '''
-        p vector of parameters to optimize
-        c command vector
-        m measurement vector
-
-        computes the error between the scaled command derivate and the measurements
-        '''
-        tau = p[0]
-        ca = actuator_model(c, tau)
-        dca = diff_signal(ca, freq, 1, filt)
-        print(dca[-1].shape,p)
-        #print(dca[0][:,[CMD_ROLL]])
-        plt.figure()
-        plt.plot(m[:,GYRO_P])
-        plt.plot(dca[-1][:,[CMD_ROLL]])
-        plt.show()
-        res = np.linalg.lstsq(dca[-1][:,[CMD_ROLL]], m)
-        print(p, res[0], res[1])
-        return res[1]
-
-    if p0 is None:
-        p0 = np.array([0.1])
-
-    print(np.shape(xs), np.shape(ys), np.shape(p0))
-    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(xs, ys), full_output=1)
-    print(p1, success)
-    return p1
-
-def optimize_full(xs, ys, freq, filt=None, p0=None, actuator_model=ut.first_order_model):
-    '''
-    global optimization for all axis (full effectiveness)
-    '''
-    nb_cmd = xs.shape[1]
-    nb_meas = ys.shape[1]
-
-    def err_func(p, c, m):
-        '''
-        p vector of parameters to optimize
-        c command vector
-        m measurement vector
-
-        computes the error between the scaled command derivate and the measurements
-        '''
-        tau = p[0]
-        m_eff = np.reshape(p[1:], (nb_meas, nb_cmd))
-        ca = actuator_model(c, tau)
-        dca = diff_signal(ca, freq, 1, filt)
-        #print(m_eff.shape,c.shape, m.shape, ca.shape, dca[-1].shape)
-        #print(m_eff)
-
-        err = np.zeros((m.shape[0],1))
-        #print(err.shape)
-        for i in range(m.shape[0]):
-            #print(m_eff.shape,np.reshape(dca[-1][i,:].T,(4,1)).shape, m[i,:].shape)
-            #print('cmd',np.reshape(dca[-1][i,:],(nb_cmd,1)))
-            #print('meas',np.reshape(m[i,:],(nb_meas,1)))
-            #print('eff',m_eff)
-            #print('dot',np.dot(m_eff,np.reshape(dca[-1][i,:],(nb_cmd,1))))
-            r = np.dot(m_eff, np.reshape(dca[-1][i,:],(nb_cmd,1))) - np.reshape(m[i,:],(nb_meas,1))
-            #err[i] = sum(r.T[0])
-            o = np.dot(r.T,r)
-            #print(r.shape, o, o.shape)
-            err[i] = o
-
-        #print('err',err)
-        #print(p)
-        #exit(0)
-
-        #plt.figure()
-        #plt.plot(m)
-        #plt.plot(mdl)
-        #plt.show()
-        return err[:,0]
-
-    if p0 is None:
-        p0 = np.hstack((np.array([.01]), 0.1*np.ones(nb_cmd*nb_meas))) # start from random non-zero value
-
-    #ddy = diff_signal(y, freq, order+1, filt)
-    #print(np.shape(ddy))
-    #plt.figure()
-    #plt.plot(y)
-    #plt.plot(ddy[0])
-    #plt.plot(ddy[1])
-    #plt.plot(ddy[2])
-    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(xs, ys), full_output=1)
-    print('tau',p1[0])
-    print('eff',np.reshape(p1[1:],(nb_meas,nb_cmd)))
-    print(success)
-    return (p1[0], np.reshape(p1[1:],(nb_meas,nb_cmd)))
-
-
-
-def process_data(f_name, start, end, freq, opt="axis", fo_c=None):
+def process_data(conf, f_name, start, end, freq, opt="axis", fo_c=None, verbose=False):
 
     # Read data from log file
     data = genfromtxt(f_name, delimiter=',', skip_header=1)
     N = data.shape[0]
+
+    # Get number of inputs and outputs
+    nb_in = 0
+    nb_out = 0
+    for key in conf['data']:
+        el = conf['data'][key]
+        if el['type'] == 'input' and el['index'] >= 0:
+            nb_in += 1
+        if el['type'] == 'command' and el['index'] >= 0:
+            nb_out += 1
+    mixing = np.array(conf['mixing'])
+    if (nb_in, nb_out) != np.shape(mixing):
+        print("Mixing matrix dimensions not matching number of inputs and commands")
+        sys.exit(1)
+    if verbose:
+        print("Nb of inputs:", nb_in)
+        print("Nb of commands:", nb_out)
+        print("Mixing matrix:")
+        print(mixing)
+    sys.exit(0)
 
     if end == -1:
         end = N
@@ -296,44 +161,48 @@ def process_data(f_name, start, end, freq, opt="axis", fo_c=None):
 
 
 def main():
-    usage = "usage: %prog [options] log_filename.csv" + "\n" + "Run %prog --help to list the options."
-    parser = ArgumentParser(usage)
-    parser.add_option("config", help="JSON configuration file")
-    parser.add_option("-o", "--opt", dest="opt",
+    from argparse import ArgumentParser
+    import json
+
+    parser = ArgumentParser(description="Control effectiveness estimation tool")
+    parser.add_argument("config", help="JSON configuration file")
+    parser.add_argument("data", help="Log file for parameter estimation")
+    parser.add_argument("-o", "--opt", dest="opt",
                       action="store", default="axis",
                       help="Optimization type (axis, mixed, full)")
-    parser.add_option("-f", "--freq", dest="freq",
+    parser.add_argument("-f", "--freq", dest="freq",
                       action="store", default=512,
                       help="Sampling frequency")
-    parser.add_option("-d", "--dyn", dest="dyn",
+    parser.add_argument("-d", "--dyn", dest="dyn",
                       action="store", default=0.08,
                       help="First order actuator dynamic (discrete time), 'None' for auto tuning")
-    parser.add_option("-s", "--start",
+    parser.add_argument("-s", "--start",
                       help="Start time",
                       action="store", dest="start", default="0")
-    parser.add_option("-e", "--end",
+    parser.add_argument("-e", "--end",
                       help="End time (-1 for unlimited time)",
                       action="store", dest="end", default=-1)
-    parser.add_option("-p", "--plot",
+    parser.add_argument("-p", "--plot",
                       help="Show resulting plots",
                       action="store_true", dest="plot")
-    parser.add_option("-v", "--verbose",
+    parser.add_argument("-v", "--verbose",
                       action="store_true", dest="verbose")
-    (options, args) = parser.parse_args()
-    if len(args) != 1:
-        parser.error("incorrect number of arguments")
-    else:
-        if os.path.isfile(args[0]):
-            filename = args[0]
-        else:
-            print(args[0] + " not found")
-            sys.exit(1)
+    args = parser.parse_args()
 
-    freq = int(options.freq)
-    start = int(options.start) * freq
-    end = int(options.end) * freq
+    if not os.path.isfile(args.config) and not os.path.isfile(args.data):
+        print("Config or data files are not valid")
+        sys.exit(1)
 
-    process_data(filename, start, end, freq, options.opt, float(options.dyn))
+    freq = int(args.freq)
+    start = int(args.start) * freq
+    end = int(args.end) * freq
+
+    with open(args.config, 'r') as f:
+        conf = json.load(f)
+        #if args.verbose:
+        #    print(json.dumps(conf))
+
+        process_data(conf, args.data, start, end, freq, args.opt, float(args.dyn), args.verbose)
 
 
 if __name__ == "__main__":
