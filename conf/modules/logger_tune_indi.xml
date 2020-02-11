@@ -1,0 +1,17 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="logger_tune_indi" dir="loggers">
+  <doc>
+	<description>
+      Logs to a csv file.
+      (ChibiOS SD log)
+    </description>
+  </doc>
+  <header>
+	<file name="file_logger_sd_indi.h" />
+  </header>
+  <periodic fun="file_logger_sd_indi_periodic()" start="file_logger_sd_indi_start()" autorun="FALSE" />
+  <makefile target="ap">
+    <file name="file_logger_sd_indi.c"/>
+  </makefile>
+</module>
