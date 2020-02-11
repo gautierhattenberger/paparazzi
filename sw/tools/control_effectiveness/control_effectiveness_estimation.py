@@ -1,0 +1,341 @@
+#!/usr/bin/env python3
+#
+# Copyright (C) 2018 Ewoud Smeur
+# Copyright (C) 2020 Gautier Hattenberger <gautier.hattenberger@enac.fr>
+#
+# This file is part of paparazzi.
+#
+# paparazzi is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2, or (at your option)
+# any later version.
+#
+# paparazzi is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with paparazzi; see the file COPYING.  If not, see
+# <http://www.gnu.org/licenses/>.
+
+
+import os
+import scipy as sp
+from scipy import signal, optimize
+import csv
+import numpy as np
+from numpy import genfromtxt
+import matplotlib.pyplot as plt
+from matplotlib.pyplot import figure, show
+from optparse import ArgumentParser
+
+import control_effectiveness_utils as ut
+
+GYRO_P = 0
+GYRO_Q = 1
+GYRO_R = 2
+ACCEL_X = 0
+ACCEL_Y = 1
+ACCEL_Z = 2
+CMD_THRUST = 0
+CMD_ROLL = 1
+CMD_PITCH = 2
+CMD_YAW = 3
+
+
+def diff_signal(signal, freq, order=1, filt=None):
+    '''
+    compute the nth-order derivative of a signal of fixed freq
+    and by applying a filter if necessary
+    '''
+    if filt is not None:
+        signal = sp.signal.lfilter(filt[0], filt[1], signal, axis=0)
+
+    res = [signal]
+    nb = np.shape(signal)[1]
+    for i in range(order):
+        sigd = np.vstack((np.zeros((1,nb)), np.diff(res[-1], 1, axis=0))) * freq
+        res.append(sigd)
+    return res
+
+def cmd_model(c, p, freq, actuator_model, filt=None, order=1):
+    '''
+    apply actuator model, derivate and scale
+    '''
+    ca = actuator_model(c, p[0])
+    if order == 1:
+        dca = diff_signal(ca, freq, 1, filt)
+        return (p[1] * dca[1] + p[2]*np.ones(np.shape(dca[1])))
+    elif order == 2:
+        dca = diff_signal(ca, freq, 2, filt)
+        return ((p[3] * dca[2]) + p[1] * dca[1] + p[2]*np.ones(np.shape(dca[1])))
+
+def cmd_model_full(c, tau, eff, freq, actuator_model, filt=None):
+    nb_cmd = c.shape[1]
+    ca = actuator_model(c, tau)
+    dca = diff_signal(ca, freq, 1, filt)
+    res = np.zeros(np.shape(c))
+    for i in range(c.shape[0]):
+        #print(np.reshape(dca[-1][i,:],(nb_cmd,1)))
+        res[i,:] = np.dot(eff, np.reshape(dca[-1][i,:],(nb_cmd,1)))[0]
+    return res
+
+def optimize_axis(x, y, freq, order=1, filt=None, p0=None, actuator_model=ut.first_order_model):
+    '''
+    global optimization function (single axis)
+    '''
+
+    def err_func(p, c, m):
+        '''
+        p vector of parameters to optimize
+        c command vector
+        m measurement vector
+
+        computes the error between the scaled command derivate and the measurements
+        '''
+        mdl = cmd_model(c, p, freq, actuator_model, filt, order)
+        #err = np.hstack((mdl,mdl,mdl)) - m
+        err = mdl - m
+        #print("e",np.shape(mdl),np.shape(m),np.shape(err))
+        #print(p,np.shape(m),np.shape(mdl))
+        #plt.figure()
+        #plt.plot(m)
+        #plt.plot(mdl)
+        #plt.show()
+        return err[:,0]
+
+    if order <= 0:
+        print("order should be > 0")
+        exit(1)
+
+    if p0 is None:
+        p0 = np.hstack((np.array([.01, .01]), np.zeros(order))) # start from random non-zero value
+
+    #ddy = diff_signal(y, freq, order+1, filt)
+    #print(np.shape(ddy))
+    #plt.figure()
+    #plt.plot(y)
+    #plt.plot(ddy[0])
+    #plt.plot(ddy[1])
+    #plt.plot(ddy[2])
+    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(x, y), full_output=1)
+    print(p1, success)
+    return p1
+
+
+def optimize_mixed(xs, ys, freq, filt=None, p0=None, actuator_model=ut.first_order_model):
+    '''
+    mixed optimization function
+    '''
+
+    def err_func(p, c, m):
+        '''
+        p vector of parameters to optimize
+        c command vector
+        m measurement vector
+
+        computes the error between the scaled command derivate and the measurements
+        '''
+        tau = p[0]
+        ca = actuator_model(c, tau)
+        dca = diff_signal(ca, freq, 1, filt)
+        print(dca[-1].shape,p)
+        #print(dca[0][:,[CMD_ROLL]])
+        plt.figure()
+        plt.plot(m[:,GYRO_P])
+        plt.plot(dca[-1][:,[CMD_ROLL]])
+        plt.show()
+        res = np.linalg.lstsq(dca[-1][:,[CMD_ROLL]], m)
+        print(p, res[0], res[1])
+        return res[1]
+
+    if p0 is None:
+        p0 = np.array([0.1])
+
+    print(np.shape(xs), np.shape(ys), np.shape(p0))
+    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(xs, ys), full_output=1)
+    print(p1, success)
+    return p1
+
+def optimize_full(xs, ys, freq, filt=None, p0=None, actuator_model=ut.first_order_model):
+    '''
+    global optimization for all axis (full effectiveness)
+    '''
+    nb_cmd = xs.shape[1]
+    nb_meas = ys.shape[1]
+
+    def err_func(p, c, m):
+        '''
+        p vector of parameters to optimize
+        c command vector
+        m measurement vector
+
+        computes the error between the scaled command derivate and the measurements
+        '''
+        tau = p[0]
+        m_eff = np.reshape(p[1:], (nb_meas, nb_cmd))
+        ca = actuator_model(c, tau)
+        dca = diff_signal(ca, freq, 1, filt)
+        #print(m_eff.shape,c.shape, m.shape, ca.shape, dca[-1].shape)
+        #print(m_eff)
+
+        err = np.zeros((m.shape[0],1))
+        #print(err.shape)
+        for i in range(m.shape[0]):
+            #print(m_eff.shape,np.reshape(dca[-1][i,:].T,(4,1)).shape, m[i,:].shape)
+            #print('cmd',np.reshape(dca[-1][i,:],(nb_cmd,1)))
+            #print('meas',np.reshape(m[i,:],(nb_meas,1)))
+            #print('eff',m_eff)
+            #print('dot',np.dot(m_eff,np.reshape(dca[-1][i,:],(nb_cmd,1))))
+            r = np.dot(m_eff, np.reshape(dca[-1][i,:],(nb_cmd,1))) - np.reshape(m[i,:],(nb_meas,1))
+            #err[i] = sum(r.T[0])
+            o = np.dot(r.T,r)
+            #print(r.shape, o, o.shape)
+            err[i] = o
+
+        #print('err',err)
+        #print(p)
+        #exit(0)
+
+        #plt.figure()
+        #plt.plot(m)
+        #plt.plot(mdl)
+        #plt.show()
+        return err[:,0]
+
+    if p0 is None:
+        p0 = np.hstack((np.array([.01]), 0.1*np.ones(nb_cmd*nb_meas))) # start from random non-zero value
+
+    #ddy = diff_signal(y, freq, order+1, filt)
+    #print(np.shape(ddy))
+    #plt.figure()
+    #plt.plot(y)
+    #plt.plot(ddy[0])
+    #plt.plot(ddy[1])
+    #plt.plot(ddy[2])
+    p1, cov, info, msg, success = optimize.leastsq(err_func, p0, args=(xs, ys), full_output=1)
+    print('tau',p1[0])
+    print('eff',np.reshape(p1[1:],(nb_meas,nb_cmd)))
+    print(success)
+    return (p1[0], np.reshape(p1[1:],(nb_meas,nb_cmd)))
+
+
+
+def process_data(f_name, start, end, freq, opt="axis", fo_c=None):
+
+    # Read data from log file
+    data = genfromtxt(f_name, delimiter=',', skip_header=1)
+    N = data.shape[0]
+
+    if end == -1:
+        end = N
+
+    #First order actuator dynamics constant (discrete, depending on sf)
+    #for now fixed value, use autotune when None later
+    if fo_c is None:
+        fo_c = 0.08
+
+
+    # Data structure
+    t = np.arange(N) / freq
+    gyro = data[:,1:4]
+    accel = data[:,4:7]/pow(2,10)
+    cmd = data[:,7:11]
+
+    # Filtering
+    filt = signal.butter(2, 3.2/(freq/2), 'low', analog=False)
+
+    # Measurements derivates + filter
+    gyro_df = diff_signal(gyro, freq, 2, filt)
+    accel_df = diff_signal(accel, freq, 1, filt)
+    #print("g", np.shape(gyro_df))
+
+    if opt == "axis":
+        # Optimization for each channels
+        p_roll = optimize_axis(cmd[start:end,[CMD_ROLL]], gyro_df[-1][start:end,[GYRO_P]], freq, 1, filt)
+        roll_cmd = cmd_model(cmd[:,[CMD_ROLL]], p_roll, freq, first_order_model, filt)
+
+        p_pitch = optimize_axis(cmd[start:end,[CMD_PITCH]], gyro_df[-1][start:end,[GYRO_Q]], freq, 1, filt)
+        pitch_cmd = cmd_model(cmd[:,[CMD_PITCH]], p_pitch, freq, first_order_model, filt)
+
+        p_yaw = optimize_axis(cmd[start:end,[CMD_YAW]], gyro_df[-1][start:end,[GYRO_R]], freq, 2, filt)
+        yaw_cmd = cmd_model(cmd[:,[CMD_YAW]], p_yaw, freq, first_order_model, filt, 2)
+
+        p_thrust = optimize_axis(cmd[start:end,[CMD_THRUST]], accel_df[-1][start:end,[ACCEL_Z]], freq, 1, filt)
+        thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], p_thrust, freq, first_order_model, filt)
+        #thrust_cmd = cmd_model(cmd[:,[CMD_THRUST]], [0.01682614, -2.36359587/1000, 0], freq, first_order_model, filt)
+
+        # Plot
+        plot_results(roll_cmd, gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
+        plot_results(pitch_cmd, gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
+        plot_results(yaw_cmd, gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
+        plot_results(thrust_cmd, accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [m/s^3]')
+
+    elif opt == "mixed":
+        tau = optimize_mixed(cmd[start:end,:], np.hstack((gyro_df[-1][start:end,:], accel_df[-1][start:end,[ACCEL_Z]])), freq, filt)
+
+    elif opt == "full":
+        # Full optimization
+        tau, eff = optimize_full(cmd[start:end,:], np.hstack((gyro_df[-1][start:end,:], accel_df[-1][start:end,[ACCEL_Z]])), freq, filt)
+        res_cmd = cmd_model_full(cmd, tau, eff, freq, first_order_model, filt)
+        #print(res_cmd[:,CMD_ROLL])
+
+        # Plot
+        plot_results(res_cmd[:,CMD_ROLL], gyro_df[-1][:,[GYRO_P]], t, start, end, 'p dot dot [rad/s^3]')
+        plot_results(res_cmd[:,CMD_PITCH], gyro_df[-1][:,[GYRO_Q]], t, start, end, 'q dot dot [rad/s^3]')
+        plot_results(res_cmd[:,CMD_YAW], gyro_df[-1][:,[GYRO_R]], t, start, end, 'r dot dot [rad/s^3]')
+        plot_results(res_cmd[:,CMD_THRUST], accel_df[-1][:,[ACCEL_Z]], t, start, end, 'az dot [rad/s^3]')
+
+    else:
+        print("Unknown optimization type: ", opt)
+        exit(1)
+
+    # Show all plots
+    plt.show()
+
+
+def main():
+    usage = "usage: %prog [options] log_filename.csv" + "\n" + "Run %prog --help to list the options."
+    parser = ArgumentParser(usage)
+    parser.add_option("config", help="JSON configuration file")
+    parser.add_option("-o", "--opt", dest="opt",
+                      action="store", default="axis",
+                      help="Optimization type (axis, mixed, full)")
+    parser.add_option("-f", "--freq", dest="freq",
+                      action="store", default=512,
+                      help="Sampling frequency")
+    parser.add_option("-d", "--dyn", dest="dyn",
+                      action="store", default=0.08,
+                      help="First order actuator dynamic (discrete time), 'None' for auto tuning")
+    parser.add_option("-s", "--start",
+                      help="Start time",
+                      action="store", dest="start", default="0")
+    parser.add_option("-e", "--end",
+                      help="End time (-1 for unlimited time)",
+                      action="store", dest="end", default=-1)
+    parser.add_option("-p", "--plot",
+                      help="Show resulting plots",
+                      action="store_true", dest="plot")
+    parser.add_option("-v", "--verbose",
+                      action="store_true", dest="verbose")
+    (options, args) = parser.parse_args()
+    if len(args) != 1:
+        parser.error("incorrect number of arguments")
+    else:
+        if os.path.isfile(args[0]):
+            filename = args[0]
+        else:
+            print(args[0] + " not found")
+            sys.exit(1)
+
+    freq = int(options.freq)
+    start = int(options.start) * freq
+    end = int(options.end) * freq
+
+    process_data(filename, start, end, freq, options.opt, float(options.dyn))
+
+
+if __name__ == "__main__":
+    main()
+
