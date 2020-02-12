@@ -74,23 +74,37 @@ def process_data(conf, f_name, start, end, freq, opt="axis", fo_c=None, verbose=
     N = data.shape[0]
 
     # Get number of inputs and outputs
-    nb_in = 0
-    nb_out = 0
-    for key in conf['data']:
-        el = conf['data'][key]
-        if el['type'] == 'input' and el['index'] >= 0:
-            nb_in += 1
-        if el['type'] == 'command' and el['index'] >= 0:
-            nb_out += 1
     mixing = np.array(conf['mixing'])
-    if (nb_in, nb_out) != np.shape(mixing):
-        print("Mixing matrix dimensions not matching number of inputs and commands")
-        sys.exit(1)
+    (nb_in, nb_out) = np.shape(mixing)
     if verbose:
         print("Nb of inputs:", nb_in)
         print("Nb of commands:", nb_out)
         print("Mixing matrix:")
         print(mixing)
+    inputs = np.zeros((N, nb_in))
+    commands = np.zeros((N, nb_out))
+    for key in conf['data']:
+        el = conf['data'][key]
+        t = el['type']
+        idx = el['index']
+        if t == 'input' and idx >= 0:
+            if idx >= nb_in:
+                print("Invalid input index for {}".format(el['name']))
+                exit(1)
+            inputs[:, idx] = data[:, int(key)]
+            for (filt_name, params) in el['filters']:
+                inputs[:,idx] = ut.apply_filter(filt_name, params, inputs[:, idx].copy(), freq)
+                #print(el['name'], filt_name, np.shape(inputs[:,idx]))
+                #print(inputs[:,idx])
+        if t == 'command' and idx >= 0:
+            if idx >= nb_out:
+                print("Invalid command index for {}".format(el['name']))
+                exit(1)
+            commands[:, idx] = data[:, int(key)]
+            for (filt_name, params) in el['filters']:
+                commands[:,idx] = ut.apply_filter(filt_name, params, commands[:, idx].copy(), freq)
+    print(inputs)
+    print(commands)
     sys.exit(0)
 
     if end == -1:

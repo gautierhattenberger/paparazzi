@@ -25,7 +25,7 @@ Utility functions for control effectiveness estimation
 
 import numpy as np
 import scipy as sp
-from scipy import signal, optimize
+from scipy import optimize
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure, show
 
@@ -33,17 +33,17 @@ from matplotlib.pyplot import figure, show
 # functions for actuators model
 #
 
-def first_order_model(sig, tau):
+def first_order_model(signal, tau):
     '''
     Apply a first order filter with (discrete) time constant tau
     '''
-    return sp.signal.lfilter([tau], [1, tau-1], sig, axis=0)
+    return sp.signal.lfilter([tau], [1, tau-1], signal, axis=0)
 
-def rate_limit_model(sig, max_rate):
+def rate_limit_model(signal, max_rate):
     '''
     Apply rate limiter of signal
     '''
-    return sig # TODO
+    return signal # TODO
 
 #
 # Utility functions
@@ -54,15 +54,57 @@ def diff_signal(signal, freq, order=1, filt=None):
     compute the nth-order derivative of a signal of fixed freq
     and by applying a filter if necessary
     '''
-    if filt is not None:
-        signal = sp.signal.lfilter(filt[0], filt[1], signal, axis=0)
+    #if filt is not None:
+    #    signal = sp.signal.lfilter(filt[0], filt[1], signal, axis=0)
 
-    res = [signal]
-    nb = np.shape(signal)[1]
-    for i in range(order):
-        sigd = np.vstack((np.zeros((1,nb)), np.diff(res[-1], 1, axis=0))) * freq
-        res.append(sigd)
+    #res = [signal]
+    #print(np.shape(signal))
+    #print(np.shape(res))
+    #try:
+    #    nb = np.shape(signal)[1]
+    #except:
+    #    nb = 1
+    #for i in range(order):
+    #    print(nb, np.shape(res[-1]))
+    #    diff = np.diff(res[-1], 1, axis=0)
+    #    print(diff, np.shape(diff))
+    #    sigd = np.hstack((np.zeros((1,nb)), diff.reshape(1,np.shape(signal)[0]-1))) * freq
+    #    res.append(sigd)
+    #return res
+    diff = np.diff(signal, order)
+    res = np.hstack((np.zeros((1,order)), diff.reshape(1,len(diff)))) * freq
+    #print(np.shape(res), res)
     return res
+
+
+def apply_filter(filt_name, params, signal, freq):
+    '''
+    apply a filter to an input signal based on the config (name + params)
+    '''
+    if filt_name == '1st_order':
+        '''
+        params = [tau]
+        '''
+        return first_order_model(signal, params[0])
+    elif filt_name == 'rate_limit':
+        '''
+        params = [max_rate]
+        '''
+        return rate_limit_model(signal, params[0])
+    elif filt_name == 'diff_signal':
+        '''
+        params = [order]
+        '''
+        return diff_signal(signal, freq, params[0])
+    elif filt_name == 'butter':
+        '''
+        params = [order, Wn]
+        '''
+        b, a = sp.signal.butter(params[0], params[1]/(freq/2))
+        return sp.signal.lfilter(b, a, signal, axis=0)
+    else:
+        print("Unknown filter type", filt_name)
+
 
 #
 # Display functions

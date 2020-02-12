@@ -3,6 +3,7 @@
     "0" : {
       "name" : "time",
       "type" : "timestamp",
+      "index" : -1,
       "format" : "float",
       "unit" : "s"
     },
@@ -12,7 +13,7 @@
       "index" : 0,
       "format" : "bfp",
       "scale" : 12,
-      "filter" : ["diff_signal", 2]
+      "filters" : [["butter", [2, 3.2]], ["diff_signal", [2]]]
     },
     "2" : {
       "name" : "rate.y",
@@ -20,7 +21,7 @@
       "index" : 1,
       "format" : "bfp",
       "scale" : 12,
-      "filter" : ["diff_signal", 2]
+      "filters" : [["butter", [2, 3.2]], ["diff_signal", [2]]]
     },
     "3" : {
       "name" : "rate.z",
@@ -28,7 +29,7 @@
       "index" : 2,
       "format" : "bfp",
       "scale" : 12,
-      "filter" : ["diff_signal", 2]
+      "filters" : [["butter", [2, 3.2]], ["diff_signal", [2]]]
     },
     "4" : {
       "name" : "accel.x",
@@ -36,7 +37,7 @@
       "index" : -1,
       "format" : "bfp",
       "scale" : 10,
-      "filter" : []
+      "filters" : []
     },
     "5" : {
       "name" : "accel.y",
@@ -44,15 +45,15 @@
       "index" : -1,
       "format" : "bfp",
       "scale" : 10,
-      "filter" : []
+      "filters" : []
     },
     "6" : {
       "name" : "accel.z",
       "type" : "input",
-      "index" : 4,
+      "index" : 3,
       "format" : "bfp",
       "scale" : 10,
-      "filter" : ["diff_signal", 1]
+      "filters" : [["butter", [2, 3.2]], ["diff_signal", [1]]]
     },
     "7" : {
       "name" : "roll",
@@ -60,7 +61,7 @@
       "index" : 0,
       "format" : "pprz",
       "scale" : 1.0,
-      "filter" : ["1st_order", 0.08 ]
+      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]]]
     },
     "8" : {
       "name" : "pitch",
@@ -68,7 +69,7 @@
       "index" : 1,
       "format" : "pprz",
       "scale" : 1.0,
-      "filter" : ["1st_order", 0.08 ]
+      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]]]
     },
     "9" : {
       "name" : "yaw",
@@ -76,7 +77,7 @@
       "index" : 2,
       "format" : "pprz",
       "scale" : 1.0,
-      "filter" : ["1st_order", 0.08 ]
+      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]]]
     },
     "10" : {
       "name" : "throttle",
@@ -84,7 +85,7 @@
       "index" : 3,
       "format" : "pprz",
       "scale" : 1.0,
-      "filter" : ["1st_order", 0.08 ]
+      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]]]
     }
   },
   "mixing" : [
