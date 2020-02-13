@@ -72,12 +72,12 @@ def diff_signal(signal, freq, order=1, filt=None):
     #    res.append(sigd)
     #return res
     diff = np.diff(signal, order)
-    res = np.hstack((np.zeros((1,order)), diff.reshape(1,len(diff)))) * freq
+    res = np.hstack((np.zeros((1,order)), diff.reshape(1,len(diff)))) * pow(freq, order)
     #print(np.shape(res), res)
     return res
 
 
-def apply_filter(filt_name, params, signal, freq):
+def apply_filter(filt_name, params, signal, freq, fo_c=None):
     '''
     apply a filter to an input signal based on the config (name + params)
     '''
@@ -85,7 +85,12 @@ def apply_filter(filt_name, params, signal, freq):
         '''
         params = [tau]
         '''
-        return first_order_model(signal, params[0])
+        if fo_c is None:
+            # use param from conf file
+            return first_order_model(signal, params[0])
+        else:
+            # use function parameter
+            return first_order_model(signal, fo_c)
     elif filt_name == 'rate_limit':
         '''
         params = [max_rate]
@@ -113,6 +118,26 @@ def get_name_by_index(conf, type_, index):
             return el['name']
     return None
 
+def apply_format(conf, data):
+    try:
+        format_ = conf['format']
+        if format_ == "float":
+            return data
+        if format_ == "bfp":
+            res = conf['resolution']
+            return data / pow(2, res)
+        if format_ == "pprz":
+            return data
+        if format_ == "int":
+            scale = conf['scale']
+            return data * scale
+        else:
+            print("Unknown format:", format_)
+            return data
+    except:
+        print("Format error:", conf)
+        return data
+
 #
 # Display functions
 #
@@ -127,10 +152,10 @@ def plot_results(x, y, t, start, end, label, show=False):
     plt.plot(t, x)
     plt.xlabel('t [s]')
     plt.ylabel(label)
-    plt.figure()
-    plt.plot(x[start:end], y[start:end])
-    plt.xlabel('command [pprz]')
-    plt.ylabel(label)
+    #plt.figure()
+    #plt.plot(x[start:end], y[start:end])
+    #plt.xlabel('command [pprz]')
+    #plt.ylabel(label)
     if show:
         plt.show()
 
@@ -143,8 +168,8 @@ def print_results():
 #
 
 def fit_axis(x, y, axis, start, end):
-    c = np.linalg.lstsq(x[start:end], y[start:end], rcond=None)
+    c = np.linalg.lstsq(x[start:end], y[start:end])#, rcond=None)
     print(axis)
-    print(c[0])
+    print(c[0]*1000)
     return c[0]
 

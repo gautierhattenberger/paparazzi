@@ -39,28 +39,28 @@ def actuator_dyn_2nd(x, zeta, omega, dt, maxrate, maxaccel):
 
 
 # Read data from log file
-data = genfromtxt('00008.csv', delimiter=',', skip_header=1)
+data = genfromtxt('pprzlog_0005.csv', delimiter=',', skip_header=1)
 
 # Sample frequency
-sf = 512;
+sf = 1000;
 #First order actuator dynamics constant (discrete, depending on sf)
-fo_c = 0.08
+fo_c = 0.018
 
 N = data.shape[0]
 
 # Data structure
 t = np.arange(N)/sf
-gyro = data[:,1:4]
+gyro = data[:,1:4]/pow(2,12)
 accel = data[:,4:7]/pow(2,10)
 cmd = data[:,7:11]
 # If actuator feedback is available:
-obs = data[:,11:15]
+#obs = data[:,11:15]
 # If testing the actuator response:
-servotest = data[:,15]
+#servotest = data[:,15]
 
 # Actuator dynamics
 cmd_a = sp.signal.lfilter([fo_c], [1, -(1-fo_c)], cmd, axis=0)
-servotest_a = sp.signal.lfilter([fo_c], [1, -(1-fo_c)], servotest, axis=0)
+#servotest_a = sp.signal.lfilter([fo_c], [1, -(1-fo_c)], servotest, axis=0)
 
 # b, a = signal.butter(2, 7/(sf/2), 'low', analog=False)
 # servotest_a = sp.signal.lfilter(b, a, servotest, axis=0)

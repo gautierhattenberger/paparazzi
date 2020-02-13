@@ -32,18 +32,6 @@ from matplotlib.pyplot import figure, show
 
 import control_effectiveness_utils as ut
 
-GYRO_P = 0
-GYRO_Q = 1
-GYRO_R = 2
-ACCEL_X = 0
-ACCEL_Y = 1
-ACCEL_Z = 2
-CMD_THRUST = 0
-CMD_ROLL = 1
-CMD_PITCH = 2
-CMD_YAW = 3
-
-
 def cmd_model(c, p, freq, actuator_model, filt=None, order=1):
     '''
     apply actuator model, derivate and scale
@@ -76,6 +64,11 @@ def process_data(conf, f_name, start, end, freq, opt="axis", fo_c=None, verbose=
     if end < 0:
         end = N
 
+    ##First order actuator dynamics constant (discrete, depending on sf)
+    ##for now fixed value, use autotune when None later
+    #if fo_c is None:
+    #    fo_c = 0.08
+
     # Get number of inputs and outputs
     mixing = np.array(conf['mixing'])
     (nb_in, nb_out) = np.shape(mixing)
@@ -84,6 +77,7 @@ def process_data(conf, f_name, start, end, freq, opt="axis", fo_c=None, verbose=
         print("Nb of commands:", nb_out)
         print("Mixing matrix:")
         print(mixing)
+    time = np.arange(end-start) / freq # default time vector if not in data
     inputs = np.zeros((end-start, nb_in))
     commands = np.zeros((end-start, nb_out))
     for key in conf['data']:
@@ -94,33 +88,36 @@ def process_data(conf, f_name, start, end, freq, opt="axis", fo_c=None, verbose=
             if idx >= nb_in:
                 print("Invalid input index for {}".format(el['name']))
                 exit(1)
-            inputs[:, idx] = data[start:end, int(key)]
+            inputs[:, idx] = ut.apply_format(el, data[start:end, int(key)])
             for (filt_name, params) in el['filters']:
                 inputs[:,idx] = ut.apply_filter(filt_name, params, inputs[:, idx].copy(), freq)
-                #print(el['name'], filt_name, np.shape(inputs[:,idx]))
-                #print(inputs[:,idx])
         if t == 'command' and idx >= 0:
             if idx >= nb_out:
                 print("Invalid command index for {}".format(el['name']))
                 exit(1)
-            commands[:, idx] = data[start:end, int(key)]
+            commands[:, idx] = ut.apply_format(el, data[start:end, int(key)])
             for (filt_name, params) in el['filters']:
-                commands[:,idx] = ut.apply_filter(filt_name, params, commands[:, idx].copy(), freq)
-    print(inputs)
-    print(commands)
+                commands[:,idx] = ut.apply_filter(filt_name, params, commands[:, idx].copy(), freq, fo_c)
+        if t == 'timestamp':
+            time = ut.apply_format(el, data[start:end, int(key)])
+
+    #print(inputs)
+    #print(commands)
 
     for i in range(nb_in):
         name = ut.get_name_by_index(conf, 'input', i)
         cmd = np.multiply(commands, mixing[[i],:])
-        print(cmd)
-        c = ut.fit_axis(cmd, inputs[:,[i]], name, 0, N)
+        #print(cmd)
+        fit = ut.fit_axis(cmd, inputs[:,[i]], name, 0, N)
+        cmd_fit = np.dot(cmd, fit)
+        #print(cmd)
+        #print(cmd_fit)
+        ut.plot_results(cmd_fit, inputs[:,[i]], time, 0, N, name)
+
+    plt.show()
+
     sys.exit(0)
-
-    #First order actuator dynamics constant (discrete, depending on sf)
-    #for now fixed value, use autotune when None later
-    if fo_c is None:
-        fo_c = 0.08
-
+    
 
     # Data structure
     t = np.arange(N) / freq
@@ -194,7 +191,7 @@ def main():
                       action="store", default=512,
                       help="Sampling frequency")
     parser.add_argument("-d", "--dyn", dest="dyn",
-                      action="store", default=0.08,
+                      #action="store", default=0.08,
                       help="First order actuator dynamic (discrete time), 'None' for auto tuning")
     parser.add_argument("-s", "--start",
                       help="Start time",
@@ -216,13 +213,16 @@ def main():
     freq = int(args.freq)
     start = int(args.start) * freq
     end = int(args.end) * freq
+    dyn = args.dyn
+    if dyn is not None:
+        dyn = float(dyn)
 
     with open(args.config, 'r') as f:
         conf = json.load(f)
         #if args.verbose:
         #    print(json.dumps(conf))
 
-        process_data(conf, args.data, start, end, freq, args.opt, float(args.dyn), args.verbose)
+        process_data(conf, args.data, start, end, freq, args.opt, dyn, args.verbose)
 
 
 if __name__ == "__main__":
