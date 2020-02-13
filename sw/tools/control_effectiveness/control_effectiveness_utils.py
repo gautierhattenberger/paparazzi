@@ -106,6 +106,13 @@ def apply_filter(filt_name, params, signal, freq):
         print("Unknown filter type", filt_name)
 
 
+def get_name_by_index(conf, type_, index):
+    for key in conf['data']:
+        el = conf['data'][key]
+        if el['index'] == index and el['type'] == type_:
+            return el['name']
+    return None
+
 #
 # Display functions
 #
@@ -130,4 +137,14 @@ def plot_results(x, y, t, start, end, label, show=False):
 def print_results():
     pass
 
+
+#
+# Optimization functions
+#
+
+def fit_axis(x, y, axis, start, end):
+    c = np.linalg.lstsq(x[start:end], y[start:end], rcond=None)
+    print(axis)
+    print(c[0])
+    return c[0]
 

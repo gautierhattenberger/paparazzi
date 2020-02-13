@@ -73,6 +73,9 @@ def process_data(conf, f_name, start, end, freq, opt="axis", fo_c=None, verbose=
     data = genfromtxt(f_name, delimiter=',', skip_header=1)
     N = data.shape[0]
 
+    if end < 0:
+        end = N
+
     # Get number of inputs and outputs
     mixing = np.array(conf['mixing'])
     (nb_in, nb_out) = np.shape(mixing)
@@ -81,8 +84,8 @@ def process_data(conf, f_name, start, end, freq, opt="axis", fo_c=None, verbose=
         print("Nb of commands:", nb_out)
         print("Mixing matrix:")
         print(mixing)
-    inputs = np.zeros((N, nb_in))
-    commands = np.zeros((N, nb_out))
+    inputs = np.zeros((end-start, nb_in))
+    commands = np.zeros((end-start, nb_out))
     for key in conf['data']:
         el = conf['data'][key]
         t = el['type']
@@ -91,7 +94,7 @@ def process_data(conf, f_name, start, end, freq, opt="axis", fo_c=None, verbose=
             if idx >= nb_in:
                 print("Invalid input index for {}".format(el['name']))
                 exit(1)
-            inputs[:, idx] = data[:, int(key)]
+            inputs[:, idx] = data[start:end, int(key)]
             for (filt_name, params) in el['filters']:
                 inputs[:,idx] = ut.apply_filter(filt_name, params, inputs[:, idx].copy(), freq)
                 #print(el['name'], filt_name, np.shape(inputs[:,idx]))
@@ -100,15 +103,18 @@ def process_data(conf, f_name, start, end, freq, opt="axis", fo_c=None, verbose=
             if idx >= nb_out:
                 print("Invalid command index for {}".format(el['name']))
                 exit(1)
-            commands[:, idx] = data[:, int(key)]
+            commands[:, idx] = data[start:end, int(key)]
             for (filt_name, params) in el['filters']:
                 commands[:,idx] = ut.apply_filter(filt_name, params, commands[:, idx].copy(), freq)
     print(inputs)
     print(commands)
-    sys.exit(0)
 
-    if end == -1:
-        end = N
+    for i in range(nb_in):
+        name = ut.get_name_by_index(conf, 'input', i)
+        cmd = np.multiply(commands, mixing[[i],:])
+        print(cmd)
+        c = ut.fit_axis(cmd, inputs[:,[i]], name, 0, N)
+    sys.exit(0)
 
     #First order actuator dynamics constant (discrete, depending on sf)
     #for now fixed value, use autotune when None later
