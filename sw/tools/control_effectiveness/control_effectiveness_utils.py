@@ -25,7 +25,7 @@ Utility functions for control effectiveness estimation
 
 import numpy as np
 import scipy as sp
-from scipy import optimize
+from scipy import optimize, signal
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import figure, show
 
@@ -152,10 +152,10 @@ def plot_results(x, y, t, start, end, label, show=False):
     plt.plot(t, x)
     plt.xlabel('t [s]')
     plt.ylabel(label)
-    #plt.figure()
-    #plt.plot(x[start:end], y[start:end])
-    #plt.xlabel('command [pprz]')
-    #plt.ylabel(label)
+    plt.figure()
+    plt.plot(x[start:end], y[start:end])
+    plt.xlabel('command [pprz]')
+    plt.ylabel(label)
     if show:
         plt.show()
 
@@ -169,7 +169,7 @@ def print_results():
 
 def fit_axis(x, y, axis, start, end):
     c = np.linalg.lstsq(x[start:end], y[start:end])#, rcond=None)
-    print(axis)
+    print("Fit axis", axis)
     print(c[0]*1000)
     return c[0]
 
