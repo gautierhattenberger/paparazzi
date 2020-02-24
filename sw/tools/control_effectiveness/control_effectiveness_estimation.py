@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 
 import control_effectiveness_utils as ut
 
-def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False):
+def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False, plot=False):
 
     # Read data from log file
     data = genfromtxt(f_name, delimiter=',', skip_header=1)
@@ -49,26 +49,26 @@ def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False):
     time = np.arange(end-start) / freq # default time vector if not in data
     inputs = np.zeros((end-start, nb_in))
     commands = np.zeros((end-start, nb_out))
-    for key in conf['data']:
-        el = conf['data'][key]
+    for el in conf['data']:
         t = el['type']
         idx = el['index']
+        col = el['column']
         if t == 'input' and idx >= 0:
             if idx >= nb_in:
                 print("Invalid input index for {}".format(el['name']))
                 exit(1)
-            inputs[:, idx] = ut.apply_format(el, data[start:end, int(key)])
+            inputs[:, idx] = ut.apply_format(el, data[start:end, col])
             for (filt_name, params) in el['filters']:
                 inputs[:,idx] = ut.apply_filter(filt_name, params, inputs[:, idx].copy(), freq)
         if t == 'command' and idx >= 0:
             if idx >= nb_out:
                 print("Invalid command index for {}".format(el['name']))
                 exit(1)
-            commands[:, idx] = ut.apply_format(el, data[start:end, int(key)])
+            commands[:, idx] = ut.apply_format(el, data[start:end, col])
             for (filt_name, params) in el['filters']:
                 commands[:,idx] = ut.apply_filter(filt_name, params, commands[:, idx].copy(), freq, fo_c)
         if t == 'timestamp':
-            time = ut.apply_format(el, data[start:end, int(key)])
+            time = ut.apply_format(el, data[start:end, col])
 
     for i in range(nb_in):
         name = ut.get_name_by_index(conf, 'input', i)
@@ -77,7 +77,8 @@ def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False):
         cmd_fit = np.dot(cmd, fit)
         ut.plot_results(cmd_fit, inputs[:,[i]], time, 0, N, name)
 
-    plt.show()
+    if plot:
+        plt.show()
 
 
 def main():
@@ -91,7 +92,6 @@ def main():
                       action="store", default=512,
                       help="Sampling frequency")
     parser.add_argument("-d", "--dyn", dest="dyn",
-                      #action="store", default=0.08,
                       help="First order actuator dynamic (discrete time), 'None' for config file default")
     parser.add_argument("-s", "--start",
                       help="Start time",
@@ -119,7 +119,7 @@ def main():
 
     with open(args.config, 'r') as f:
         conf = json.load(f)
-        process_data(conf, args.data, start, end, freq, dyn, args.verbose)
+        process_data(conf, args.data, start, end, freq, dyn, args.verbose, args.plot)
 
 
 if __name__ == "__main__":

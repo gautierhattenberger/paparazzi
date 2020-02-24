@@ -1,94 +1,113 @@
 {
-  "data" : {
-    "0" : {
+  "data" : [
+    {
       "name" : "time",
       "type" : "timestamp",
+      "column" : 0,
       "index" : -1,
       "format" : "int",
       "scale" : 0.001,
       "unit" : "s"
     },
-    "1" : {
+    {
       "name" : "rate.x",
       "type" : "input",
+      "column" : 1,
       "index" : 0,
       "format" : "bfp",
       "resolution" : 12,
       "filters" : [["butter", [2, 3.2]], ["diff_signal", [2]]]
     },
-    "2" : {
+    {
       "name" : "rate.y",
       "type" : "input",
+      "column" : 2,
       "index" : 1,
       "format" : "bfp",
       "resolution" : 12,
       "filters" : [["butter", [2, 3.2]], ["diff_signal", [2]]]
     },
-    "3" : {
+    {
       "name" : "rate.z",
       "type" : "input",
+      "column" : 3,
       "index" : 2,
       "format" : "bfp",
       "resolution" : 12,
       "filters" : [["butter", [2, 3.2]], ["diff_signal", [2]]]
     },
-    "4" : {
+    {
       "name" : "accel.x",
       "type" : "input",
+      "column" : 4,
       "index" : -1,
       "format" : "bfp",
       "resolution" : 10,
       "filters" : []
     },
-    "5" : {
+    {
       "name" : "accel.y",
       "type" : "input",
+      "column" : 5,
       "index" : -1,
       "format" : "bfp",
       "resolution" : 10,
       "filters" : []
     },
-    "6" : {
+    {
       "name" : "accel.z",
       "type" : "input",
+      "column" : 6,
       "index" : 3,
       "format" : "bfp",
       "resolution" : 10,
       "filters" : [["butter", [2, 3.2]], ["diff_signal", [1]]]
     },
-    "7" : {
+    {
       "name" : "throttle",
       "type" : "command",
-      "index" : 3,
-      "format" : "pprz",
-      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [1]]]
-    },
-    "8" : {
-      "name" : "roll",
-      "type" : "command",
+      "column" : 7,
       "index" : 0,
       "format" : "pprz",
       "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [1]]]
     },
-    "9" : {
-      "name" : "pitch",
+    {
+      "name" : "roll",
       "type" : "command",
+      "column" : 8,
       "index" : 1,
       "format" : "pprz",
       "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [1]]]
     },
-    "10" : {
-      "name" : "yaw",
+    {
+      "name" : "pitch",
       "type" : "command",
+      "column" : 9,
       "index" : 2,
       "format" : "pprz",
       "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [1]]]
+    },
+    {
+      "name" : "yaw",
+      "type" : "command",
+      "column" : 10,
+      "index" : 3,
+      "format" : "pprz",
+      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [1]]]
+    },
+    {
+      "name" : "yaw2",
+      "type" : "command",
+      "column" : 10,
+      "index" : 4,
+      "format" : "pprz",
+      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [2]], ["div", ["freq"]]]
     }
-  },
+  ],
   "mixing" : [
-    [ 1.0, 0.0, 0.0, 0.0 ],
-    [ 0.0, 1.0, 0.0, 0.0 ],
-    [ 0.0, 0.0, 1.0, 0.0 ],
-    [ 0.0, 0.0, 0.0, 1.0 ]
+    [ 0.0, 1.0, 0.0, 0.0, 0.0 ],
+    [ 0.0, 0.0, 1.0, 0.0, 0.0 ],
+    [ 0.0, 0.0, 0.0, 1.0, 1.0 ],
+    [ 1.0, 0.0, 0.0, 0.0, 0.0 ]
   ]
 }

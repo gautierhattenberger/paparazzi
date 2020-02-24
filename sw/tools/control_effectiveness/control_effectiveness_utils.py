@@ -107,13 +107,34 @@ def apply_filter(filt_name, params, signal, freq, fo_c=None):
         '''
         b, a = sp.signal.butter(params[0], params[1]/(freq/2))
         return sp.signal.lfilter(b, a, signal, axis=0)
+    elif filt_name == 'mult':
+        '''
+        params = [factor]
+        '''
+        if isinstance(params[0], (int, float)):
+            return signal * params[0]
+        elif params[0] == "freq":
+            return signal * freq
+        else:
+            print("Unknown mult param", params[0])
+            return signal
+    elif filt_name == 'div':
+        '''
+        params = [factor]
+        '''
+        if isinstance(params[0], (int, float)):
+            return signal / params[0]
+        elif params[0] == "freq":
+            return signal / freq
+        else:
+            print("Unknown mult param", params[0])
+            return signal
     else:
         print("Unknown filter type", filt_name)
 
 
 def get_name_by_index(conf, type_, index):
-    for key in conf['data']:
-        el = conf['data'][key]
+    for el in conf['data']:
         if el['index'] == index and el['type'] == type_:
             return el['name']
     return None
