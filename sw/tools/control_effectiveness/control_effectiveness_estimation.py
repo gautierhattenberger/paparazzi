@@ -49,6 +49,7 @@ def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False, plot=
     time = np.arange(end-start) / freq # default time vector if not in data
     inputs = np.zeros((end-start, nb_in))
     commands = np.zeros((end-start, nb_out))
+    output = np.zeros((nb_in, nb_out))
     for el in conf['data']:
         t = el['type']
         idx = el['index']
@@ -73,9 +74,37 @@ def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False, plot=
     for i in range(nb_in):
         name = ut.get_name_by_index(conf, 'input', i)
         cmd = np.multiply(commands, mixing[[i],:])
-        fit = ut.fit_axis(cmd, inputs[:,[i]], name, 0, N)
+        fit = ut.fit_axis(cmd, inputs[:,[i]], name, 0, N, verbose)
+        output[[i],:] = fit.T
         cmd_fit = np.dot(cmd, fit)
         ut.plot_results(cmd_fit, inputs[:,[i]], time, 0, N, name)
+
+    try:
+        # display if needed
+        disp = conf['display']
+    except:
+        disp = None
+        print("No display section")
+
+    if disp is not None:
+        print("\nAdd the following lines to your airframe file:\n")
+        for d in disp:
+            name = d['name']
+            coef = d['coef']
+            if isinstance(coef, (int, float)):
+                print('<define name="{}" value="{}"/>'.format(name, coef))
+            elif isinstance(coef, str):
+                if coef == "freq":
+                    print('<define name="{}" value="{}"/>'.format(name, freq))
+                elif coef == "dyn" and fo_c is not None:
+                    print('<define name="{}" value="{}"/>'.format(name, fo_c))
+                else:
+                    print('Unknown display for', name, 'with', coef)
+            elif len(coef) == 2 and isinstance(coef[0], int) and isinstance(coef[1], int):
+                print('<define name="{}" value="{:.5f}"/>'.format(name, output[coef[0], coef[1]]))
+            else:
+                s = ', '.join(["{:.5f}".format(output[e[0], e[1]]) for e in coef])
+                print('<define name="{}" value="{}" type="float[]"/>'.format(name, s))
 
     if plot:
         plt.show()

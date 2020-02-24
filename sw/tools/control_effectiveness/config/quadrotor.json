@@ -109,5 +109,47 @@
     [ 0.0, 0.0, 1.0, 0.0, 0.0 ],
     [ 0.0, 0.0, 0.0, 1.0, 1.0 ],
     [ 1.0, 0.0, 0.0, 0.0, 0.0 ]
+  ],
+  "display" : [
+    {
+      "name" : "G1_P",
+      "coef" : [0, 1]
+    },
+    {
+      "name" : "G1_Q",
+      "coef" : [1, 2]
+    },
+    {
+      "name" : "G1_R",
+      "coef" : [2, 3]
+    },
+    {
+      "name" : "G2_R",
+      "coef" : [2, 4]
+    },
+    {
+      "name" : "FILT_CUTOFF",
+      "coef" : 3.2
+    },
+    {
+      "name" : "FILT_CUTOFF_R",
+      "coef" : 3.2
+    },
+    {
+      "name" : "ACT_DYN_P",
+      "coef" : "dyn"
+    },
+    {
+      "name" : "ACT_DYN_Q",
+      "coef" : "dyn"
+    },
+    {
+      "name" : "ACT_DYN_R",
+      "coef" : "dyn"
+    },
+    {
+      "name" : "test",
+      "coef" : [[0,0],[0,1],[0,2],[0,3]]
+    }
   ]
 }

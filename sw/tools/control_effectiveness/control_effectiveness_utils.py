@@ -54,26 +54,8 @@ def diff_signal(signal, freq, order=1, filt=None):
     compute the nth-order derivative of a signal of fixed freq
     and by applying a filter if necessary
     '''
-    #if filt is not None:
-    #    signal = sp.signal.lfilter(filt[0], filt[1], signal, axis=0)
-
-    #res = [signal]
-    #print(np.shape(signal))
-    #print(np.shape(res))
-    #try:
-    #    nb = np.shape(signal)[1]
-    #except:
-    #    nb = 1
-    #for i in range(order):
-    #    print(nb, np.shape(res[-1]))
-    #    diff = np.diff(res[-1], 1, axis=0)
-    #    print(diff, np.shape(diff))
-    #    sigd = np.hstack((np.zeros((1,nb)), diff.reshape(1,np.shape(signal)[0]-1))) * freq
-    #    res.append(sigd)
-    #return res
     diff = np.diff(signal, order)
     res = np.hstack((np.zeros((1,order)), diff.reshape(1,len(diff)))) * pow(freq, order)
-    #print(np.shape(res), res)
     return res
 
 
@@ -188,9 +170,10 @@ def print_results():
 # Optimization functions
 #
 
-def fit_axis(x, y, axis, start, end):
+def fit_axis(x, y, axis, start, end, verbose=False):
     c = np.linalg.lstsq(x[start:end], y[start:end])#, rcond=None)
-    print("Fit axis", axis)
-    print(c[0]*1000)
+    if verbose:
+        print("Fit axis", axis)
+        print(c[0]*1000)
     return c[0]
 
