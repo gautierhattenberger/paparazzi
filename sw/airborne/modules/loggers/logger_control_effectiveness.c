@@ -68,8 +68,6 @@
 /** Write the log header line according to the enabled parts */
 void logger_control_effectiveness_start(void)
 {
-  counter = 0;
-
   if (pprzLogFile != -1) {
     sdLogWriteLog(pprzLogFile, "time,gyro_p,gyro_q,gyro_r,ax,ay,az");
 #if LOGGER_CONTROL_EFFECTIVENESS_COMMANDS
