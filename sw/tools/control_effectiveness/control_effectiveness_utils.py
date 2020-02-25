@@ -23,6 +23,7 @@
 Utility functions for control effectiveness estimation
 '''
 
+import sys
 import numpy as np
 import scipy as sp
 from scipy import optimize, signal
@@ -58,8 +59,20 @@ def diff_signal(signal, freq, order=1, filt=None):
     res = np.hstack((np.zeros((1,order)), diff.reshape(1,len(diff)))) * pow(freq, order)
     return res
 
+def get_param(param, var):
+    '''
+    get param value as a number or from var if string
+    '''
+    if isinstance(param, str):
+        if param in var:
+            return var[param]
+        else:
+            print('Unknown variable', param)
+            sys.exit(1)
+    else:
+        return param
 
-def apply_filter(filt_name, params, signal, freq, fo_c=None):
+def apply_filter(filt_name, params, signal, var):
     '''
     apply a filter to an input signal based on the config (name + params)
     '''
@@ -67,50 +80,39 @@ def apply_filter(filt_name, params, signal, freq, fo_c=None):
         '''
         params = [tau]
         '''
-        if fo_c is None:
-            # use param from conf file
-            return first_order_model(signal, params[0])
-        else:
-            # use function parameter
-            return first_order_model(signal, fo_c)
+        return first_order_model(signal, get_param(params[0], var))
+
     elif filt_name == 'rate_limit':
         '''
         params = [max_rate]
         '''
-        return rate_limit_model(signal, params[0])
+        return rate_limit_model(signal, get_param(params[0], var))
+
     elif filt_name == 'diff_signal':
         '''
         params = [order]
         '''
-        return diff_signal(signal, freq, params[0])
+        return diff_signal(signal, var['freq'], get_param(params[0], var))
+
     elif filt_name == 'butter':
         '''
         params = [order, Wn]
         '''
-        b, a = sp.signal.butter(params[0], params[1]/(freq/2))
+        b, a = sp.signal.butter(get_param(params[0], var), get_param(params[1], var)/(var['freq']/2))
         return sp.signal.lfilter(b, a, signal, axis=0)
+
     elif filt_name == 'mult':
         '''
         params = [factor]
         '''
-        if isinstance(params[0], (int, float)):
-            return signal * params[0]
-        elif params[0] == "freq":
-            return signal * freq
-        else:
-            print("Unknown mult param", params[0])
-            return signal
+        return signal * get_param(params[0], var)
+
     elif filt_name == 'div':
         '''
         params = [factor]
         '''
-        if isinstance(params[0], (int, float)):
-            return signal / params[0]
-        elif params[0] == "freq":
-            return signal / freq
-        else:
-            print("Unknown mult param", params[0])
-            return signal
+        return signal / get_param(params[0], var)
+
     else:
         print("Unknown filter type", filt_name)
 

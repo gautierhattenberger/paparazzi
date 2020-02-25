@@ -1,4 +1,8 @@
 {
+  "variables" : {
+    "filt_cutoff" : 3.2,
+    "act_dyn" : 0.008
+  },
   "data" : [
     {
       "name" : "time",
@@ -16,7 +20,7 @@
       "index" : 0,
       "format" : "bfp",
       "resolution" : 12,
-      "filters" : [["butter", [2, 3.2]], ["diff_signal", [2]]]
+      "filters" : [["butter", [2, "filt_cutoff"]], ["diff_signal", [2]]]
     },
     {
       "name" : "rate.y",
@@ -25,7 +29,7 @@
       "index" : 1,
       "format" : "bfp",
       "resolution" : 12,
-      "filters" : [["butter", [2, 3.2]], ["diff_signal", [2]]]
+      "filters" : [["butter", [2, "filt_cutoff"]], ["diff_signal", [2]]]
     },
     {
       "name" : "rate.z",
@@ -34,7 +38,7 @@
       "index" : 2,
       "format" : "bfp",
       "resolution" : 12,
-      "filters" : [["butter", [2, 3.2]], ["diff_signal", [2]]]
+      "filters" : [["butter", [2, "filt_cutoff"]], ["diff_signal", [2]]]
     },
     {
       "name" : "accel.x",
@@ -61,7 +65,7 @@
       "index" : 3,
       "format" : "bfp",
       "resolution" : 10,
-      "filters" : [["butter", [2, 3.2]], ["diff_signal", [1]]]
+      "filters" : [["butter", [2, "filt_cutoff"]], ["diff_signal", [1]]]
     },
     {
       "name" : "throttle",
@@ -69,7 +73,7 @@
       "column" : 7,
       "index" : 0,
       "format" : "pprz",
-      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [1]]]
+      "filters" : [["1st_order", ["act_dyn"]], ["butter", [2, "filt_cutoff"]], ["diff_signal", [1]]]
     },
     {
       "name" : "roll",
@@ -77,7 +81,7 @@
       "column" : 8,
       "index" : 1,
       "format" : "pprz",
-      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [1]]]
+      "filters" : [["1st_order", ["act_dyn"]], ["butter", [2, "filt_cutoff"]], ["diff_signal", [1]]]
     },
     {
       "name" : "pitch",
@@ -85,7 +89,7 @@
       "column" : 9,
       "index" : 2,
       "format" : "pprz",
-      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [1]]]
+      "filters" : [["1st_order", ["act_dyn"]], ["butter", [2, "filt_cutoff"]], ["diff_signal", [1]]]
     },
     {
       "name" : "yaw",
@@ -93,7 +97,7 @@
       "column" : 10,
       "index" : 3,
       "format" : "pprz",
-      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [1]]]
+      "filters" : [["1st_order", ["act_dyn"]], ["butter", [2, "filt_cutoff"]], ["diff_signal", [1]]]
     },
     {
       "name" : "yaw2",
@@ -101,7 +105,7 @@
       "column" : 10,
       "index" : 4,
       "format" : "pprz",
-      "filters" : [["1st_order", [0.08]], ["butter", [2, 3.2]], ["diff_signal", [2]], ["div", ["freq"]]]
+      "filters" : [["1st_order", ["act_dyn"]], ["butter", [2, "filt_cutoff"]], ["diff_signal", [2]], ["div", ["freq"]]]
     }
   ],
   "mixing" : [
@@ -129,23 +133,23 @@
     },
     {
       "name" : "FILT_CUTOFF",
-      "coef" : 3.2
+      "coef" : "filt_cutoff"
     },
     {
       "name" : "FILT_CUTOFF_R",
-      "coef" : 3.2
+      "coef" : "filt_cutoff"
     },
     {
       "name" : "ACT_DYN_P",
-      "coef" : "dyn"
+      "coef" : "act_dyn"
     },
     {
       "name" : "ACT_DYN_Q",
-      "coef" : "dyn"
+      "coef" : "act_dyn"
     },
     {
       "name" : "ACT_DYN_R",
-      "coef" : "dyn"
+      "coef" : "act_dyn"
     },
     {
       "name" : "test",

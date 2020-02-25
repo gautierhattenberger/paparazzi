@@ -29,7 +29,7 @@ import matplotlib.pyplot as plt
 
 import control_effectiveness_utils as ut
 
-def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False, plot=False):
+def process_data(conf, f_name, start, end, freq, act_dyn=None, verbose=False, plot=False):
 
     # Read data from log file
     data = genfromtxt(f_name, delimiter=',', skip_header=1)
@@ -37,6 +37,14 @@ def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False, plot=
     N = data.shape[0]
     if end < 0:
         end = N
+
+    # extract variables
+    var = {}
+    if 'variables' in conf:
+        var = conf['variables']
+    var['freq'] = freq
+    if act_dyn is not None:
+        var['act_dyn'] = act_dyn # this may overwrite default value
 
     # Get number of inputs and outputs
     mixing = np.array(conf['mixing'])
@@ -60,14 +68,14 @@ def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False, plot=
                 exit(1)
             inputs[:, idx] = ut.apply_format(el, data[start:end, col])
             for (filt_name, params) in el['filters']:
-                inputs[:,idx] = ut.apply_filter(filt_name, params, inputs[:, idx].copy(), freq)
+                inputs[:,idx] = ut.apply_filter(filt_name, params, inputs[:, idx].copy(), var)
         if t == 'command' and idx >= 0:
             if idx >= nb_out:
                 print("Invalid command index for {}".format(el['name']))
                 exit(1)
             commands[:, idx] = ut.apply_format(el, data[start:end, col])
             for (filt_name, params) in el['filters']:
-                commands[:,idx] = ut.apply_filter(filt_name, params, commands[:, idx].copy(), freq, fo_c)
+                commands[:,idx] = ut.apply_filter(filt_name, params, commands[:, idx].copy(), var)
         if t == 'timestamp':
             time = ut.apply_format(el, data[start:end, col])
 
@@ -91,15 +99,8 @@ def process_data(conf, f_name, start, end, freq, fo_c=None, verbose=False, plot=
         for d in disp:
             name = d['name']
             coef = d['coef']
-            if isinstance(coef, (int, float)):
-                print('<define name="{}" value="{}"/>'.format(name, coef))
-            elif isinstance(coef, str):
-                if coef == "freq":
-                    print('<define name="{}" value="{}"/>'.format(name, freq))
-                elif coef == "dyn" and fo_c is not None:
-                    print('<define name="{}" value="{}"/>'.format(name, fo_c))
-                else:
-                    print('Unknown display for', name, 'with', coef)
+            if isinstance(coef, (int, float, str)):
+                print('<define name="{}" value="{}"/>'.format(name, ut.get_param(coef, var)))
             elif len(coef) == 2 and isinstance(coef[0], int) and isinstance(coef[1], int):
                 print('<define name="{}" value="{:.5f}"/>'.format(name, output[coef[0], coef[1]]))
             else:
