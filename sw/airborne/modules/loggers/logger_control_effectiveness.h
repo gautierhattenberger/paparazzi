@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2014 Freek van Tienen <freek.v.tienen@gmail.com>
+ * Copyright (C) 2020 Gautier Hattenberger <gautier.hattenberger@enac.fr>
  *
  * This file is part of paparazzi.
  *
@@ -14,20 +14,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with paparazzi; see the file COPYING.  If not, write to
- * the Free Software Foundation, 59 Temple Place - Suite 330,
- * Boston, MA 02111-1307, USA.
+ * along with paparazzi; see the file COPYING.  If not, see
+ * <http://www.gnu.org/licenses/>.
  *
  */
 
-/** @file modules/loggers/file_logger.h
- *  @brief File logger for Linux based autopilots
+/** @file modules/loggers/logger_control_effectiveness.h
+ *  @brief Log data required to compute control effectiveness
  */
 
-#ifndef FILE_LOGGER_SD_INDI_H_
-#define FILE_LOGGER_SD_INDI_H_
+#ifndef LOGGER_CONTROL_EFFECTIVENESS_H
+#define LOGGER_CONTROL_EFFECTIVENESS_H
 
-extern void file_logger_sd_indi_start(void);
-extern void file_logger_sd_indi_periodic(void);
+extern void logger_control_effectiveness_start(void);
+extern void logger_control_effectiveness_periodic(void);
 
-#endif /* FILE_LOGGER_SD_INDI_H_ */
+#endif /* LOGGER_CONTROL_EFFECTIVENESS_H */
