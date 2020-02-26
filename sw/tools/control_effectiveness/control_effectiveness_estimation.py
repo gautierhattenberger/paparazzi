@@ -29,20 +29,16 @@ import matplotlib.pyplot as plt
 
 import control_effectiveness_utils as ut
 
-def process_data(conf, f_name, start, end, freq, act_dyn=None, verbose=False, plot=False):
+def process_data(conf, f_name, start, end, freq=None, act_dyn=None, verbose=False, plot=False):
 
     # Read data from log file
     data = genfromtxt(f_name, delimiter=',', skip_header=1)
-
     N = data.shape[0]
-    if end < 0:
-        end = N
 
     # extract variables
     var = {}
     if 'variables' in conf:
         var = conf['variables']
-    var['freq'] = freq
     if act_dyn is not None:
         var['act_dyn'] = act_dyn # this may overwrite default value
 
@@ -54,7 +50,32 @@ def process_data(conf, f_name, start, end, freq, act_dyn=None, verbose=False, pl
         print("Nb of commands:", nb_out)
         print("Mixing matrix:")
         print(mixing)
-    time = np.arange(end-start) / freq # default time vector if not in data
+
+    # Search for time vector
+    time = None
+    for el in conf['data']:
+        if el['type'] == 'timestamp':
+            # convert time limits to index in timestamp array
+            (start, end) = ut.get_index_from_time(data[:,el['column']], start, end)
+            # get time vector
+            time = ut.apply_format(el, data[start:end, el['column']])
+            # Auto freq if needed
+            if freq is None:
+                period = np.mean(np.diff(time))
+                if period > 0.:
+                    freq = np.round(1. / period)
+                    print("Using auto freq:", freq)
+                else:
+                    print("Invalid freq")
+                    sys.exit(1)
+            break
+    if time is None:
+        start = int(start * freq)
+        end = int(end * freq)
+        time = np.arange(end-start) / freq # default time vector if not in data
+    var['freq'] = freq
+
+    # Search and filter inputs and outputs
     inputs = np.zeros((end-start, nb_in))
     commands = np.zeros((end-start, nb_out))
     output = np.zeros((nb_in, nb_out))
@@ -76,8 +97,6 @@ def process_data(conf, f_name, start, end, freq, act_dyn=None, verbose=False, pl
             commands[:, idx] = ut.apply_format(el, data[start:end, col])
             for (filt_name, params) in el['filters']:
                 commands[:,idx] = ut.apply_filter(filt_name, params, commands[:, idx].copy(), var)
-        if t == 'timestamp':
-            time = ut.apply_format(el, data[start:end, col])
 
     for i in range(nb_in):
         name = ut.get_name_by_index(conf, 'input', i)
@@ -119,8 +138,7 @@ def main():
     parser.add_argument("config", help="JSON configuration file")
     parser.add_argument("data", help="Log file for parameter estimation")
     parser.add_argument("-f", "--freq", dest="freq",
-                      action="store", default=512,
-                      help="Sampling frequency")
+                      help="Sampling frequency, trying auto freq if not set")
     parser.add_argument("-d", "--dyn", dest="dyn",
                       help="First order actuator dynamic (discrete time), 'None' for config file default")
     parser.add_argument("-s", "--start",
@@ -140,9 +158,11 @@ def main():
         print("Config or data files are not valid")
         sys.exit(1)
 
-    freq = int(args.freq)
-    start = int(args.start) * freq
-    end = int(args.end) * freq
+    start = int(args.start)
+    end = int(args.end)
+    freq = args.freq
+    if freq is not None:
+        freq = float(freq)
     dyn = args.dyn
     if dyn is not None:
         dyn = float(dyn)

@@ -143,6 +143,25 @@ def apply_format(conf, data):
         print("Format error:", conf)
         return data
 
+def get_index_from_time(time, start, end):
+    N = len(time)
+    start_idx = None
+    end_idx = None
+    # if end is negative, select till the last value
+    if end < 0:
+        end_idx = N
+    for i, t in enumerate(time):
+        if start_idx is None and start < t:
+            start_idx = i
+        if end_idx is None and end < t:
+            end_idx = i
+    # if not found, select all vector
+    if start_idx is None:
+        start_idx = 0
+    if end_idx is None:
+        end_idx = N
+    return (start_idx, end_idx)
+
 #
 # Display functions
 #
