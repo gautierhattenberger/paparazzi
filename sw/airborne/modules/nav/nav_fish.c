@@ -64,7 +64,7 @@
 #endif
 
 #ifndef NAV_FISH_EW1
-#define NAV_FISH_EW1 1.f
+#define NAV_FISH_EW1 0.7f
 #endif
 
 #ifndef NAV_FISH_EW2
@@ -80,7 +80,7 @@
 #endif
 
 #ifndef NAV_FISH_LW
-#define NAV_FISH_LW (2.f*NAV_FISH_BODY_LENGTH)
+#define NAV_FISH_LW (2.5f*NAV_FISH_BODY_LENGTH)
 #endif
 
 #ifndef NAV_FISH_ALPHA_REP
@@ -88,7 +88,7 @@
 #endif
 
 #ifndef NAV_FISH_YATT
-#define NAV_FISH_YATT 0.15f
+#define NAV_FISH_YATT 0.4f
 #endif
 
 #ifndef NAV_FISH_LATT
@@ -100,7 +100,7 @@
 #endif
 
 #ifndef NAV_FISH_YALI
-#define NAV_FISH_YALI 0.05f
+#define NAV_FISH_YALI 0.15f
 #endif
 
 #ifndef NAV_FISH_LALI
@@ -315,10 +315,10 @@ static float neighbor_attraction(struct EnuCoor_f *pos, struct EnuCoor_f *other,
     }
     float amplifier = 1.f;
     if (d2d < nfp.d0_att) {
-      amplifier = expf(nfp.alpha_rep * ((nfp.d0_att - d2d)/(nfp.d0_att)));
+      amplifier = expf(nfp.alpha_rep * ((nfp.d0_att - d2d) / nfp.d0_att));
     }
     float tmp_att = d2d / nfp.l_att;
-    tmp_att = nfp.y_att * ((d2d - nfp.d0_att) / (1.f + tmp_att * tmp_att)) * sinf(view) * amplifier;
+    tmp_att = nfp.y_att * (((d2d - nfp.d0_att) / nfp.l_att) / (1.f + tmp_att * tmp_att)) * sinf(view) * amplifier;
     return tmp_att;
 }
 
@@ -334,7 +334,7 @@ static float neighbor_alignement(struct EnuCoor_f *pos, struct EnuCoor_f *other,
     float d2d = distance_drone_to_drone(pos, other);
     float d_phi = delta_phi(psi, psi_other);
     float tmp_ali = d2d / nfp.l_ali;
-    tmp_ali = nfp.y_ali * sinf(d_phi) * (d2d + nfp.d0_ali) * expf(-tmp_ali * tmp_ali);
+    tmp_ali = nfp.y_ali * sinf(d_phi) * ((d2d + nfp.d0_ali) / nfp.l_ali) * expf(-tmp_ali * tmp_ali);
     return tmp_ali;
 }   
 
@@ -373,7 +373,7 @@ static float calculate_new_heading(void)
   nav_fish.f_ali = 0.f;
   nav_fish.f_att = 0.f;
   for (uint8_t ac = 0; ac < NB_ACS; ac++) {
-    printf("nbacs=  %d \n",NB_ACS);
+    //printf("nbacs=  %d \n",NB_ACS);
     if (ti_acs[ac].ac_id == AC_ID || ti_acs[ac].ac_id == 0) { continue; }
     float delta_t = Max((int)(gps.tow - acInfoGetItow(ti_acs[ac].ac_id)) / 1000., 0.);
     if (delta_t < 1.f) {
@@ -383,9 +383,9 @@ static float calculate_new_heading(void)
       pos_current = acInfoGetPositionEnu_f(ti_acs[ac].ac_id);
       psi_current = acInfoGetCourse(ti_acs[ac].ac_id);
       if (nfp.strategy == 2) {
-      pos_focal = NULL;
-      nav_fish.f_ali = nav_fish.f_ali + neighbor_alignement(pos, pos_current, psi, psi_current);
-      nav_fish.f_att = nav_fish.f_att + neighbor_attraction(pos, pos_current, psi);
+        pos_focal = NULL;
+        nav_fish.f_ali = nav_fish.f_ali + neighbor_alignement(pos, pos_current, psi, psi_current);
+        nav_fish.f_att = nav_fish.f_att + neighbor_attraction(pos, pos_current, psi);
       }
       if (nfp.strategy == 1) {
         float influence = neighbor_influence(pos, pos_current ,psi ,psi_current);
@@ -462,7 +462,7 @@ bool nav_fish_position_run(void)
   struct EnuCoor_i new_pos = {
     POS_BFP_OF_REAL(pos->x + move.x),
     POS_BFP_OF_REAL(pos->y + move.y),
-    POS_BFP_OF_REAL(3.f + move.z)
+    POS_BFP_OF_REAL(nfp.alt + move.z)
   };
   waypoint_move_enu_i(NAV_FISH_WP, &new_pos);
   nav_set_heading_towards_waypoint(NAV_FISH_WP);
