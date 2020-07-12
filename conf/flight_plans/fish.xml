@@ -1,0 +1,70 @@
+<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+
+<flight_plan alt="152" ground_alt="147" lat0="43 33 50.83" lon0="1 28 52.61" max_dist_from_home="10" name="Test rotorcraft fish nav" security_height="2">
+  <header>
+#include "autopilot.h"
+  </header>
+  <waypoints>
+    <waypoint name="HOME" x="0.0" y="0.0"/>
+    <waypoint name="CLIMB" x="0.0" y="5.0"/>
+    <waypoint name="STDBY" x="5.0" y="0.0"/>
+    <waypoint name="p1" x="1.0" y="1.0"/>
+    <waypoint name="TD" x="5.6" y="-3.9"/>
+  </waypoints>
+  <blocks>
+    <block name="Wait GPS">
+      <call_once fun="NavKillThrottle()"/>
+      <while cond="!GpsFixValid()"/>
+    </block>
+    <block name="Geo init">
+      <while cond="LessThan(NavBlockTime(), 10)"/>
+    <!--  <call_once fun="NavSetGroundReferenceHere()"/> -->
+      <!--<call_once fun="NavSetAltitudeReferenceHere()"/>-->
+    </block>
+    <block name="Holding point">
+      <call_once fun="NavKillThrottle()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+    <block name="Start Engine">
+      <call_once fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+    <block name="Takeoff" strip_button="Takeoff" strip_icon="takeoff.png">
+      <exception cond="stateGetPositionEnu_f() @DEREF z @GT 2.0" deroute="Standby"/>
+      <call_once fun="NavResurrect()"/>
+      <attitude pitch="0" roll="0" throttle="0.1" vmode="throttle" until="stage_time>2"/>
+      <call_once fun="NavSetWaypointHere(WP_CLIMB)"/>
+   <stay vmode="climb" climb="nav_climb_vspeed" wp="CLIMB"/> 
+    </block>
+    <block name="Standby" strip_button="Standby" strip_icon="home.png">
+      <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
+      <set var="nav_fish_nav_fish_position_run_status" value="MODULES_STOP"/>
+      <stay wp="STDBY"/>
+    </block>
+    <block name="stay_p1" strip_button="Follow P1" group="fish">
+      <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
+      <set var="nav_fish_nav_fish_position_run_status" value="MODULES_START"/>
+      <stay wp="p1"/>
+    </block>
+    <block name="Guided_run" strip_button="Guided run" group="fish">
+      <call_once fun="autopilot_set_mode(AP_MODE_GUIDED)"/>
+      <set var="nav_fish_nav_fish_position_run_status" value="MODULES_STOP"/>
+      <call fun="nav_fish_velocity_run()"/>
+    </block>
+    <block name="land here" strip_button="Land Here" strip_icon="land-right.png">
+      <call_once fun="NavSetWaypointHere(WP_TD)"/>
+    </block>
+    <block name="land">
+      <go wp="TD"/>
+    </block>
+    <block name="flare">
+      <exception cond="NavDetectGround()" deroute="Holding point"/>
+      <exception cond="!nav_is_in_flight()" deroute="landed"/>
+      <call_once fun="NavStartDetectGround()"/>
+      <stay climb="nav_descend_vspeed" vmode="climb" wp="TD"/>
+    </block>
+    <block name="landed">
+      <attitude pitch="0" roll="0" throttle="0" vmode="throttle" until="FALSE"/>
+    </block>
+  </blocks>
+</flight_plan>
