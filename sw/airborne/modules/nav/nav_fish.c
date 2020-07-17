@@ -196,6 +196,20 @@ static inline void send_swarm_message(void) {
   DOWNLINK_SEND_SWARM_FISH(DefaultChannel, DefaultDevice, &nav_fish.heading, &nav_fish.step_size, &nav_fish.r_w, &nav_fish.f_w, &nav_fish.theta_w, &nav_fish.f_fluct, &nav_fish.f_wall, &nav_fish.f_ali, &nav_fish.f_att);
 }
 
+/** sign function
+ *
+ *@param number x
+ *@return sign of x
+ */
+static float sign(float x)
+{
+  if(x >= 0.f) {
+    return 1.f;
+  } else {
+    return -1.f;
+  }
+}
+
 /** Gaussian random number generator with mean =0 and invariance =1 using Box-Muller method
  * @return random number following a normal distribution
  */
@@ -262,7 +276,7 @@ static float viewing_angle(struct EnuCoor_f *pos, struct EnuCoor_f *other, float
   struct EnuCoor_f diff;
   VECT3_DIFF(diff, *other, *pos);
   float dir = atan2f(diff.y, diff.x);
-  return M_PI_2 - psi + dir;
+  return (sign(diff.x)*M_PI_2) - psi - dir;
 }
 
 /** calculates difference between two headings
@@ -290,13 +304,13 @@ static float neighbor_influence(struct EnuCoor_f *pos, struct EnuCoor_f *other, 
     float d2d = distance_drone_to_drone(pos, other);
     float d_phi = delta_phi(psi, psi_other);
     float tmp_ali = d2d / nfp.l_ali;
-    tmp_ali = nfp.y_ali * sinf(d_phi) * (d2d + nfp.d0_ali) * expf(-tmp_ali * tmp_ali);
+    tmp_ali = nfp.y_ali * sinf(d_phi) * ((d2d + nfp.d0_ali) / nfp.l_ali) * expf(-tmp_ali * tmp_ali);
     float amplifier = 1.f;
     if (d2d < nfp.d0_att) {
       amplifier = expf(nfp.alpha_rep * ((nfp.d0_att - d2d)/(nfp.d0_att)));
     }
     float tmp_att = d2d / nfp.l_att;
-    tmp_att = nfp.y_att * ((d2d - nfp.d0_att) / (1.f + tmp_att * tmp_att)) * sinf(view) * amplifier;
+    tmp_att = nfp.y_att * (((d2d - nfp.d0_att) / nfp.l_att) / (1.f + tmp_att * tmp_att)) * sinf(view) * amplifier;
     return fabs(tmp_att + tmp_ali);
 }
 
