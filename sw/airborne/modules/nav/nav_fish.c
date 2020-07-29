@@ -286,7 +286,7 @@ static float viewing_angle(struct EnuCoor_f *pos, struct EnuCoor_f *other, float
  */ 
 static float delta_phi(float psi, float psi_other)
 {
-  float dp = psi - psi_other;
+  float dp = psi_other - psi;
   FLOAT_ANGLE_NORMALIZE(dp);
   return dp;
 }
@@ -369,7 +369,7 @@ static float calculate_new_heading(void)
 
   // compute fluctuation and wall reaction
   float fw = expf(-powf(nav_fish.r_w / nfp.l_w, 2.f));
-  float ow = sinf(nav_fish.theta_w) * (1.f + nfp.e_w1 * cosf(nav_fish.theta_w) + nfp.e_w2 * cosf(2.f * nav_fish.theta_w));
+  float ow = (-1.0f)*sinf(nav_fish.theta_w) * (1.f + nfp.e_w1 * cosf(nav_fish.theta_w) + nfp.e_w2 * cosf(2.f * nav_fish.theta_w));
   nav_fish.f_w = fw;
   nav_fish.f_fluct = nfp.fluct * (1.f - nfp.alpha * fw) * normal_random_gen();
   nav_fish.f_wall = nfp.y_w * ow * fw;
@@ -393,8 +393,9 @@ static float calculate_new_heading(void)
     if (delta_t < 1.f) {
       // compute if others position is not older than 1s
       id_current = ti_acs[ac].ac_id;
-      //  printf("i am %d  calling %d \n",AC_ID,id_current);
       pos_current = acInfoGetPositionEnu_f(ti_acs[ac].ac_id);
+      pos_current->x=pos_current->x*2.56;
+      pos_current->y=pos_current->y*2.56;
       psi_current = acInfoGetCourse(ti_acs[ac].ac_id);
       if (nfp.strategy == 2) {
         pos_focal = NULL;
@@ -442,7 +443,7 @@ bool nav_fish_velocity_run(void)
   if (counter > 0) { return true; }
   counter = PRESCALE;
   float diff_heading = calculate_new_heading();
-  float new_heading = nav_fish.heading - diff_heading;
+  float new_heading = nav_fish.heading + diff_heading;
   FLOAT_ANGLE_NORMALIZE(new_heading);
   //printf(" (speed) diff heading =%f , heading= %f,  new_heading= %f \n", diff_heading * 180 / 3.14, DegOfRad(nav_fish.heading),
         // DegOfRad(new_heading));
