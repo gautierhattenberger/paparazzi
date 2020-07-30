@@ -231,7 +231,7 @@ static float distance_to_wall(struct EnuCoor_f *pos)
   float x_home = waypoint_get_x(WP_HOME);
   float y_home = waypoint_get_y(WP_HOME);
   float dist = NAV_FISH_WALL_DISTANCE - sqrtf(((pos->x - x_home) * (pos->x - x_home)) + ((pos->y - y_home) * (pos->y - y_home)));
-  printf("dist =%f \n",dist);
+  //printf("dist =%f \n",dist);
   if (dist < 0.f) {
     return 0.f;
   }
@@ -278,8 +278,13 @@ static float viewing_angle(struct EnuCoor_f *pos, struct EnuCoor_f *other, float
 {
   struct EnuCoor_f diff;
   VECT3_DIFF(diff, *other, *pos);
-  float dir = atanf(diff.y/diff.x);
-  printf("id =%d  dir=%f  dx=%f dy= %f\n",AC_ID,dir,diff.x,diff.y);
+  float dir = 0.f;
+  if (fabsf(diff.x) < 1e-5f) {
+    dir = sign(diff.y) * M_PI_2;
+  } else {
+    dir = atanf(diff.y/diff.x);
+  }
+  //printf("id =%d  dir=%f  dx=%f dy= %f\n",AC_ID,dir,diff.x,diff.y);
   return (sign(diff.x)*M_PI_2) - psi - dir;
 }
 
@@ -287,9 +292,9 @@ static float viewing_angle(struct EnuCoor_f *pos, struct EnuCoor_f *other, float
  * @param psi first heading
  * @param psi_other second heading
  * @return the difference between the two headings
- */ 
+ */
 static float delta_phi(float psi, float psi_other)
-{ 
+{
   float dp = psi_other - psi;
   FLOAT_ANGLE_NORMALIZE(dp);
   return dp;
@@ -403,8 +408,6 @@ static float calculate_new_heading(void)
       // compute if others position is not older than 1s
       id_current = ti_acs[ac].ac_id;
       pos_current = acInfoGetPositionEnu_f(ti_acs[ac].ac_id);
-      pos_current->x=pos_current->x*2.56;
-      pos_current->y=pos_current->y*2.56;
       psi_current = acInfoGetCourse(ti_acs[ac].ac_id);
       if (nfp.strategy == 2) {
         pos_focal = NULL;
@@ -511,27 +514,27 @@ static void move_plan(uint8_t wp_id)
 
 bool move_swarm(void)
 {
-  move_plan(WP_HOME);
-move_plan(WP_p1);
-move_plan(WP_p2);
-move_plan(WP_p3);
-move_plan(WP_p4);
-move_plan(WP_p5);
-move_plan(WP_STDBY);
-move_plan(WP_TD);
-move_plan(WP_S1);
-move_plan(WP_S2);
-move_plan(WP_S3);
-move_plan(WP_S4);
-move_plan(WP_S5);
-move_plan(WP_S6);
-move_plan(WP_S7);
-move_plan(WP_S8);
-move_plan(WP__N1);
-move_plan(WP__N2);
-move_plan(WP__N3);
-move_plan(WP__N4);
-//autopilot_guided_update(GUIDED_FLAG_XY_BODY | GUIDED_FLAG_XY_VEL, 10.0f, 0.0f, -nfp.alt, 0.0f);
+//  move_plan(WP_HOME);
+//move_plan(WP_p1);
+//move_plan(WP_p2);
+//move_plan(WP_p3);
+//move_plan(WP_p4);
+//move_plan(WP_p5);
+//move_plan(WP_STDBY);
+//move_plan(WP_TD);
+//move_plan(WP_S1);
+//move_plan(WP_S2);
+//move_plan(WP_S3);
+//move_plan(WP_S4);
+//move_plan(WP_S5);
+//move_plan(WP_S6);
+//move_plan(WP_S7);
+//move_plan(WP_S8);
+//move_plan(WP__N1);
+//move_plan(WP__N2);
+//move_plan(WP__N3);
+//move_plan(WP__N4);
+autopilot_guided_update(GUIDED_FLAG_XY_BODY | GUIDED_FLAG_XY_VEL, 10.0f, 0.0f, -nfp.alt, 0.0f);
   return true;
 }
 

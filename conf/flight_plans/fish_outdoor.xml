@@ -1,6 +1,6 @@
 <!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
 
-<flight_plan alt="148" ground_alt="146" lat0="43.462976" lon0="1.2733345" max_dist_from_home="50" name="Test Voliere fish nav" security_height="0.3">
+<flight_plan alt="190" ground_alt="185" lat0="43.462976" lon0="1.2733345" max_dist_from_home="50" name="Test Voliere fish nav" security_height="0.3">
   <header>
 #include "autopilot.h"
 #include "subsystems/datalink/datalink.h"
@@ -138,6 +138,8 @@
       <attitude pitch="0" roll="0" throttle="0" until="FALSE" vmode="throttle"/>
     </block>
     <block name="EmergencyLanding">
+      <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
+      <set value="MODULES_STOP" var="nav_fish_nav_fish_position_run_status"/>
       <stay throttle="0.1" vmode="throttle" wp="HOME"/>
     </block>
   </blocks>
