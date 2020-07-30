@@ -28,7 +28,7 @@
     <waypoint name="_N4" x="-29.2" y="89.5"/>
   </waypoints>
   <sectors>
-    <sector color="red" name="Net">
+    <sector color="red" name="Net" type="dynamic">
       <corner name="_N1"/>
       <corner name="_N2"/>
       <corner name="_N3"/>
@@ -111,6 +111,11 @@
       <call_once fun="autopilot_set_mode(AP_MODE_GUIDED)"/>
       <set value="MODULES_STOP" var="nav_fish_nav_fish_position_run_status"/>
       <call fun="nav_fish_velocity_run()"/>
+    </block>
+    <block group="fish" name="move_swarm" strip_button="move swarm">
+      <call_once fun="autopilot_set_mode(AP_MODE_GUIDED)"/>
+      <set value="MODULES_STOP" var="nav_fish_move_swarm_status"/>
+      <call fun="move_swarm()"/>
     </block>
     <block name="land here" strip_button="Land Here" strip_icon="land-right.png">
       <call_once fun="NavSetWaypointHere(WP_TD)"/>

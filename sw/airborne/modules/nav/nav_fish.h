@@ -69,7 +69,7 @@ extern bool nav_fish_position_run(void);
  */
 extern bool nav_fish_velocity_run(void);
 
-
+extern bool move_swarm(void);
 
 //extern bool parameter_data();
 //void navigation_fish_setAngleParameter(float param);

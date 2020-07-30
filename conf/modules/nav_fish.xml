@@ -39,6 +39,7 @@
   <init fun="nav_fish_init()"/>
   <periodic fun="nav_fish_velocity_run()" freq="16." autorun="FALSE" /> 
   <periodic fun="nav_fish_position_run()" freq="16." autorun="FALSE" />
+  <periodic fun="move_swarm()" freq="1." autorun="FALSE" />
   <makefile>
     <file name="nav_fish.c"/>
   </makefile>

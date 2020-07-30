@@ -228,7 +228,10 @@ static float normal_random_gen(void)
  */
 static float distance_to_wall(struct EnuCoor_f *pos)
 {
-  float dist = NAV_FISH_WALL_DISTANCE - sqrtf(pos->x * pos->x + pos->y * pos->y);
+  float x_home = waypoint_get_x(WP_HOME);
+  float y_home = waypoint_get_y(WP_HOME);
+  float dist = NAV_FISH_WALL_DISTANCE - sqrtf(((pos->x - x_home) * (pos->x - x_home)) + ((pos->y - y_home) * (pos->y - y_home)));
+  printf("dist =%f \n",dist);
   if (dist < 0.f) {
     return 0.f;
   }
@@ -275,7 +278,8 @@ static float viewing_angle(struct EnuCoor_f *pos, struct EnuCoor_f *other, float
 {
   struct EnuCoor_f diff;
   VECT3_DIFF(diff, *other, *pos);
-  float dir = atan2f(diff.y, diff.x);
+  float dir = atanf(diff.y/diff.x);
+  printf("id =%d  dir=%f  dx=%f dy= %f\n",AC_ID,dir,diff.x,diff.y);
   return (sign(diff.x)*M_PI_2) - psi - dir;
 }
 
@@ -285,7 +289,7 @@ static float viewing_angle(struct EnuCoor_f *pos, struct EnuCoor_f *other, float
  * @return the difference between the two headings
  */ 
 static float delta_phi(float psi, float psi_other)
-{
+{ 
   float dp = psi_other - psi;
   FLOAT_ANGLE_NORMALIZE(dp);
   return dp;
@@ -324,8 +328,13 @@ static float neighbor_attraction(struct EnuCoor_f *pos, struct EnuCoor_f *other,
 {
     float view = viewing_angle(pos, other, psi);
     float d2d = distance_drone_to_drone(pos, other);
+    
     if(d2d <= nfp.min_d2d) {
-      nav_fish.velocity = nfp.min_velocity;
+      if (view > -M_PI_2 && view <= M_PI_2) {
+        nav_fish.velocity = nav_fish.velocity - nfp.min_velocity;
+      } else {
+        nav_fish.velocity = nav_fish.velocity + nfp.min_velocity;
+      }
     }
     float amplifier = 1.f;
     if (d2d < nfp.d0_att) {
@@ -484,6 +493,49 @@ bool nav_fish_position_run(void)
   send_swarm_message();
   return true;
 }
+
+static void move_plan(uint8_t wp_id)
+{
+  float x = waypoint_get_x(wp_id);
+  float y = waypoint_get_y(wp_id) + 1.0f;
+  float alt = waypoint_get_alt(wp_id);
+  struct EnuCoor_i new_pos = {
+    POS_BFP_OF_REAL(x),
+    POS_BFP_OF_REAL(y),
+    POS_BFP_OF_REAL(alt)
+  };
+  waypoint_move_enu_i(wp_id, &new_pos);
+} 
+
+
+
+bool move_swarm(void)
+{
+  move_plan(WP_HOME);
+move_plan(WP_p1);
+move_plan(WP_p2);
+move_plan(WP_p3);
+move_plan(WP_p4);
+move_plan(WP_p5);
+move_plan(WP_STDBY);
+move_plan(WP_TD);
+move_plan(WP_S1);
+move_plan(WP_S2);
+move_plan(WP_S3);
+move_plan(WP_S4);
+move_plan(WP_S5);
+move_plan(WP_S6);
+move_plan(WP_S7);
+move_plan(WP_S8);
+move_plan(WP__N1);
+move_plan(WP__N2);
+move_plan(WP__N3);
+move_plan(WP__N4);
+//autopilot_guided_update(GUIDED_FLAG_XY_BODY | GUIDED_FLAG_XY_VEL, 10.0f, 0.0f, -nfp.alt, 0.0f);
+  return true;
+}
+
+
 
 
 //
