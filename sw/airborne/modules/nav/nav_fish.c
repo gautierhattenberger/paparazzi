@@ -127,6 +127,23 @@
 #define NAV_FISH_STRATEGY 0
 #endif
 
+#ifndef NAV_FISH_TRYATT
+#define NAV_FISH_TRYATT 0.2f
+#endif
+
+#ifndef NAV_FISH_TRLATT
+#define NAV_FISH_TRLATT 3.f
+#endif
+
+#ifndef NAV_FISH_TRYALI
+#define NAV_FISH_TRYALI 0.25f
+#endif
+
+#ifndef NAV_FISH_TRLALI
+#define NAV_FISH_TRLALI 2.f
+#endif
+
+static float distance_wall = NAV_FISH_WALL_DISTANCE;
 struct NavFishParams nav_fish_params;
 // shortname to params
 #define nfp nav_fish_params
@@ -146,6 +163,12 @@ struct NavFish {
 };
 
 struct NavFish nav_fish;
+
+//trajectory start and end local coordinates
+float x_start  = 0.f;
+float y_start  = 0.f;
+float x_finish = 35.f;
+float y_finish = 35.f;
 
 /** initialization of parameters and state variables
  */
@@ -168,6 +191,10 @@ void nav_fish_init(void)
   nav_fish_params.l_ali        = NAV_FISH_LALI;
   nav_fish_params.d0_ali       = NAV_FISH_D0ALI;
   nav_fish_params.alt          = NAV_FISH_ALT;
+  nav_fish_params.tr_y_att     = NAV_FISH_TRYATT;
+  nav_fish_params.tr_l_att     = NAV_FISH_TRLATT;
+  nav_fish_params.tr_y_ali     = NAV_FISH_TRYALI;
+  nav_fish_params.tr_l_ali     = NAV_FISH_TRLALI;
   nav_fish_params.strategy     = NAV_FISH_STRATEGY;
 
   nav_fish.heading = 0.f;
@@ -230,8 +257,7 @@ static float distance_to_wall(struct EnuCoor_f *pos)
 {
   float x_home = waypoint_get_x(WP_HOME);
   float y_home = waypoint_get_y(WP_HOME);
-  float dist = NAV_FISH_WALL_DISTANCE - sqrtf(((pos->x - x_home) * (pos->x - x_home)) + ((pos->y - y_home) * (pos->y - y_home)));
-  //printf("dist =%f \n",dist);
+  float dist = distance_wall - sqrtf(((pos->x - x_home) * (pos->x - x_home)) + ((pos->y - y_home) * (pos->y - y_home)));
   if (dist < 0.f) {
     return 0.f;
   }
@@ -365,6 +391,14 @@ static float neighbor_alignement(struct EnuCoor_f *pos, struct EnuCoor_f *other,
     tmp_ali = nfp.y_ali * sinf(d_phi) * ((d2d + nfp.d0_ali) / nfp.l_ali) * expf(-tmp_ali * tmp_ali);
     return tmp_ali;
 }   
+   
+static float perpendicular_distance(float x, float y, float sx, float sy, float dx, float dy)
+{
+  float agent=(dy * (y - sy) + dx * (x - sx)) / (dx * dx + dy * dy);
+  float x_new=sx + dx * agent;
+  float y_new=sy + dy * agent;
+  return sqrtf((x - x_new)*(x - x_new) + (y - y_new)*(y - y_new));
+}
 
 /** calculates new variation of the heading for the uav based on current state
  * @return heading variation 
@@ -378,9 +412,14 @@ static float calculate_new_heading(void)
   nav_fish.r_w = distance_to_wall(pos);
   nav_fish.theta_w = angle_to_wall(pos, psi);
 
-  //printf("AC %d\n", AC_ID);
-  //printf(" - angle to wall= %lf, dist= %lf\n", DegOfRad(nav_fish.theta_w), nav_fish.r_w);
-
+  // trajectory attraction and alignement
+  float dx = x_finish - x_start;
+  float dy = y_finish - y_start;
+  float alpha = atan2f(dx,dy) - psi;
+  float pd = perpendicular_distance(pos->x ,pos->y ,x_start ,y_start ,dx ,dy);
+  float beta = (sign(x_finish - pos->x)*M_PI_2) - psi - atanf((y_finish - pos->y)/(x_finish - pos->x)) ;
+  float trajectory = (nfp.tr_y_ali * sinf(alpha) * expf(nfp.tr_l_ali - pd)) + (nfp.tr_y_att * sinf(beta) * expf((pd - (3 * nfp.tr_l_att)) / (nfp.tr_l_att + pd)));
+  
   // compute fluctuation and wall reaction
   float fw = expf(-powf(nav_fish.r_w / nfp.l_w, 2.f));
   float ow = (-1.0f)*sinf(nav_fish.theta_w) * (1.f + nfp.e_w1 * cosf(nav_fish.theta_w) + nfp.e_w2 * cosf(2.f * nav_fish.theta_w));
@@ -440,7 +479,7 @@ static float calculate_new_heading(void)
   }
 
   // compute heading variation
-  float diff_heading = nav_fish.f_fluct + nav_fish.f_wall + nav_fish.f_ali + nav_fish.f_att;
+  float diff_heading = nav_fish.f_fluct + nav_fish.f_wall + nav_fish.f_ali + nav_fish.f_att +trajectory;
   return diff_heading;
 }
 
@@ -497,11 +536,20 @@ bool nav_fish_position_run(void)
   return true;
 }
 
+/*static float direction = 0.1f; 
 static void move_plan(uint8_t wp_id)
 {
-  float x = waypoint_get_x(wp_id);
-  float y = waypoint_get_y(wp_id) + 1.0f;
+  float current_x = waypoint_get_x(wp_id);
+  if (current_x >= 35.f) {
+    direction = -0.1f;
+  }
+  if (current_x <= -35.f) {
+    direction = 0.1f;
+  }
+  float x = waypoint_get_x(wp_id) + direction;
+  float y = waypoint_get_y(wp_id);
   float alt = waypoint_get_alt(wp_id);
+  printf("x= %f \n",x);
   struct EnuCoor_i new_pos = {
     POS_BFP_OF_REAL(x),
     POS_BFP_OF_REAL(y),
@@ -514,7 +562,8 @@ static void move_plan(uint8_t wp_id)
 
 bool move_swarm(void)
 {
-//  move_plan(WP_HOME);
+  distance_wall = 6.0f;
+  move_plan(WP_HOME);
 //move_plan(WP_p1);
 //move_plan(WP_p2);
 //move_plan(WP_p3);
@@ -534,9 +583,11 @@ bool move_swarm(void)
 //move_plan(WP__N2);
 //move_plan(WP__N3);
 //move_plan(WP__N4);
-autopilot_guided_update(GUIDED_FLAG_XY_BODY | GUIDED_FLAG_XY_VEL, 10.0f, 0.0f, -nfp.alt, 0.0f);
+//autopilot_guided_update(GUIDED_FLAG_XY_BODY | GUIDED_FLAG_XY_VEL, 10.0f, 0.0f, -nfp.alt, 0.0f);
   return true;
 }
+
+*/
 
 
 

@@ -50,6 +50,10 @@ struct NavFishParams {
   int strategy;        ///< strategy for choosing focal uav : 0 for closest uav , 1 for most influential uav
   float alt;           ///< flight altitude
   float alpha_rep;     ///< intensity of repulsion
+  float tr_y_ali;      ///< alignement to trajectory intensity
+  float tr_l_ali;      ///< alignement distance to trajectory  intensity
+  float tr_y_att;      ///< attraction to trajectory intensity
+  float tr_l_att;      ///< attraction distance to trajectory intensity
 };
 
 extern struct NavFishParams nav_fish_params;
@@ -69,7 +73,6 @@ extern bool nav_fish_position_run(void);
  */
 extern bool nav_fish_velocity_run(void);
 
-extern bool move_swarm(void);
 
 //extern bool parameter_data();
 //void navigation_fish_setAngleParameter(float param);

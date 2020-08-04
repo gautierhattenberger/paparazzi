@@ -11,7 +11,7 @@
     <waypoint name="p1" x="21.2" y="32.0"/>
     <waypoint name="p2" x="9.0" y="5.0"/>
     <waypoint name="p3" x="9.0" y="-5.0"/>
-    <waypoint name="p4" x="-1.0" y="-5.0"/>
+    <waypoint name="p4" x="-35.0" y="-35.0"/>
     <waypoint name="p5" x="-1.0" y="5.0"/>
     <waypoint name="TD" x="1.0" y="0"/>
     <waypoint name="S1" x="16.4" y="60.3"/>
@@ -114,8 +114,6 @@
     </block>
     <block group="fish" name="move_swarm" strip_button="move swarm">
       <call_once fun="autopilot_set_mode(AP_MODE_GUIDED)"/>
-      <set value="MODULES_STOP" var="nav_fish_move_swarm_status"/>
-      <call fun="move_swarm()"/>
     </block>
     <block name="land here" strip_button="Land Here" strip_icon="land-right.png">
       <call_once fun="NavSetWaypointHere(WP_TD)"/>
