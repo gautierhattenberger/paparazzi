@@ -1,13 +1,12 @@
-<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="148" ground_alt="146" lat0="43.5640917" lon0="1.4829201" max_dist_from_home="3.5" name="Test Voliere fish nav" security_height="0.3">
+<flight_plan alt="148" ground_alt="146" lat0="43.5640917" lon0="1.4829201" max_dist_from_home="3.5" name="Demo fish nav Enac indoor" security_height="0.3">
   <header>
 #include "autopilot.h"
   </header>
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
     <waypoint name="STDBY" x="1.0" y="0.0"/>
-    <waypoint name="p1" x="-1.0" y="1.0"/>
     <waypoint name="TD" x="1.0" y="0"/>
     <waypoint name="S1" x="0" y="4.0"/>
     <waypoint name="S2" x="3.0" y="3.0"/>
@@ -67,12 +66,6 @@
       <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
       <set var="nav_fish_nav_fish_position_run_status" value="MODULES_STOP"/>
       <stay wp="STDBY"/>
-    </block>
-    <block name="stay_p1" strip_button="Follow P1" group="fish">
-      <exception cond="!InsideSafety(GetPosX(),GetPosY())" deroute="Standby"/>
-      <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
-      <set var="nav_fish_nav_fish_position_run_status" value="MODULES_START"/>
-      <stay wp="p1"/>
     </block>
     <block name="Guided_run" strip_button="Guided run" group="fish">
       <exception cond="!InsideSafety(GetPosX(),GetPosY())" deroute="Standby"/>

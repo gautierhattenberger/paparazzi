@@ -1,18 +1,17 @@
-<!DOCTYPE flight_plan SYSTEM "flight_plan.dtd">
+<!DOCTYPE flight_plan SYSTEM "../flight_plan.dtd">
 
-<flight_plan alt="190" ground_alt="185" lat0="43.462976" lon0="1.2733345" max_dist_from_home="50" name="Test Voliere fish nav" security_height="0.3">
+<flight_plan alt="190" ground_alt="185" lat0="43.462976" lon0="1.2733345" max_dist_from_home="50" name="Demo fish nav Muret outdoor" security_height="0.3">
   <header>
 #include "autopilot.h"
 #include "subsystems/datalink/datalink.h"
-</header>
+  </header>
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
     <waypoint name="STDBY" x="1.0" y="0.0"/>
-    <waypoint name="p1" x="21.2" y="32.0"/>
-    <waypoint name="p2" x="9.0" y="5.0"/>
-    <waypoint name="p3" x="9.0" y="-5.0"/>
-    <waypoint name="p4" x="-35.0" y="-35.0"/>
-    <waypoint name="p5" x="-1.0" y="5.0"/>
+    <waypoint name="WAIT_1" x="9.0" y="5.0"/>
+    <waypoint name="WAIT_2" x="9.0" y="-5.0"/>
+    <waypoint name="WAIT_3" x="-35.0" y="-35.0"/>
+    <waypoint name="WAIT_4" x="-1.0" y="5.0"/>
     <waypoint name="TD" x="1.0" y="0"/>
     <waypoint name="S1" x="16.4" y="60.3"/>
     <waypoint name="S2" x="52.5" y="35.7"/>
@@ -47,7 +46,7 @@
   </sectors>
   <variables>
     <variable init="0.1" var="fp_throttle"/>
-  </variables> 
+  </variables>
   <exceptions>
     <exception cond="(datalink_time > 5 @AND
       !(IndexOfBlock('Takeoff') > nav_block) @AND
@@ -88,32 +87,23 @@
       <set value="MODULES_STOP" var="nav_fish_nav_fish_position_run_status"/>
       <stay wp="STDBY"/>
     </block>
-    <block name="stay_p2">
-      <stay wp="p2"/>
+    <block name="Wait 1">
+      <stay wp="WAIT_1"/>
     </block>
-    <block name="stay_p3">
-      <stay wp="p3"/>
+    <block name="Wait 2">
+      <stay wp="WAIT_2"/>
     </block>
-    <block name="stay_p4">
-      <stay wp="p4"/>
+    <block name="Wait 3">
+      <stay wp="WAIT_3"/>
     </block>
-    <block name="stay_p5">
-      <stay wp="p5"/>
-    </block>
-    <block group="fish" name="stay_p1" strip_button="Follow P1">
-      <exception cond="!InsideSafety(GetPosX(),GetPosY())" deroute="Standby"/>
-      <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
-      <set value="MODULES_START" var="nav_fish_nav_fish_position_run_status"/>
-      <stay wp="p1"/>
+    <block name="Wait 4">
+      <stay wp="WAIT_4"/>
     </block>
     <block group="fish" name="Guided_run" strip_button="Guided run">
       <exception cond="!InsideSafety(GetPosX(),GetPosY())" deroute="Standby"/>
       <call_once fun="autopilot_set_mode(AP_MODE_GUIDED)"/>
       <set value="MODULES_STOP" var="nav_fish_nav_fish_position_run_status"/>
       <call fun="nav_fish_velocity_run()"/>
-    </block>
-    <block group="fish" name="move_swarm" strip_button="move swarm">
-      <call_once fun="autopilot_set_mode(AP_MODE_GUIDED)"/>
     </block>
     <block name="land here" strip_button="Land Here" strip_icon="land-right.png">
       <call_once fun="NavSetWaypointHere(WP_TD)"/>
