@@ -72,7 +72,11 @@ class Bebop(ParrotUtils):
         self.upload_file('bebop/button_switch', self.scripts_path, kill_prog=False)
         self.upload_file('bebop/pprzstarter', self.scripts_path, kill_prog=False)
         self.execute_command("mount -o remount,rw /")
-        self.execute_command("sed -i 's|^exit 0|/data/ftp/internal_000/scripts/pprzstarter \& exit 0|' /etc/init.d/rcS")
+        if self.check_connect2hub():
+            self.execute_command("sed -i 's|connect2hub|pprzstarter|' /etc/init.d/rcS")
+            self.execute_command("rm /data/ftp/internal_000/scripts/connect2hub")
+        else:
+            self.execute_command("sed -i 's|^exit 0|/data/ftp/internal_000/scripts/pprzstarter \& exit 0|' /etc/init.d/rcS")
         self.execute_command("chmod a+x /etc/init.d/rcS")
         self.execute_command("chmod a+x /data/ftp/internal_000/scripts/pprzstarter")
         self.execute_command("chmod a+x /data/ftp/internal_000/scripts/button_switch")
@@ -100,6 +104,13 @@ class Bebop(ParrotUtils):
         else:
             return False
 
+    def check_connect2hub(self):
+        connect2hub = self.execute_command('grep "connect2hub" /etc/init.d/rcS')
+        if "connect2hub" in connect2hub:
+            return True
+        else:
+            return False
+
     def bebop_set_ssid(self, name):
         '''
         Set network SSID (of the router to join, not the Bebop SSID in master mode)
@@ -121,6 +132,14 @@ class Bebop(ParrotUtils):
         '''
         self.write_to_config('WIFI_ADDRESS', address)
         print('The IP address is now ' + address)
+
+    def bebop_set_wifi_key(self, amode, key):
+        '''
+        Set encryption mode and key
+        '''
+        self.write_to_config('WIFI_AMODE', amode)
+        self.write_to_config('WIFI_KEY', key)
+        print('The encryption mode is ' + amode + ' with key ' + key)
 
     def bebop_shutdown(self):
         '''
@@ -152,6 +171,10 @@ class Bebop(ParrotUtils):
 
         ss = self.subparsers.add_parser('address', help='Set the IP address, static or dhcp')
         ss.add_argument('address', help="The new IP address (static) or 'dhcp'")
+
+        ss = self.subparsers.add_parser('wifikey', help='Set the Wifi encryption')
+        ss.add_argument('amode', help="Encryption mode ('none' to disable, or available modes are: open|shared|openshared|wpa|wpapsk|wpa2|wpa2psk|wpanone|ftpsk)")
+        ss.add_argument('key', help="Encryption key (anything when 'amode' is set to 'none')")
 
         ss = self.subparsers.add_parser('configure_network', help='Configure the network on the Bebop 1 or 2')
         ss.add_argument('name', help='The network ID (SSID) to join in managed mode')
@@ -188,6 +211,12 @@ class Bebop(ParrotUtils):
                 print("Invalid address or dhcp option. Leaving.")
                 return
             self.bebop_set_address(args.address)
+            if raw_input("Shall I restart the Bebop? (y/N) ").lower() == 'y':
+                self.reboot()
+
+        # Change the wifi encryption mode
+        elif args.command == 'wifikey':
+            self.bebop_set_wifi_key(args.amode, args.key)
             if raw_input("Shall I restart the Bebop? (y/N) ").lower() == 'y':
                 self.reboot()
 
@@ -234,7 +263,7 @@ class Bebop(ParrotUtils):
             self.write_to_config('START_PPRZ', autorun[args.type])
             print('The autostart on boot is changed to ' + args.type)
 
-            if raw_input("Shall I restart the ARDrone 2? (y/N) ").lower() == 'y':
+            if raw_input("Shall I restart the Bebop? (y/N) ").lower() == 'y':
                 self.reboot()
 
         # Change the autostart

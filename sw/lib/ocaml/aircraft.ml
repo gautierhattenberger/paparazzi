@@ -109,7 +109,7 @@ let rec target_conf_add_module = fun conf target firmware name mtype load_type -
 (* sort element of an airframe type by target *)
 let sort_airframe_by_target = fun config_by_target airframe ->
   match airframe with
-  | None -> ()
+  | None -> []
   | Some a ->
     (* build a list of pairs (target, firmware) *)
     let l = List.fold_left (fun lf f ->
@@ -150,7 +150,9 @@ let sort_airframe_by_target = fun config_by_target airframe ->
             ) c m.Airframe.OldModules.modules
           ) conf a.Airframe.modules in
         Hashtbl.add config_by_target name conf
-      ) l
+    ) l;
+    (* return list of targets * firmwares *)
+    l
 
 (** Extract a configuration element from aircraft config,
  *  returns a tuple with absolute file path and element object
@@ -196,12 +198,11 @@ let get_all_modules = fun config_by_target ->
     ) conf.modules
   ) config_by_target;
   List.sort (fun m1 m2 -> compare m1.Module.name m2.Module.name) !modules
-    
 
 
 let parse_aircraft = fun ?(parse_af=false) ?(parse_ap=false) ?(parse_fp=false) ?(parse_rc=false) ?(parse_tl=false) ?(parse_set=false) ?(parse_all=false) ?(verbose=false) target aircraft_xml ->
 
-  let name = Xml.attrib aircraft_xml "name" in
+  let name = ExtXml.attrib aircraft_xml "name" in
   let conf_aircraft = [] in (* accumulate aircraft XML config *)
   let config_by_target = Hashtbl.create 5 in
 
@@ -214,7 +215,8 @@ let parse_aircraft = fun ?(parse_af=false) ?(parse_ap=false) ?(parse_fp=false) ?
   let conf_aircraft = conf_aircraft @ (match airframe with None -> [] | Some x -> [x.Airframe.xml]) in
   if verbose then
     Printf.printf ", sorting by target%!";
-  sort_airframe_by_target config_by_target airframe;
+  let target_list = sort_airframe_by_target config_by_target airframe in
+  let firmware = try let (_, f) = List.find (fun (t, f) -> t.AfT.name = target) target_list in f.AfF.name with Not_found -> "none" in
   if verbose then
     Printf.printf ", extracting and parsing autopilot...%!";
   let autopilots = if parse_ap || parse_all then
@@ -247,15 +249,23 @@ let parse_aircraft = fun ?(parse_af=false) ?(parse_ap=false) ?(parse_fp=false) ?
                     let c = { c with
                               configures = c.configures @ m.Module.configures;
                               defines = c.defines @ m.Module.defines } in
-                    target_conf_add_module c target "" m.Module.name m.Module.mtype UserLoad
+                    target_conf_add_module c target firmware m.Module.name m.Module.mtype UserLoad
                 ) conf ap.Autopilot.modules in
                 Hashtbl.replace config_by_target target conf
               ) config_by_target;
               (af_ap.Airframe.Autopilot.freq, ap)
             ) autopilots in
-            let c = Hashtbl.find config_by_target target in
-            Hashtbl.replace config_by_target target { c with autopilot = true };
-            Some autopilots
+            try
+              let c = Hashtbl.find config_by_target target in
+              Hashtbl.replace config_by_target target { c with autopilot = true };
+              Some autopilots
+            with Not_found ->
+              (* target not found or not defined, add in all targets instead *)
+              List.iter (fun (t, _) ->
+                let c = Hashtbl.find config_by_target t.AfT.name in
+                Hashtbl.replace config_by_target target { c with autopilot = true }
+              ) target_list;
+              Some autopilots
     end
   else None in
   let conf_aircraft = conf_aircraft @ (match autopilots with None -> [] | Some lx -> List.map (fun (_, x) -> x.Autopilot.xml) lx) in
@@ -277,7 +287,7 @@ let parse_aircraft = fun ?(parse_af=false) ?(parse_ap=false) ?(parse_fp=false) ?
             let c = { c with
                       configures = c.configures @ m.Module.configures;
                       defines = c.defines @ m.Module.defines } in
-            target_conf_add_module c target "" m.Module.name m.Module.mtype UserLoad
+            target_conf_add_module c target firmware m.Module.name m.Module.mtype UserLoad
         ) conf fp.Flight_plan.modules in
         Hashtbl.replace config_by_target target conf
       ) config_by_target

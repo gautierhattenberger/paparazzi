@@ -68,20 +68,34 @@ let send_aircrafts_msg = fun _asker _values ->
 
 let expand_aicraft x =
   let ac_name = ExtXml.attrib x "name" in
+  let handle_error_message = fun error_type msg ->
+    prerr_endline ("A failure occurred while processing aircraft '"^ac_name^"'");
+    prerr_endline (" - "^error_type^" : "^msg);
+    prerr_endline (" - '"^ac_name^"' will be ignored by the server");
+    prerr_endline " - Please remove it from 'conf.xml' or fix its parameter(s)";
+    flush stderr;
+    Xml.Element ("ignoring_aircraft",["name", ac_name],[])
+  in
   try
+    (* parse aircraft *)
     let ac = Aircraft.parse_aircraft ~parse_all:true "" x in
-    if List.length ac.Aircraft.xml > 0 then Xml.Element (Xml.tag x, Xml.attribs x, ac.Aircraft.xml)
+    (* Add latest generated settings if any with a special tag as it is the only way to have this information.
+     * The settings parsed by Aircraft module will not include module settings as we don't know the target.
+     * It should be the correct settings, unless an aircraft is rebuilt with different parameters or target
+     * and with the server already running and not restarted. *)
+    let settings_xml = try
+        let xml = ExtXml.parse_file (Env.paparazzi_home // "var" // "aircrafts" // ac_name // "settings.xml") in
+        [Xml.Element ("generated_settings", [], Xml.children xml)]
+      with _ -> []
+    in
+    if List.length ac.Aircraft.xml > 0 then Xml.Element (Xml.tag x, Xml.attribs x, ac.Aircraft.xml @ settings_xml)
     else failwith "Nothing to parse"
-  with Failure msg ->
-    begin
-      prerr_endline ("A failure occurred while processing aircraft '"^ac_name^"'");
-      prerr_endline (" - Fail with : "^msg);
-      prerr_endline (" - '"^ac_name^"' will be ignored by the server");
-      prerr_endline " - Please remove it from 'conf.xml' or fix its parameter(s)";
-      flush stderr;
-      (*failwith msg*)
-      Xml.Element ("ignoring_aircraft",["name", ac_name],[])
-    end
+  with
+    | Failure msg -> handle_error_message "Fail with" msg
+    | Xml.File_not_found file -> handle_error_message "File not found" file
+    | Module.Module_not_found m -> handle_error_message "Module not found" m
+    | Dtd.Prove_error err -> handle_error_message "Dtd error" (Dtd.prove_error err)
+    | Not_found -> handle_error_message "Not found" "sorry, something went wrong somewhere"
 
 let make_element = fun t a c -> Xml.Element (t,a,c)
 
@@ -806,10 +820,12 @@ let setting = fun logging _sender vs ->
              "value", List.assoc "value" vs] in
   Dl_Pprz.message_send dl_id "SETTING" vs;
   log logging ac_id "SETTING" vs;
-  (* mark the setting as not yet confirmed *)
-  let ac = Hashtbl.find aircrafts ac_id in
-  let idx = PprzLink.int_of_value (List.assoc "index" vs) in
-  ac.dl_setting_values.(idx) <- None
+  try
+    (* mark the setting as not yet confirmed *)
+    let ac = Hashtbl.find aircrafts ac_id in
+    let idx = PprzLink.int_of_value (List.assoc "index" vs) in
+    ac.dl_setting_values.(idx) <- None
+  with Not_found -> ()
 
 
 (** Got a GET_DL_SETTING, and send an GET_SETTING *)
@@ -819,10 +835,12 @@ let get_setting = fun logging _sender vs ->
              "ac_id", PprzLink.String ac_id ] in
   Dl_Pprz.message_send dl_id "GET_SETTING" vs;
   log logging ac_id "GET_SETTING" vs;
-  (* mark the setting as not yet confirmed *)
-  let ac = Hashtbl.find aircrafts ac_id in
-  let idx = PprzLink.int_of_value (List.assoc "index" vs) in
-  ac.dl_setting_values.(idx) <- None
+  try
+    (* mark the setting as not yet confirmed *)
+    let ac = Hashtbl.find aircrafts ac_id in
+    let idx = PprzLink.int_of_value (List.assoc "index" vs) in
+    ac.dl_setting_values.(idx) <- None
+  with Not_found -> ()
 
 
 (** Got a JUMP_TO_BLOCK, and send an BLOCK *)
@@ -901,7 +919,6 @@ let () =
     "Usage: ";
 
   Srtm.add_path srtm_path;
-
   Ivy.init "Paparazzi server" "READY" (fun _ _ -> ());
   Ivy.start !ivy_bus;
 
