@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2020 Adjiri Adam <adam.adjiri@etu.isae-ensma.fr>
+ *                    Gautier Hattenberger <gautier.hattenberger@enac.fr>
  *
  * This file is part of paparazzi
  *
@@ -47,13 +48,13 @@ struct NavFishParams {
   float y_ali;         ///< alignement intensity
   float l_ali;         ///< alignement distance
   float d0_ali;        ///< alignement balance distance
-  int strategy;        ///< strategy for choosing focal uav : 0 for closest uav , 1 for most influential uav
-  float alt;           ///< flight altitude
   float alpha_rep;     ///< intensity of repulsion
   float tr_y_ali;      ///< alignement to trajectory intensity
   float tr_l_ali;      ///< alignement distance to trajectory  intensity
   float tr_y_att;      ///< attraction to trajectory intensity
   float tr_l_att;      ///< attraction distance to trajectory intensity
+  float alt;           ///< flight altitude
+  uint8_t strategy;    ///< strategy for choosing focal uav : 0 for closest uav , 1 for most influential uav
 };
 
 extern struct NavFishParams nav_fish_params;
@@ -64,18 +65,9 @@ extern struct NavFishParams nav_fish_params;
 extern void nav_fish_init(void);
 
 /**
- * nav fish position run
- */
-extern bool nav_fish_position_run(void);
-
-/**
  * nav fish velocity run
  */
 extern bool nav_fish_velocity_run(void);
 
-
-//extern bool parameter_data();
-//void navigation_fish_setAngleParameter(float param);
 #endif  // NAV_FISH_H
-
 

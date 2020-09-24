@@ -64,13 +64,11 @@
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
-      <set var="nav_fish_nav_fish_position_run_status" value="MODULES_STOP"/>
       <stay wp="STDBY"/>
     </block>
     <block name="Guided_run" strip_button="Guided run" group="fish">
       <exception cond="!InsideSafety(GetPosX(),GetPosY())" deroute="Standby"/>
       <call_once fun="autopilot_set_mode(AP_MODE_GUIDED)"/>
-      <set var="nav_fish_nav_fish_position_run_status" value="MODULES_STOP"/>
       <call fun="nav_fish_velocity_run()"/>
     </block>
     <block name="land here" strip_button="Land Here" strip_icon="land-right.png">

@@ -8,10 +8,6 @@
   <waypoints>
     <waypoint name="HOME" x="0.0" y="0.0"/>
     <waypoint name="STDBY" x="1.0" y="0.0"/>
-    <waypoint name="WAIT_1" x="9.0" y="5.0"/>
-    <waypoint name="WAIT_2" x="9.0" y="-5.0"/>
-    <waypoint name="WAIT_3" x="-35.0" y="-35.0"/>
-    <waypoint name="WAIT_4" x="-1.0" y="5.0"/>
     <waypoint name="TD" x="1.0" y="0"/>
     <waypoint name="S1" x="16.4" y="60.3"/>
     <waypoint name="S2" x="52.5" y="35.7"/>
@@ -84,25 +80,11 @@
     </block>
     <block name="Standby" strip_button="Standby" strip_icon="home.png">
       <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
-      <set value="MODULES_STOP" var="nav_fish_nav_fish_position_run_status"/>
       <stay wp="STDBY"/>
-    </block>
-    <block name="Wait 1">
-      <stay wp="WAIT_1"/>
-    </block>
-    <block name="Wait 2">
-      <stay wp="WAIT_2"/>
-    </block>
-    <block name="Wait 3">
-      <stay wp="WAIT_3"/>
-    </block>
-    <block name="Wait 4">
-      <stay wp="WAIT_4"/>
     </block>
     <block group="fish" name="Guided_run" strip_button="Guided run">
       <exception cond="!InsideSafety(GetPosX(),GetPosY())" deroute="Standby"/>
       <call_once fun="autopilot_set_mode(AP_MODE_GUIDED)"/>
-      <set value="MODULES_STOP" var="nav_fish_nav_fish_position_run_status"/>
       <call fun="nav_fish_velocity_run()"/>
     </block>
     <block name="land here" strip_button="Land Here" strip_icon="land-right.png">
@@ -127,7 +109,6 @@
     </block>
     <block name="EmergencyLanding">
       <call_once fun="autopilot_set_mode(AP_MODE_NAV)"/>
-      <set value="MODULES_STOP" var="nav_fish_nav_fish_position_run_status"/>
       <stay throttle="0.1" vmode="throttle" wp="HOME"/>
     </block>
   </blocks>
