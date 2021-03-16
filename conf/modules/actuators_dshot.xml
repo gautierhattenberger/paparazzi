@@ -11,6 +11,10 @@
     </description>
     <define name="DSHOT_SPEED" value="600" description="DSHOT speed (150,300,600,1200)"/>
   </doc>
+  <dep>
+    <depends>@commands</depends>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_dshot.h"/>
   </header>

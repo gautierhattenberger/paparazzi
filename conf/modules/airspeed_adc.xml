@@ -19,6 +19,10 @@
       </dl_settings>
     </dl_settings>
   </settings>
+  <dep>
+    <depends>adc</depends>
+    <provides>airspeed</provides>
+  </dep>
   <header>
     <file name="airspeed_adc.h"/>
   </header>

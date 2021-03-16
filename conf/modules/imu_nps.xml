@@ -6,6 +6,9 @@
       Simulated IMU for NPS.
     </description>
   </doc>
+  <dep>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_common"/>
   <header>
     <file name="imu_nps.h" dir="subsystems/imu"/>

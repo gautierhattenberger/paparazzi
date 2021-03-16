@@ -7,6 +7,10 @@
       Parses the REMOTE_GPS and REMOTE_GPS_SMALL datalink messages and publishes it onboard via ABI.
     </description>
   </doc>
+  <dep>
+    <depends>@datalink</depends>
+    <provides>gps</provides>
+  </dep>
   <autoload name="gps"/>
   <autoload name="gps_nps"/>
   <autoload name="gps_sim"/>

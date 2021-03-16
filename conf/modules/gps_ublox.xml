@@ -9,6 +9,10 @@
     <configure name="UBX_GPS_PORT" value="UARTx" description="UART where the GPS is connected to (UART1, UART2, etc"/>
     <configure name="UBX_GPS_BAUD" value="B38400" description="UART baud rate"/>
   </doc>
+  <dep>
+    <depends>uart</depends>
+    <provides>gps</provides>
+  </dep>
   <autoload name="gps"/>
   <autoload name="gps_nps"/>
   <autoload name="gps_sim"/>

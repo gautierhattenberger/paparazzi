@@ -19,6 +19,7 @@
   </settings>
   <dep>
     <depends>guidance_rotorcraft</depends>
+    <provides>navigation</provides>
   </dep>
   <header>
     <file name="navigation.h" dir="firmwares/rotorcraft"/>

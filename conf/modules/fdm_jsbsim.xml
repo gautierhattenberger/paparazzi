@@ -16,6 +16,9 @@
     <configure name="JSBSIM_ROOT" value="/usr" description="set root directory for JSBSim library when auto-detection (see FIND_JSBSIM_VIA_PKG_CONFIG) is not used (default path: /usr)"/>
     <configure name="JSBSIM_USE_SGPATH" value="FALSE|TRUE" description="old version of jsbsim don't use SGPath module, can be forced to true or false if not found automatically"/>
   </doc>
+  <dep>
+    <provides>baro</provides>
+  </dep>
   <header/>
   <makefile target="nps|hitl">
     <configure name="JSBSIM_ROOT" default="/usr"/>

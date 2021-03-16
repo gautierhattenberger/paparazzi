@@ -8,6 +8,9 @@
       only a copy of telemetry ivy limited to sim target for now
     </description>
   </doc>
+  <dep>
+    <provides>datalink,telemetry</provides>
+  </dep>
   <header>
     <file name="ivy_dl.h"/>
   </header>

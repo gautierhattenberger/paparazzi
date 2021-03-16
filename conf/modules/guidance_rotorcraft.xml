@@ -50,6 +50,10 @@
       </dl_settings>
     </dl_settings>
   </settings>
+  <dep>
+    <depends>@navigation</depends>
+    <provides>guidance,attitude_command</provides>
+  </dep>
   <header>
     <file name="guidance_h.h"/>
     <file name="guidance_v.h"/>

@@ -7,6 +7,10 @@
       - Accelerometer/Gyroscope: MPU60x0 via I2C1
     </description>
   </doc>
+  <dep>
+    <depends>i2c</depends>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_common"/>
   <autoload name="imu_nps"/>
   <header>

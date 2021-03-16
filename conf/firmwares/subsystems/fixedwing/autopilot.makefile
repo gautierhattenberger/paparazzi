@@ -86,15 +86,6 @@ ifneq ($(TARGET),fbw)
 $(TARGET).srcs += math/pprz_geodetic_int.c math/pprz_geodetic_float.c math/pprz_geodetic_double.c math/pprz_trig_int.c math/pprz_orientation_conversion.c math/pprz_algebra_int.c math/pprz_algebra_float.c math/pprz_algebra_double.c math/pprz_stat.c
 endif
 
-#
-# I2C
-#
-ifneq ($(TARGET),fbw)
-$(TARGET).srcs += mcu_periph/i2c.c
-$(TARGET).srcs += mcu_periph/softi2c.c
-$(TARGET).srcs += $(SRC_ARCH)/mcu_periph/i2c_arch.c
-endif
-
 ######################################################################
 ##
 ## COMMON FOR ALL NON-SIMULATION TARGETS
@@ -140,17 +131,6 @@ endif
 ifeq ($(ARCH), $(filter $(ARCH), stm32 sim))
   ns_srcs 	+= $(SRC_ARCH)/led_hw.c
 endif
-
-
-#
-# UARTS
-#
-ns_srcs 		+= mcu_periph/uart.c
-ns_srcs 		+= $(SRC_ARCH)/mcu_periph/uart_arch.c
-ifeq ($(ARCH), linux)
-ns_srcs			+= $(SRC_ARCH)/serial_port.c
-endif
-
 
 #
 # ANALOG
@@ -209,9 +189,6 @@ sim.srcs 		+= $(fbw_srcs) $(ap_srcs)
 
 sim.CFLAGS 		+= -DSITL
 sim.srcs 		+= $(SRC_ARCH)/sim_ap.c
-
-sim.CFLAGS 		+= -DDOWNLINK -DPERIODIC_TELEMETRY -DDOWNLINK_TRANSPORT=ivy_tp -DDOWNLINK_DEVICE=ivy_tp
-sim.srcs 		+= subsystems/datalink/downlink.c subsystems/datalink/datalink.c $(SRC_FIRMWARE)/fixedwing_datalink.c pprzlink/src/ivy_transport.c subsystems/datalink/telemetry.c $(SRC_FIRMWARE)/ap_downlink.c $(SRC_FIRMWARE)/fbw_downlink.c
 
 sim.srcs 		+= $(SRC_ARCH)/sim_gps.c $(SRC_ARCH)/sim_adc_generic.c
 

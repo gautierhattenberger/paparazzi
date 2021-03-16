@@ -25,6 +25,9 @@
       </dl_settings>
     </dl_settings>
   </settings>
+  <dep>
+    <provides>navigation</provides>
+  </dep>
   <header>
     <file name="nav.h" dir="firmwares/fixedwing"/>
   </header>

@@ -134,15 +134,6 @@ endif # TARGET == fbw
 ## COMMON HARDWARE SUPPORT FOR ALL TARGETS
 ##
 
-ifneq ($(TARGET), fbw)
-$(TARGET).srcs += mcu_periph/i2c.c
-$(TARGET).srcs += mcu_periph/softi2c.c
-$(TARGET).srcs += $(SRC_ARCH)/mcu_periph/i2c_arch.c
-endif
-
-include $(CFG_SHARED)/uart.makefile
-
-
 #
 # Electrical subsystem / Analog Backend
 #

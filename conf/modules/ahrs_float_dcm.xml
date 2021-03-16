@@ -31,6 +31,10 @@
     </dl_settings>
   </settings>
 
+  <dep>
+    <depends>@imu,@gps</depends>
+    <provides>ahrs</provides>
+  </dep>
   <autoload name="ahrs_sim"/>
   <header>
     <file name="ahrs.h" dir="subsystems"/>

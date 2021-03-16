@@ -13,6 +13,10 @@
     <configure name="MODEM_PORT_IN" value="4243" description="input UDP port"/>
     <configure name="MODEM_BROADCAST" value="TRUE|FALSE" description="UDP socket in broadcast mode"/>
   </doc>
+  <dep>
+    <depends>udp</depends>
+    <provides>datalink,telemetry</provides>
+  </dep>
   <header>
     <file name="pprz_dl.h"/>
   </header>
@@ -39,9 +43,6 @@
     <file name="datalink.c" dir="subsystems/datalink"/>
     <file name="telemetry.c" dir="subsystems/datalink"/>
     <file name="pprz_transport.c" dir="pprzlink/src"/>
-    <raw>
-      include $(CFG_SHARED)/udp.makefile
-    </raw>
   </makefile>
   <makefile target="nps|hitl" firmware="fixedwing">
     <file name="fixedwing_datalink.c" dir="$(SRC_FIRMWARE)"/>
