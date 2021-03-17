@@ -9,9 +9,9 @@
     </description>
   </doc>
   <dep>
+    <depends>gps</depends>
     <provides>gps</provides>
   </dep>
-  <autoload name="gps"/>
   <header>
     <file name="gps.h" dir="subsystems"/>
   </header>

@@ -10,9 +10,11 @@
   </doc>
 
   <dep>
-    <depends>gps_ublox</depends>
+    <depends>i2c,gps_ublox</depends>
+    <provides>gps</provides>
   </dep>
-  <autoload name="gps_ublox"/>
+  <autoload name="gps_nps"/>
+  <autoload name="gps_sim"/>
   <header>
     <file name="gps_ubx_i2c.h"/>
   </header>
