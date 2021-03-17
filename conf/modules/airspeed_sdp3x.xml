@@ -26,6 +26,10 @@
       </dl_settings>
     </dl_settings>
   </settings>
+  <dep>
+    <depends>i2c</depends>
+    <provides>airspeed</provides>
+  </dep>
 
   <header>
     <file name="airspeed_sdp3x.h"/>
