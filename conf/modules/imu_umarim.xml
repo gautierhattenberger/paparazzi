@@ -8,7 +8,10 @@
       - Gyroscope: ITG3200 via I2C
     </description>
   </doc>
-  <autoload name="imu_common"/>
+  <dep>
+    <depends>i2c,imu_common</depends>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_nps"/>
   <header>
     <file name="imu_umarim.h" dir="boards/umarim"/>

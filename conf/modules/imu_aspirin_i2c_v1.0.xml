@@ -19,7 +19,10 @@
       <define name="MAG_Z_SENS" value="4.90788848" integer="16"/>
     </section>
   </doc>
-  <autoload name="imu_aspirin_i2c_common"/>
+  <dep>
+    <depends>imu_aspirin_i2c_common</depends>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_nps"/>
   <makefile target="!sim|nps|fbw">
     <define name="IMU_ASPIRIN_VERSION_1_0"/>

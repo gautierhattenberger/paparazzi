@@ -32,6 +32,9 @@
       <define name="MAG_45_HACK" value="1"/>
     </section>
   </doc>
+  <dep>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_b2_common"/>
   <header>
     <file name="imu_b2.h" dir="subsystems/imu"/>

@@ -22,9 +22,8 @@
     </section>
   </doc>
   <dep>
-    <depends>spi_master</depends>
+    <depends>spi_master,i2c,imu_common</depends>
   </dep>
-  <autoload name="imu_common"/>
   <autoload name="imu_nps"/>
   <header>
     <file name="imu_aspirin.h" dir="subsystems/imu"/>

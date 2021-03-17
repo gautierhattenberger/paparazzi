@@ -18,6 +18,10 @@
       <define name="MAG_Z_SENS" value="4.90788848" integer="16"/>
     </section>
   </doc>
+  <dep>
+    <depends>i2c</depends>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_common"/>
   <autoload name="imu_nps"/>
   <header>

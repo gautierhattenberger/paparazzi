@@ -6,7 +6,10 @@
       IMU on Parrot ARDrone2.
     </description>
   </doc>
-  <autoload name="imu_common"/>
+  <dep>
+    <depends>imu_common</depends>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_nps"/>
   <header>
     <file name="imu_ardrone2.h" dir="subsystems/imu"/>

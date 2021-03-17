@@ -7,9 +7,9 @@
     </description>
   </doc>
   <dep>
+    <depends>imu_common</depends>
     <provides>imu</provides>
   </dep>
-  <autoload name="imu_common"/>
   <header>
     <file name="imu_nps.h" dir="subsystems/imu"/>
   </header>

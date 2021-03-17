@@ -41,9 +41,9 @@
     </section>
   </doc>
   <dep>
-    <depends>spi_master</depends>
+    <depends>spi_master,imu_common</depends>
+    <provides>imu</provides>
   </dep>
-  <autoload name="imu_common"/>
   <autoload name="imu_nps"/>
   <header>
     <file name="imu_b2.h" dir="subsystems/imu"/>

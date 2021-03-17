@@ -7,7 +7,10 @@
       - Accelerometer/Gyroscope: MPU6000 via I2C0
     </description>
   </doc>
-  <autoload name="imu_common"/>
+  <dep>
+    <depends>i2c,imu_common</depends>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_nps"/>
   <!--autoload name="sonar_bebop"/-->
   <header>

@@ -10,7 +10,10 @@
     <configure name="VN_PORT" value="uart3" description="UART to use"/>
     <configure name="VN_BAUD" value="B921600" description="UART baudrate"/>
   </doc>
-  <autoload name="imu_common"/>
+  <dep>
+    <depends>uart,imu_common</depends>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_nps"/>
   <header>
     <file name="imu_vectornav.h" dir="modules/imu"/>

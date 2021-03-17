@@ -30,9 +30,9 @@
     <define name="IMU_HMC_Z_SIGN" value="1" description="axis sign"/>
   </doc>
   <dep>
-    <depends>spi_master</depends>
+    <depends>spi_master,i2c,imu_common</depends>
+    <provides>imu</provides>
   </dep>
-  <autoload name="imu_common"/>
   <autoload name="imu_nps"/>
   <header>
     <file name="imu_mpu6000_hmc5883.h" dir="subsystems/imu"/>

@@ -10,7 +10,10 @@
       For configuration see the imu_aspirin_v2_common module
     </description>
   </doc>
-  <autoload name="imu_aspirin_v2_common"/>
+  <dep>
+    <depends>imu_aspirin_v2_common</depends>
+    <provides>imu</provides>
+  </dep>
   <makefile target="!sim|nps|fbw|hitl">
     <!-- SLAVE3 is on PC13, which is the baro CS -->
     <define name="DUSE_SPI_SLAVE3"/>

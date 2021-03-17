@@ -10,7 +10,10 @@
       For configuration see the imu_aspirin_common module
     </description>
   </doc>
-  <autoload name="imu_aspirin_i2c_common"/>
+  <dep>
+    <depends>imu_aspirin_i2c_common</depends>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_nps"/>
   <makefile target="!sim|nps|fbw">
     <define name="IMU_ASPIRIN_VERSION_1_5"/>

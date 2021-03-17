@@ -41,6 +41,10 @@
       <define name="ACCEL_Z_SIGN" value="1"/>
     </section>
   </doc>
+  <dep>
+    <depends>adc</depends>
+    <provides>imu</provides>
+  </dep>
   <autoload name="imu_common"/>
   <autoload name="imu_nps"/>
   <header>
