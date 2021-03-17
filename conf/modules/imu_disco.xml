@@ -19,7 +19,7 @@
   </doc>
   <dep>
     <depends>i2c</depends>
-    <provides>imu</provides>
+    <provides>imu,mag</provides>
   </dep>
   <autoload name="imu_common"/>
   <autoload name="imu_nps"/>

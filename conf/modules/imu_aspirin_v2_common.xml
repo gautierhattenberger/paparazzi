@@ -22,6 +22,7 @@
   </doc>
   <dep>
     <depends>spi_master,imu_common</depends>
+    <provides>imu,mag</provides>
   </dep>
   <autoload name="imu_nps"/>
   <header>

@@ -9,6 +9,10 @@
     <define name="IMU_TO_MAG_THETA" value="0" description="rotation of magneto compared to the magneto in pitch axis"/>
     <define name="IMU_TO_MAG_PSI" value="0" description="rotation of magneto compared to the magneto in yaw axis"/>
   </doc>
+  <dep>
+    <depends>uart</depends>
+    <provides>mag</provides>
+  </dep>
   <header>
     <file name="mag_pitot_uart.h"/>
   </header>

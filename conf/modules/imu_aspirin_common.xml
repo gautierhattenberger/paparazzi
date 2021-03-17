@@ -23,6 +23,7 @@
   </doc>
   <dep>
     <depends>spi_master,i2c,imu_common</depends>
+    <provides>imu,mag</depends>
   </dep>
   <autoload name="imu_nps"/>
   <header>
