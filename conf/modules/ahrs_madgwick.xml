@@ -17,6 +17,10 @@
     </dl_settings>
   </settings>
 
+  <dep>
+    <depends>@imu</depends>
+    <provides>ahrs</provides>
+  </dep>
   <header>
     <file name="ahrs.h" dir="subsystems"/>
   </header>

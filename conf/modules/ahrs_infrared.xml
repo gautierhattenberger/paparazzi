@@ -12,6 +12,7 @@
   </doc>
   <dep>
     <depends>infrared_adc</depends>
+    <provides>ahrs</provides>
   </dep>
   <header>
     <file name="ahrs_infrared.h"/>

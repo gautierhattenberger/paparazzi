@@ -8,6 +8,10 @@
     <configure name="VN_PORT" value="uart3" description="UART to use"/>
     <configure name="VN_BAUD" value="B921600" description="UART baudrate"/>
   </doc>
+  <dep>
+    <depends>uart</depends>
+    <provides>ahrs,imu</provides>
+  </dep>
   <autoload name="ahrs_sim"/>
   <header>
     <file name="ahrs.h" dir="subsystems"/>

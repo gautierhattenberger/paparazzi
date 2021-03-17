@@ -6,6 +6,10 @@
     <configure name="CHIMU_UART_NR" value="3" description="UART"/>
     <define name="CHIMU_BIG_ENDIAN" value="TRUE" description="For older CHIMU v1.0 you should define CHIMU_BIG_ENDIAN"/>
   </doc>
+  <dep>
+    <depends>uart</depends>
+    <provides>ahrs,imu</provides>
+  </dep>
   <header>
     <file name="ins_module.h"/>
   </header>
