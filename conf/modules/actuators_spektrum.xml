@@ -12,6 +12,10 @@
     <configure name="ACTUATORS_SPEKTRUM_DEV" value="UARTX" description="UART port (default uart4)"/>
     <configure name="ACTUATORS_SPEKTRUM_DEV2" value="UARTX" description="UART port for optional secondary output"/>
   </doc>
+  <dep>
+    <depends>uart</depends>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_spektrum.h" dir="subsystems/actuators"/>
   </header>

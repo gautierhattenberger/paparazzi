@@ -12,6 +12,10 @@
     <configure name="ACTUATORS_ASCTEC_I2C_DEV" value="i2cX" description="I2C port (default i2c1)"/>
     <configure name="ACTUATORS_ASCTEC_I2C_SCL_TIME" value="150" description="configurable I2C timing on lpc21 boards"/>
   </doc>
+  <dep>
+    <depends>i2c</depends>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_asctec.h" dir="subsystems/actuators"/>
   </header>

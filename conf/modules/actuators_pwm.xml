@@ -6,6 +6,9 @@
       Actuators Driver using direct PWM output
     </description>
   </doc>
+  <dep>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_pwm.h" dir="subsystems/actuators"/>
   </header>

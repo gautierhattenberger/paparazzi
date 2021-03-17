@@ -7,6 +7,10 @@
     </description>
     <configure name="ACTUATORS_MD25_DEV" value="i2cX" description="I2C port (default i2c2)"/>
   </doc>
+  <dep>
+    <depends>i2c</depends>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_md25.h"/>
   </header>

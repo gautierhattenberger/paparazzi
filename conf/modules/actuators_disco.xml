@@ -6,6 +6,10 @@
       Actuators Driver for Disco plane
     </description>
   </doc>
+  <dep>
+    <depends>i2c</depends>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators.h" dir="boards/disco"/>
   </header>

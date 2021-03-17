@@ -6,6 +6,9 @@
       Actuators Driver using a 4015
     </description>
   </doc>
+  <dep>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_4015.h" dir="subsystems/actuators"/>
   </header>

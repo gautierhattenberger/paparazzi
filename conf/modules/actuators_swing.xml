@@ -6,6 +6,9 @@
       Actuators Driver for Swing
     </description>
   </doc>
+  <dep>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators.h" dir="boards/swing"/>
   </header>

@@ -11,6 +11,9 @@
       Can be adjusted in the "servos_ppm_hw.h" file to suit your particular receiver.
     </description>
   </doc>
+  <dep>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_ppm.h" dir="subsystems/actuators"/>
   </header>

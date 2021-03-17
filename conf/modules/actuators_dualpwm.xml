@@ -7,6 +7,9 @@
       Only with stm32
     </description>
   </doc>
+  <dep>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_dualpwm.h" dir="subsystems/actuators"/>
   </header>

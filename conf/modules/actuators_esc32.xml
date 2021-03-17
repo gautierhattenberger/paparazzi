@@ -11,6 +11,9 @@
       - command_laws section to map motor_mixing commands to servos
     </description>
   </doc>
+  <dep>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_esc32.h" dir="subsystems/actuators"/>
   </header>

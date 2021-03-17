@@ -7,6 +7,9 @@
       This module prevents autoloading of actuators by fixedwing firmware
     </description>
   </doc>
+  <dep>
+    <provides>actuators</provides>
+  </dep>
   <header/>
   <makefile>
     <configure name="ACTUATORS" value="none"/>

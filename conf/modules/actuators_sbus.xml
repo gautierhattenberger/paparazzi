@@ -9,6 +9,10 @@
     </description>
     <configure name="ACTUATORS_SBUS_DEV" value="UARTX" description="UART port (default uart4)"/>
   </doc>
+  <dep>
+    <depends>uart</depends>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_sbus.h" dir="subsystems/actuators"/>
   </header>

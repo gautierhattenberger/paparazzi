@@ -6,6 +6,9 @@
       Actuators Driver using a 4017 chip
     </description>
   </doc>
+  <dep>
+    <provides>actuators</provides>
+  </dep>
   <header>
     <file name="actuators_4017.h" dir="subsystems/actuators"/>
   </header>
