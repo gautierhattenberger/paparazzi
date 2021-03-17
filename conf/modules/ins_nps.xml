@@ -6,6 +6,10 @@
      Simulated AHRS and INS.
     </description>
   </doc>
+  <dep>
+    <depends>@imu,@gps</depends>
+    <provides>ins</provides>
+  </dep>
   <autoload name="gps_nps"/>
   <header>
     <file name="ins_gps_passthrough.h" dir="subsystems/ins"/>

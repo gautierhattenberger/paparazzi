@@ -8,7 +8,10 @@
     <configure name="VN_PORT" value="uart3" description="UART to use"/>
     <configure name="VN_BAUD" value="B921600" description="UART baudrate"/>
   </doc>
-  <autoload name="gps"/>
+  <dep>
+    <depends>uart,gps</depends>
+    <provides>ins,ahrs,gps</provides>
+  </dep>
   <autoload name="ins_sim"/>
   <autoload name="ins_nps"/>
   <header>

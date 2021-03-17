@@ -15,6 +15,10 @@
       </dl_settings>
     </dl_settings>
   </settings>
+  <dep>
+    <depends>@gps</depends>
+    <provides>imu,ins,ahrs</provides>
+  </dep>
   <header>
     <file name="ins_arduimu_basic.h"/>
   </header>

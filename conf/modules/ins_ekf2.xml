@@ -14,6 +14,10 @@
       </dl_settings>
     </dl_settings>
   </settings>
+  <dep>
+    <depends>@gps,@mag,@imu</depends>
+    <provides>ins,ahrs</provides>
+  </dep>
   <header>
     <file name="ins_ekf2.h" dir="subsystems/ins"/>
   </header>
