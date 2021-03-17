@@ -1,0 +1,13 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="imu_sim" dir="imu">
+  <doc>
+    <description>
+      Dummy IMU for SIM.
+    </description>
+  </doc>
+  <dep>
+    <provides>imu</provides>
+  </dep>
+  <makefile target="sim"/>
+</module>

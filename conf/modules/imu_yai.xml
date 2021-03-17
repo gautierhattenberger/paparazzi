@@ -8,5 +8,6 @@
     </description>
   </doc>
   <autoload name="imu_nps"/>
+  <autoload name="imu_sim"/>
   <autoload name="imu_b2_common"/>
 </module>

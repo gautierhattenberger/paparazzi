@@ -19,10 +19,10 @@
     </section>
   </doc>
   <dep>
-    <depends>i2c</depends>
+    <depends>i2c,imu_common</depends>
     <provides>imu</provides>
   </dep>
-  <autoload name="imu_common"/>
+  <autoload name="imu_sim"/>
   <autoload name="imu_nps"/>
   <header>
     <file name="imu_drotek_10dof_v2.h" dir="subsystems/imu"/>

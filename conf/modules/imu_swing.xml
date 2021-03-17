@@ -12,6 +12,7 @@
     <provides>imu</provides>
   </dep>
   <autoload name="imu_nps"/>
+  <autoload name="imu_sim"/>
   <!--autoload name="sonar_bebop"/-->
   <header>
     <file name="imu_swing.h" dir="subsystems/imu"/>

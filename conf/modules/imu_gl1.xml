@@ -24,6 +24,7 @@
     <provides>imu,mag</provides>
   </dep>
   <autoload name="imu_nps"/>
+  <autoload name="imu_sim"/>
   <header>
     <file name="imu_gl1.h" dir="subsystems/imu"/>
   </header>

@@ -25,6 +25,7 @@
     <provides>imu</provides>
   </dep>
   <autoload name="imu_nps"/>
+  <autoload name="imu_sim"/>
   <header>
     <file name="imu_mpu6000_hmc5883.h" dir="subsystems/imu"/>
   </header>

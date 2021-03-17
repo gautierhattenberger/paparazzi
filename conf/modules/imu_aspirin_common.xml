@@ -26,6 +26,7 @@
     <provides>imu,mag</depends>
   </dep>
   <autoload name="imu_nps"/>
+  <autoload name="imu_sim"/>
   <header>
     <file name="imu_aspirin.h" dir="subsystems/imu"/>
   </header>
