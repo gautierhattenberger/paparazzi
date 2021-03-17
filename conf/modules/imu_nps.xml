@@ -8,7 +8,7 @@
   </doc>
   <dep>
     <depends>imu_common</depends>
-    <provides>imu</provides>
+    <provides>imu,mag</provides>
   </dep>
   <header>
     <file name="imu_nps.h" dir="subsystems/imu"/>
