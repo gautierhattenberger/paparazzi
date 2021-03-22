@@ -169,10 +169,6 @@ ap_srcs 		+= subsystems/settings.c
 ap_srcs 		+= $(SRC_ARCH)/subsystems/settings_arch.c
 
 
-# BARO
-include $(CFG_SHARED)/baro_board.makefile
-
-
 ######################################################################
 ##
 ## SIMULATOR THREAD SPECIFIC

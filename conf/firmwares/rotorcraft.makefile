@@ -93,12 +93,6 @@ $(TARGET).srcs += subsystems/commands.c
 ifneq ($(TARGET), fbw)
 $(TARGET).srcs += state.c
 
-#
-# BARO_BOARD (if existing/configured)
-#
-include $(CFG_SHARED)/baro_board.makefile
-
-
 else
 $(TARGET).CFLAGS += -DFBW=1
 endif

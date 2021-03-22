@@ -1,0 +1,10 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="nps" dir="targets">
+  <doc>
+    <description>NPS target specific module</description>
+  </doc>
+  <makefile target="nps">
+  </makefile>
+</module>
+

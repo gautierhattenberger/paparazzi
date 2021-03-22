@@ -1,0 +1,10 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="fbw" dir="targets">
+  <doc>
+    <description>FBW target specific module</description>
+  </doc>
+  <makefile target="fbw">
+  </makefile>
+</module>
+

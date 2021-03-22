@@ -1,0 +1,17 @@
+<!DOCTYPE module SYSTEM "../module.dtd">
+
+<module name="ap" dir="targets">
+  <doc>
+    <description>AP target specific module</description>
+  </doc>
+  <dep>
+    <depends>baro_board</depends>
+    <provides>autopilot</provides>
+  </dep>
+  <makefile target="ap">
+    <raw>
+#Example of AP makefile part
+    </raw>
+  </makefile>
+</module>
+
