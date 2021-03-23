@@ -7,7 +7,8 @@
     </description>
   </doc>
   <dep>
-    <depends>stabilization_rotorcraft</depends>
+    <depends>stabilization_rotorcraft,@attitude_command</depends>
+    <provides>commands</provides>
   </dep>
   <header>
     <file name="stabilization_attitude_passthrough.h"/>

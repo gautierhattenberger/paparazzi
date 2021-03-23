@@ -9,6 +9,9 @@
       - Then call nav_heli_spinup_run
     </description>
   </doc>
+  <dep>
+    <depends>@navigation</depends>
+  </dep>
   <header>
     <file name="nav_heli_spinup.h"/>
   </header>

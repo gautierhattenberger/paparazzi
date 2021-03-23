@@ -6,6 +6,9 @@
      Zamboni pattern survey for fixedwings.
     </description>
   </doc>
+  <dep>
+    <depends>@navigation</depends>
+  </dep>
   <header>
     <file name="nav_survey_zamboni.h"/>
   </header>

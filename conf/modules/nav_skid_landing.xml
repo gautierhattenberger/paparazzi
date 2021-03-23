@@ -49,6 +49,9 @@
     </dl_settings>
   </settings>
 
+  <dep>
+    <depends>@navigation</depends>
+  </dep>
   <header>
     <file name="nav_skid_landing.h"/>
   </header>

@@ -12,6 +12,9 @@
   <header>
     <file name="nav_gls.h"/>
   </header>
+  <dep>
+    <depends>@navigation</depends>
+  </dep>
   <makefile target="ap|sim|nps">
     <file name="nav_gls.c"/>
     <test firmware="fixedwing">

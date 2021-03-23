@@ -16,6 +16,9 @@
 
     </description>
   </doc>
+  <dep>
+    <depends>@navigation</depends>
+  </dep>
   <header>
     <file name="nav_line_border.h"/>
   </header>

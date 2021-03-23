@@ -12,6 +12,9 @@
                  with takeoff circle radius, until you reach desired takeoff altitude
     </description>
   </doc>
+  <dep>
+    <depends>@navigation</depends>
+  </dep>
   <header>
     <file name="nav_launcher.h"/>
   </header>

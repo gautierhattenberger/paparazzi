@@ -15,6 +15,9 @@
       </dl_settings>
     </dl_settings>
   </settings>
+  <dep>
+    <provides>navigation</provides>
+  </dep>
   <header>
     <file name="nav_rover_base.h"/>
   </header>

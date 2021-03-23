@@ -18,6 +18,10 @@
       </dl_settings>
     </dl_settings>
   </settings>
+  <dep>
+    <depends>@navigation</depends>
+    <provides>guidance</provides>
+  </dep>
   <header>
     <file name="rover_guidance.h"/>
   </header>

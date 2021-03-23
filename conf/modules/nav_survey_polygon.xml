@@ -26,6 +26,9 @@ Block example:
 -->
     </description>
   </doc>
+  <dep>
+    <depends>@navigation</depends>
+  </dep>
   <header>
     <file name="nav_survey_polygon.h"/>
   </header>

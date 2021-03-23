@@ -34,6 +34,7 @@
   </settings>
   <dep>
     <depends>stabilization_rotorcraft</depends>
+    <provides>commands</provides>
   </dep>
   <header>
     <file name="stabilization_rate.h"/>

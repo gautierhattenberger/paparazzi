@@ -6,6 +6,9 @@
       Copy of nav line with altitude changes at every sweep
     </description>
   </doc>
+  <dep>
+    <depends>@navigation</depends>
+  </dep>
   <header>
     <file name="nav_vertical_raster.h"/>
   </header>
