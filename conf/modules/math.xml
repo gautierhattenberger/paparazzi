@@ -1,0 +1,25 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="math">
+  <doc>
+    <description>
+      Math library.
+      Basic functions, extra matrix decompositions not included.
+    </description>
+  </doc>
+  <dep>
+    <provides>math</provides>
+  </dep>
+  <makefile>
+    <file name="pprz_algebra_int.c" dir="math"/>
+    <file name="pprz_algebra_float.c" dir="math"/>
+    <file name="pprz_algebra_double.c" dir="math"/>
+    <file name="pprz_geodetic_int.c" dir="math"/>
+    <file name="pprz_geodetic_float.c" dir="math"/>
+    <file name="pprz_geodetic_double.c" dir="math"/>
+    <file name="pprz_trig_int.c" dir="math"/>
+    <file name="pprz_orientation_conversion.c" dir="math"/>
+    <file name="pprz_stat.c" dir="math"/>
+  </makefile>
+</module>
+

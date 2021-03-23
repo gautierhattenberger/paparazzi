@@ -5,13 +5,10 @@
     <description>AP target specific module</description>
   </doc>
   <dep>
-    <depends>baro_board</depends>
-    <provides>autopilot</provides>
+    <depends>system_core,electrical,baro_board</depends>
   </dep>
   <makefile target="ap">
-    <raw>
-#Example of AP makefile part
-    </raw>
+    <define name="AP"/>
   </makefile>
 </module>
 

@@ -1,0 +1,21 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+
+<module name="electrical" dir="core">
+  <doc>
+    <description>
+      General electrical interface
+    </description>
+  </doc>
+  <dep>
+    <depends>adc</depends>
+    <provides>electrical</provides>
+  </dep>
+  <header>
+    <file name="electrical.h" dir="subsystems"/>
+  </header>
+  <makefile>
+    <file name="electrical.c" dir="subsystems"/>
+    <test/>
+  </makefile>
+</module>
+

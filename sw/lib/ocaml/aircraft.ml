@@ -194,9 +194,9 @@ let resolve_modules_dep = fun config_by_target firmware fail ->
     (* check if a board, target or firmware specific module is available *)
     let target_module_name = Env.paparazzi_conf // "modules" // "targets" // target ^ ".xml" in
     let target_module = if Sys.file_exists target_module_name then [GC.Var target_module_name] else [] in
-    let firmware_module_name = Env.paparazzi_conf // "modules" // "targets" // conf.firmware_name ^ ".xml" in
+    let firmware_module_name = Env.paparazzi_conf // "modules" // "firmwares" // conf.firmware_name ^ ".xml" in
     let firmware_module = if Sys.file_exists firmware_module_name then [GC.Var firmware_module_name] else [] in
-    let board_module_name = Env.paparazzi_conf // "modules" // "targets" // conf.board_type ^ ".xml" in
+    let board_module_name = Env.paparazzi_conf // "modules" // "boards" // conf.board_type ^ ".xml" in
     let board_module = if Sys.file_exists board_module_name then [GC.Var board_module_name] else [] in
     (* iter on modules of this target from a meta module *)
     let root_dep = { Module.empty_dep with Module.requires = (List.map (fun (_, m) -> GC.Var m.Module.name) conf.modules) @ target_module @ firmware_module @ board_module } in

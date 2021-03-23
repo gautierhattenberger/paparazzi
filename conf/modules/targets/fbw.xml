@@ -4,7 +4,11 @@
   <doc>
     <description>FBW target specific module</description>
   </doc>
+  <dep>
+    <depends>system_core,electrical</depends>
+  </dep>
   <makefile target="fbw">
+    <define name="FBW"/>
   </makefile>
 </module>
 
