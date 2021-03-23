@@ -4,8 +4,14 @@
   <doc>
     <description>SIM target specific module</description>
   </doc>
+  <dep>
+    <depends>electrical</depends>
+  </dep>
   <makefile target="sim">
     <define name="SITL"/>
+    <define name="AP"/>
+    <define name="FBW"/>
+    <file name="main.c" dir="$(SRC_FIRMWARE)"/>
     <file_arch name="sim_ap.c" dir="."/>
     <file_arch name="sim_gps.c" dir="."/>
     <file_arch name="sim_adc_generic.c" dir="."/>

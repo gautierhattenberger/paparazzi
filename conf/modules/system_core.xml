@@ -35,7 +35,7 @@ $(TARGET).ARCHDIR = $(ARCH)
     <file name="actuators.c" dir="subsystems"/>
     <file name="commands.c" dir="subsystems"/>
   </makefile>
-  <makefile target="ap|nps|hitl" firmware="fixedwing">
+  <makefile target="ap|sim|nps|hitl" firmware="fixedwing">
     <file name="actuators.c" dir="subsystems" cond="ifeq (,$(findstring $(SEPARATE_FBW),1 TRUE))"/>
     <file name="commands.c" dir="subsystems" cond="ifeq (,$(findstring $(SEPARATE_FBW),1 TRUE))"/>
   </makefile>
