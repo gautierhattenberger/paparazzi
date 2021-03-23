@@ -11,6 +11,9 @@
     <configure name="SEPARATE_FBW" value="FALSE|TRUE" description="Enable separation between AP and FBW on separated MCU"/>
   </doc>
 
+  <dep>
+    <provides>intermcu</provides>
+  </dep>
   <makefile target="ap|fbw" firmware="fixedwing">
     <raw>
       ifeq (,$(findstring $(SEPARATE_FBW),1 TRUE))

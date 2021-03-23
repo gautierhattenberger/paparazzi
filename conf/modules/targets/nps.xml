@@ -2,12 +2,19 @@
 
 <module name="nps" dir="targets">
   <doc>
-    <description>NPS target specific module</description>
+    <description>
+      New Paparazzi Simulator (NPS)
+
+      Bindings between embedded autopilot code and a flight dynamic model (FDM).
+      Possible FDM are: JSBSim or CRRCSIM, see corresponding modules.
+      Can run Software In The Loop (SITL) or Hardware In The Loop (HITL) simulations.
+    </description>
   </doc>
   <dep>
     <depends>electrical</depends>
   </dep>
-  <makefile target="nps">
+  <makefile target="nps|hitl">
+    <configure name="BARO_PERIODIC_FREQUENCY" default="50"/>
     <configure name="NPS_DIR" value="nps"/>
     <raw>
 nps.MAKEFILE = nps
@@ -32,7 +39,6 @@ nps.LDFLAGS += $(shell pkg-config glib-2.0 --libs)
 VPATH += $(PAPARAZZI_SRC)/sw/simulator
 
     </raw>
-    <configure name="BARO_PERIODIC_FREQUENCY" default="50"/>
     <define name="BARO_PERIODIC_FREQUENCY" value="$(BARO_PERIODIC_FREQUENCY)"/>
     <define name="USE_BARO_BOARD" value="FALSE"/>
     <define name="SITL"/>

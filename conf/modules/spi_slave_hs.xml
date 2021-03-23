@@ -7,6 +7,9 @@
       Only for fixedwing and boards based on LPC21
     </description>
   </doc>
+  <dep>
+    <depends>mcu</depends>
+  </dep>
   <header>
     <file name="spi.h" dir="mcu_periph"/>
   </header>

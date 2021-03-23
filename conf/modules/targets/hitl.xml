@@ -2,8 +2,14 @@
 
 <module name="hitl" target="targets">
   <doc>
-    <description>HITL target specific module</description>
+    <description>
+      Hardware In The Loop simulation
+      Based on NPS simulator
+    </description>
   </doc>
+  <dep>
+    <depends>targets/nps</depends>
+  </dep>
   <makefile target="hitl">
   </makefile>
 </module>

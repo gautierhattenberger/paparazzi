@@ -2,7 +2,13 @@
 
 <module name="sim" dir="targets">
   <doc>
-    <description>SIM target specific module</description>
+    <description>
+      Basic Simulator (SIM)
+
+      Bindings between embedded autopilot code and a flight dynamic model (FDM).
+      FDM and low level code is written in OCaml.
+      Only for fixed-wing.
+    </description>
   </doc>
   <dep>
     <depends>electrical</depends>

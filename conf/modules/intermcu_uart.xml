@@ -14,6 +14,10 @@
     <configure name="FBW_MODE_LED" value="none|num" description="LED number or 'none'"/>
   </doc>
 
+  <dep>
+    <depends>uart</depends>
+    <provides>intermcu</provides>
+  </dep>
   <makefile target="fbw" firmware="fixedwing">
     <configure name="INTERMCU_PORT" default="UART2" case="upper|lower"/>
     <configure name="FBW_MODE_LED" default="none"/>

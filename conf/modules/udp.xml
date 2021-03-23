@@ -7,6 +7,9 @@
       To activate a specific UDP peripheral, define flag USE_UDPX where X is your UDP peripheral number
     </description>
   </doc>
+  <dep>
+    <depends>mcu</depends>
+  </dep>
   <header>
     <file name="udp.h" dir="mcu_periph"/>
   </header>

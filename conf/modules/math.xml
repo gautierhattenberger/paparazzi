@@ -4,6 +4,10 @@
   <doc>
     <description>
       Math library.
+      - algebra (integer, float, double)
+      - geodetic (integer, float, double)
+      - trigo (int)
+      - orientation conversion
       Basic functions, extra matrix decompositions not included.
     </description>
   </doc>
