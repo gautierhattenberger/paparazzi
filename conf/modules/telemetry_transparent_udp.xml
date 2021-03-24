@@ -11,6 +11,10 @@
     <configure name="MODEM_PORT_IN" value="4243" description="input UDP port"/>
     <configure name="MODEM_BROADCAST" value="TRUE|FALSE" description="UDP socket in broadcast mode"/>
   </doc>
+  <dep>
+    <depends>udp</depends>
+    <provides>datalink,telemetry</provides>
+  </dep>
   <autoload name="telemetry" type="sim"/>
   <header>
     <file name="pprz_dl.h"/>

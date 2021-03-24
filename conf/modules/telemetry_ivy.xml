@@ -6,6 +6,9 @@
       Telemetry using IVY
     </description>
   </doc>
+  <dep>
+    <provides>datalink,telemetry</provides>
+  </dep>
   <header>
     <file name="ivy_dl.h"/>
   </header>

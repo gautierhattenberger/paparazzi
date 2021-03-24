@@ -16,6 +16,10 @@
     <define name="W5100_DRDY_GPIO" value="GPIOX" description="GPIO port used for data ready pin"/>
     <define name="W5100_DRDY_GPIO_PIN" value="GPIOY" description="GPIO pin number used for data ready pin"/>
   </doc>
+  <dep>
+    <depends>spi_master</depends>
+    <provides>datalink,telemetry</provides>
+  </dep>
   <autoload name="telemetry" type="sim"/>
   <header>
     <file name="w5100.h" dir="subsystems/datalink"/>
