@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_aspirin_i2c_common">
+<module name="imu_aspirin_i2c_common" task="sensors">
   <doc>
     <description>
       Common functionality of Aspirin IMUs using I2C only.

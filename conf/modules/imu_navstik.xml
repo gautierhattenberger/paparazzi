@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_navstik" dir="imu">
+<module name="imu_navstik" dir="imu" task="sensors">
   <doc>
     <description>
       Navstik IMU: MPU60x0 and HMC5883 via I2C.

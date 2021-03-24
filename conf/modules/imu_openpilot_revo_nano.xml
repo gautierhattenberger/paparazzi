@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_openpilot_revo_nano" dir="imu">
+<module name="imu_openpilot_revo_nano" dir="imu" task="sensors">
   <doc>
     <description>
       IMU driver for OpenPilot Revo Nano.

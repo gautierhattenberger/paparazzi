@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="airspeed_ms45xx_i2c" dir="sensors">
+<module name="airspeed_ms45xx_i2c" dir="sensors" task="sensors">
   <doc>
     <description>
       MS45XX differential or gauge type of pressure sensor for e.g measuring airspeed.

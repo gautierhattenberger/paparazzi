@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="gps_optitrack" dir="gps">
+<module name="gps_optitrack" dir="gps" task="sensors">
   <doc>
     <description>
       Optitrack used as indoor GPS.

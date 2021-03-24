@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_xsens" dir="ins">
+<module name="imu_xsens" dir="ins" task="sensors">
   <doc>
     <description>
       XSens IMU.

@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="baro_board" dir="sensors">
+<module name="baro_board" dir="sensors" task="sensors">
   <doc>
     <description>
       Magic module to load the proper baro for a board (if supported)

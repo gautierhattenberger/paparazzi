@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="airspeed_ets" dir="sensors">
+<module name="airspeed_ets" dir="sensors" task="sensors">
   <doc>
     <description>
       Airspeed ETS (I2C).

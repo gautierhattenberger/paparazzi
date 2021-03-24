@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_analog" dir="imu">
+<module name="imu_analog" dir="imu" task="sensors">
   <doc>
     <description>
       Analog IMU connected to MCU ADC ports.

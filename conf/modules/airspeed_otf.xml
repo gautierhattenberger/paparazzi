@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="airspeed_otf" dir="sensors">
+<module name="airspeed_otf" dir="sensors" task="sensors">
   <doc>
     <description>
       OTF! airspeed/flow angle sensor

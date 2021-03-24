@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="airspeed_uADC" dir="sensors">
+<module name="airspeed_uADC" dir="sensors" task="sensors">
   <doc>
     <description>
       Driver for the Aeroprobe uADC air data computer.

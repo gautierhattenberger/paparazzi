@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_swing" dir="imu">
+<module name="imu_swing" dir="imu" task="sensors">
   <doc>
     <description>
       Driver for IMU on the Parrot Swing drone.

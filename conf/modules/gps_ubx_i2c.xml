@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="gps_ubx_i2c" dir="gps">
+<module name="gps_ubx_i2c" dir="gps" task="sensors">
   <doc>
     <description>
       U-blox GPS (I2C)

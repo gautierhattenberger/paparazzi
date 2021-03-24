@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_sim" dir="imu">
+<module name="imu_sim" dir="imu" task="sensors">
   <doc>
     <description>
       Dummy IMU for SIM.

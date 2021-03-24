@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="mag_ist8310" dir="sensors">
+<module name="mag_ist8310" dir="sensors" task="sensors">
   <doc>
     <description>
       ST IST8310 magnetometer.

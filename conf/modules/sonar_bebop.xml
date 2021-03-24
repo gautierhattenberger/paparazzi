@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="sonar_bebop" dir="sonar">
+<module name="sonar_bebop" dir="sonar" task="sensors">
   <doc>
     <description>
      Bebop Sonar driver.

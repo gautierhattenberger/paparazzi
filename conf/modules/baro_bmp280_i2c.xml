@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="baro_bmp280_i2c" dir="sensors">
+<module name="baro_bmp280_i2c" dir="sensors" task="sensors">
   <doc>
     <description>
       Bosch-Sensortech BMP280xx pressure sensor

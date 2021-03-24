@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="mag_micromag_fw" dir="sensors">
+<module name="mag_micromag_fw" dir="sensors" task="sensors">
   <doc>
     <description>
       Micromag magnetometer.

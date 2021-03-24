@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="gps_sirf" dir="gps">
+<module name="gps_sirf" dir="gps" task="sensors">
   <doc>
     <description>
       Sirf GPS (UART)

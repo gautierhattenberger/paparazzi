@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_um6" dir="imu">
+<module name="imu_um6" dir="imu" task="sensors">
   <doc>
     <description>
       CHR-UM6 IMU.

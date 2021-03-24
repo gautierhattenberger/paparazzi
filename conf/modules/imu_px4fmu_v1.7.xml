@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_px4fmu_v1.7" dir="imu">
+<module name="imu_px4fmu_v1.7" dir="imu" task="sensors">
   <doc>
     <description>
       MPU6000 via SPI and HMC5883 via I2C on the PX4FMU v1.7 board

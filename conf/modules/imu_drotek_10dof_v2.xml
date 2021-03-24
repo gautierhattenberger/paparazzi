@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_drotek_10dof_v2" dir="imu">
+<module name="imu_drotek_10dof_v2" dir="imu" task="sensors">
   <doc>
     <description>
       Drotek 10DOF V2 IMU via I2C.

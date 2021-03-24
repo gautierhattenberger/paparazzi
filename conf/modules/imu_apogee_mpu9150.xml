@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_apogee_mpu9150" dir="imu">
+<module name="imu_apogee_mpu9150" dir="imu" task="sensors">
   <doc>
     <description>
       Driver for IMU on Apogee board.

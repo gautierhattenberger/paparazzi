@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_px4fmu_v2.4" dir="imu">
+<module name="imu_px4fmu_v2.4" dir="imu" task="sensors">
   <doc>
     <description>
       PX4 Pixhawk IMU via SPI.

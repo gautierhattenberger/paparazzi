@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="baro_board_common" dir="sensors">
+<module name="baro_board_common" dir="sensors" task="sensors">
   <doc>
     <description>
       Baro module calling internal barometer functions for boards supporting them

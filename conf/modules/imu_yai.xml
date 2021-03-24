@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_yai" dir="imu">
+<module name="imu_yai" dir="imu" task="sensors">
   <doc>
     <description>
       YAI IMU.

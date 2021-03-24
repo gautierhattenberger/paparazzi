@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="baro_ms5611_spi" dir="sensors">
+<module name="baro_ms5611_spi" dir="sensors" task="sensors">
   <doc>
     <description>
       Baro MS5611 (SPI)

@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_navgo" dir="imu">
+<module name="imu_navgo" dir="imu" task="sensors">
   <doc>
     <description>
       NAVGO IMU.

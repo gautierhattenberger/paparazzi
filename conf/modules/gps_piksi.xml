@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="gps_piksi" dir="gps">
+<module name="gps_piksi" dir="gps" task="sensors">
   <doc>
     <description>
       Swift-Nav Piksi RTK GPS.

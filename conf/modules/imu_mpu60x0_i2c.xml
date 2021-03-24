@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_mpu60x0_i2c" dir="imu">
+<module name="imu_mpu60x0_i2c" dir="imu" task="sensors">
   <doc>
     <description>
       IMU with MPU60x0 via I2C.

@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="airspeed_adc" dir="sensors">
+<module name="airspeed_adc" dir="sensors" task="sensors">
   <doc>
     <description>Airspeed sensor (ADC).
     Using the internal ADC.

@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="mag_pitot_uart" dir="sensors">
+<module name="mag_pitot_uart" dir="sensors" task="sensors">
   <doc>
     <description>Remotely located magnetometer and pitot tube over uart (RS232) communication</description>
     <configure name="MAG_PITOT_PORT" value="UART5" description="select which uart it is connected to"/>

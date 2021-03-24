@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_vectornav">
+<module name="imu_vectornav" task="sensors">
   <doc>
     <description>
       Vectornav VN-200 over uart used as IMU.

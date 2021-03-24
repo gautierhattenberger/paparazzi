@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="baro_ets" dir="sensors">
+<module name="baro_ets" dir="sensors" task="sensors">
   <doc>
     <description>
       Baro ETS (I2C).

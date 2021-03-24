@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="airspeed_ads1114" dir="sensors">
+<module name="airspeed_ads1114" dir="sensors" task="sensors">
   <doc>
     <description>
       ADS1114 airspeed sensor.

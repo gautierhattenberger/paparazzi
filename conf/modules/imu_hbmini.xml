@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_hbmini" dir="imu">
+<module name="imu_hbmini" dir="imu" task="sensors">
   <doc>
     <description>
       HBmini IMU.

@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="imu_umarim" dir="imu">
+<module name="imu_umarim" dir="imu" task="sensors">
   <doc>
     <description>
       UMARIM IMU.
