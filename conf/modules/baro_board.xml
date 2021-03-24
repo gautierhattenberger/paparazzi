@@ -11,69 +11,19 @@
     <configure name="USE_BARO_BOARD" value="FALSE|TRUE" description="enable or not the internal baro driver (default TRUE)"/>
   </doc>
   <dep>
-    <depends>i2c,spi_master</depends>
-    <provides>baro</provides>
+    <depends>baro_board_common</depends>
   </dep>
-  <header>
-    <file name="module_baro_board.h"/>
-  </header>
-  <init fun="baro_board_init()"/>
-  <periodic fun="baro_board_periodic()" freq="BARO_PERIODIC_FREQUENCY"/>
-  <event fun="baro_board_event()"/>
   <makefile target="ap">
-    <configure name="USE_BARO_BOARD" default="TRUE"/>
-    <configure name="BARO_LED" default="none"/>
-    <configure name="BARO_PERIODIC_FREQUENCY" default="50"/>
-    <define name="USE_BARO_BOARD" value="$(USE_BARO_BOARD)"/>
-    <define name="BARO_LED" value="$(BARO_LED)" cond="ifneq ($(BARO_LED),none)"/>
-    <define name="BARO_PERIODIC_FREQUENCY" value="$(BARO_PERIODIC_FREQUENCY)"/>
-    <file name="module_baro_board.c"/>
     <raw>
 ifeq ($(USE_BARO_BOARD), TRUE)
 
-# booz baro
-ifeq ($(BOARD), booz)
-  BARO_BOARD_CFLAGS += -DUSE_DAC
-  BARO_BOARD_SRCS += $(SRC_ARCH)/mcu_periph/dac_arch.c
-  BARO_BOARD_SRCS += $(SRC_BOARD)/baro_board.c
-
-# Lisa/L
-else ifeq ($(BOARD), lisa_l)
-  BARO_BOARD_CFLAGS += -DUSE_I2C2
-  BARO_BOARD_SRCS += $(SRC_BOARD)/baro_board.c
-
 # Navstik baro
-else ifeq ($(BOARD), navstik)
+ifeq ($(BOARD), navstik)
   BARO_BOARD_CFLAGS += -DUSE_I2C3
   BARO_BOARD_CFLAGS += -DBARO_BOARD=BARO_BOARD_BMP085
   BARO_BOARD_SRCS += peripherals/bmp085.c
   BARO_BOARD_SRCS += $(SRC_BOARD)/baro_board.c
 
-# Ardrone baro
-else ifeq ($(BOARD), ardrone)
-  BARO_BOARD_SRCS += $(SRC_BOARD)/baro_board.c
-
-# Bebop baro
-else ifeq ($(BOARD), bebop)
-  BARO_BOARD_CFLAGS += -DBARO_BOARD=BARO_MS5611_I2C
-  BARO_BOARD_CFLAGS += -DUSE_I2C1
-  BARO_BOARD_CFLAGS += -DBB_MS5611_I2C_DEV=i2c1
-  BARO_BOARD_SRCS += peripherals/ms5611.c
-  BARO_BOARD_SRCS += peripherals/ms5611_i2c.c
-  BARO_BOARD_SRCS += boards/baro_board_ms5611_i2c.c
-
-# Disco baro
-else ifeq ($(BOARD), disco)
-  BARO_BOARD_CFLAGS += -DBARO_BOARD=BARO_MS5611_I2C
-  BARO_BOARD_CFLAGS += -DUSE_I2C1
-  BARO_BOARD_CFLAGS += -DBB_MS5611_I2C_DEV=i2c1
-  BARO_BOARD_SRCS += peripherals/ms5611.c
-  BARO_BOARD_SRCS += peripherals/ms5611_i2c.c
-  BARO_BOARD_SRCS += boards/baro_board_ms5611_i2c.c
-
-# Swing baro
-else ifeq ($(BOARD), swing)
-  BARO_BOARD_SRCS += $(SRC_BOARD)/baro_board.c
 
 # Lisa/M baro
 else ifeq ($(BOARD), lisa_m)
@@ -207,19 +157,6 @@ LIA_BARO ?= BARO_MS5611_SPI
     BARO_BOARD_SRCS += boards/baro_board_ms5611_i2c.c
   endif
 
-# navgo baro
-else ifeq ($(BOARD), navgo)
-  include $(CFG_SHARED)/spi_master.makefile
-  BARO_BOARD_CFLAGS += -DUSE_SPI_SLAVE0
-  BARO_BOARD_CFLAGS += -DUSE_SPI1
-  BARO_BOARD_SRCS += peripherals/mcp355x.c
-  BARO_BOARD_SRCS += $(SRC_BOARD)/baro_board.c
-
-# hbmini baro
-else ifeq ($(BOARD), hbmini)
-  BARO_BOARD_CFLAGS += -DUSE_I2C1
-  BARO_BOARD_SRCS += peripherals/bmp085.c
-  BARO_BOARD_SRCS += $(SRC_BOARD)/baro_board.c
 
 # krooz baro
 else ifeq ($(BOARD), krooz)
