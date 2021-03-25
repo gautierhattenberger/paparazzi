@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ahrs_madgwick" dir="ahrs">
+<module name="ahrs_madgwick" dir="ahrs" task="estimation">
   <doc>
     <description>
       AHRS using IMU (accel, gyro) only with Madwick implementation.

@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ins_vectornav" dir="ins">
+<module name="ins_vectornav" dir="ins" task="estimation">
   <doc>
     <description>
       Vectornav INS Driver.

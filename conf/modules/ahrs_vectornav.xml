@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ahrs_vectornav" dir="ahrs">
+<module name="ahrs_vectornav" dir="ahrs" task="estimation">
   <doc>
     <description>
       Vectornav VN200 over uart used as AHRS.

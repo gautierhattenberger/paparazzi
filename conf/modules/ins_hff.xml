@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ins_hff" dir="ins">
+<module name="ins_hff" dir="ins" task="estimation">
   <doc>
     <description>
       INS with float vertical and horizontal filters.

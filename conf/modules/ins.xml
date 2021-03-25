@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ins" dir="ins">
+<module name="ins" dir="ins" task="estimation">
   <doc>
     <description>
       simple INS with vertical filter.

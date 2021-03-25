@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ins_skeleton" dir="ins">
+<module name="ins_skeleton" dir="ins" task="estimation">
   <doc>
     <description>
       INS module skeleton.

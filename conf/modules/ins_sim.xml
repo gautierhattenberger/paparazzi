@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ins_sim" dir="ins">
+<module name="ins_sim" dir="ins" task="estimation">
   <doc>
     <description>
      Simulated AHRS and INS.

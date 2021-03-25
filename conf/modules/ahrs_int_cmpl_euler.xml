@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ahrs_int_cmpl_euler" dir="ahrs">
+<module name="ahrs_int_cmpl_euler" dir="ahrs" task="estimation">
   <doc>
     <description>
       AHRS using complementary filter in fixed point.

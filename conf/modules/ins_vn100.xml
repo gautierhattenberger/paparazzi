@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ins_vn100" dir="ins">
+<module name="ins_vn100" dir="ins" task="estimation">
   <doc>
     <description>VectorNav VN100 (SPI)</description>
     <configure name="VN100_SPI_DEV" value="spiX" description="select spi peripherals (default spi1)"/>

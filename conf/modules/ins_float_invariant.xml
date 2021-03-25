@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ins_float_invariant" dir="ins">
+<module name="ins_float_invariant" dir="ins" task="estimation">
   <doc>
     <description>
       Invariant INS (in float).

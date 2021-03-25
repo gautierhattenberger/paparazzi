@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ahrs_infrared" dir="ahrs">
+<module name="ahrs_infrared" dir="ahrs" task="estimation">
   <doc>
     <description>
     AHRS infrared.

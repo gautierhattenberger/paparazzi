@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ahrs_chimu_uart" dir="ins">
+<module name="ahrs_chimu_uart" dir="ins" task="estimation">
   <doc>
     <description>CHimu (UART)</description>
     <configure name="CHIMU_UART_NR" value="3" description="UART"/>

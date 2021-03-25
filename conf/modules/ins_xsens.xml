@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="ins_xsens" dir="ins">
+<module name="ins_xsens" dir="ins" task="estimation">
   <doc>
     <description>
       XSens Mti-G INS
