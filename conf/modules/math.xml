@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="math">
+<module name="math" task="core">
   <doc>
     <description>
       Math library.

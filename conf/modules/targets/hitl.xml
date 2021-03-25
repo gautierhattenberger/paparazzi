@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "../module.dtd">
 
-<module name="hitl" target="targets">
+<module name="hitl" target="targets" task="core">
   <doc>
     <description>
       Hardware In The Loop simulation

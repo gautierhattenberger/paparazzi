@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "../module.dtd">
 
-<module name="rotorcraft" dir="firmwares">
+<module name="rotorcraft" dir="firmwares" task="core">
   <doc>
     <description>
         Rotorcraft firmware common definitions

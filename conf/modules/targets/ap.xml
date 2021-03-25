@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "../module.dtd">
 
-<module name="ap" dir="targets">
+<module name="ap" dir="targets" task="core">
   <doc>
     <description>AP target specific module</description>
   </doc>

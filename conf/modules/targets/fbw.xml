@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "../module.dtd">
 
-<module name="fbw" dir="targets">
+<module name="fbw" dir="targets" task="core">
   <doc>
     <description>FBW target specific module</description>
   </doc>

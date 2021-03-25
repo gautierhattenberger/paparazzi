@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="intermcu_can" dir="intermcu">
+<module name="intermcu_can" dir="intermcu" task="core">
   <doc>
     <description>
       Inter-MCU communication over CAN

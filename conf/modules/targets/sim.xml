@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "../module.dtd">
 
-<module name="sim" dir="targets">
+<module name="sim" dir="targets" task="core">
   <doc>
     <description>
       Basic Simulator (SIM)

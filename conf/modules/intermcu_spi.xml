@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="intermcu_spi" dir="intermcu">
+<module name="intermcu_spi" dir="intermcu" task="core">
   <doc>
     <description>
       Inter-MCU communication over SPI

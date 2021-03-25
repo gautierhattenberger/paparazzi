@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "../module.dtd">
 
-<module name="fixedwing" dir="firmwares">
+<module name="fixedwing" dir="firmwares" task="core">
   <doc>
     <description>
         Fixedwing firmware common definitions
