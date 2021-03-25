@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="air_data">
+<module name="air_data" task="core">
   <doc>
     <description>
     AirData interface.
