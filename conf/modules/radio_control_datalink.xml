@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="radio_control_datalink" dir="radio_control">
+<module name="radio_control_datalink" dir="radio_control" task="radio_control">
   <doc>
     <description>
       Radio control over datalink
