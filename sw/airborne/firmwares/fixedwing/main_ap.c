@@ -52,7 +52,6 @@
 #endif
 
 // autopilot
-#include "state.h"
 #include "autopilot.h"
 #include "firmwares/fixedwing/nav.h"
 #include "generated/flight_plan.h"
@@ -138,14 +137,6 @@ void init_ap(void)
 
   /** - start interrupt task */
   mcu_int_enable();
-
-#if defined(PPRZ_TRIG_INT_COMPR_FLASH)
-  pprz_trig_int_init();
-#endif
-
-  /****** initialize and reset state interface ********/
-
-  stateInit();
 
   /************* Sensors initialization ***************/
 

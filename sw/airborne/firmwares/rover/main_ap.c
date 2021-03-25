@@ -62,8 +62,6 @@ PRINT_CONFIG_MSG_VALUE("USE_BARO_BOARD is TRUE, reading onboard baro: ", BARO_BO
 
 #include "subsystems/ahrs.h"
 
-#include "state.h"
-
 #include "firmwares/rover/main_ap.h"
 
 #include "generated/modules.h"
@@ -108,21 +106,12 @@ tid_t failsafe_tid;      ///< id for failsafe_check() timer
 tid_t radio_control_tid; ///< id for radio_control_periodic_task() timer
 tid_t electrical_tid;    ///< id for electrical_periodic() timer
 tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
-#if USE_BARO_BOARD
-tid_t baro_tid;          ///< id for baro_periodic() timer
-#endif
 
 void main_init(void)
 {
   mcu_init();
 
-#if defined(PPRZ_TRIG_INT_COMPR_FLASH)
-  pprz_trig_int_init();
-#endif
-
   electrical_init();
-
-  stateInit();
 
   actuators_init();
 
@@ -172,9 +161,6 @@ void main_init(void)
   failsafe_tid = sys_time_register_timer(0.05, NULL);
   electrical_tid = sys_time_register_timer(0.1, NULL);
   telemetry_tid = sys_time_register_timer((1. / TELEMETRY_FREQUENCY), NULL);
-#if USE_BARO_BOARD
-  baro_tid = sys_time_register_timer(1. / BARO_PERIODIC_FREQUENCY, NULL);
-#endif
 
 #if USE_IMU
   // send body_to_imu from here for now
@@ -214,11 +200,6 @@ void handle_periodic_tasks(void)
   if (sys_time_check_and_ack_timer(telemetry_tid)) {
     telemetry_periodic();
   }
-#if USE_BARO_BOARD
-  if (sys_time_check_and_ack_timer(baro_tid)) {
-    baro_periodic();
-  }
-#endif
 }
 
 void main_periodic(void)
@@ -277,10 +258,6 @@ void main_event(void)
   if (autopilot.use_rc) {
     RadioControlEvent(autopilot_on_rc_frame);
   }
-
-#if USE_BARO_BOARD
-  BaroEvent();
-#endif
 
   autopilot_event();
 

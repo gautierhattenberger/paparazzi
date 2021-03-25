@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="system_core">
+<module name="system_core" dir="core" task="core">
   <doc>
     <description>
       Core system components
@@ -9,7 +9,7 @@
     </description>
   </doc>
   <dep>
-    <depends>mcu,math</depends>
+    <depends>mcu,math,state_interface</depends>
     <provides>core</provides>
   </dep>
   <makefile>
@@ -48,7 +48,6 @@ $(TARGET).ARCHDIR = $(ARCH)
     <file name="commands.c" dir="subsystems"/>
   </makefile>
   <makefile target="!fbw">
-    <file name="state.c" dir="."/>
     <file name="settings.c" dir="subsystems"/>
     <file_arch name="settings_arch.c" dir="subsystems"/>
     <test/>

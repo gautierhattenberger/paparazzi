@@ -14,6 +14,18 @@
   <dep>
     <provides>math</provides>
   </dep>
+  <header>
+    <file name="pprz_algebra_int.h" dir="math"/>
+    <file name="pprz_algebra_float.h" dir="math"/>
+    <file name="pprz_algebra_double.h" dir="math"/>
+    <file name="pprz_geodetic_int.h" dir="math"/>
+    <file name="pprz_geodetic_float.h" dir="math"/>
+    <file name="pprz_geodetic_double.h" dir="math"/>
+    <file name="pprz_trig_int.h" dir="math"/>
+    <file name="pprz_orientation_conversion.h" dir="math"/>
+    <file name="pprz_stat.h"/>
+  </header>
+  <init fun="pprz_trig_int_init()"/>
   <makefile>
     <file name="pprz_algebra_int.c" dir="math"/>
     <file name="pprz_algebra_float.c" dir="math"/>
