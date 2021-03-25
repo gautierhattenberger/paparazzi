@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="guidance_rover_holonomic" dir="guidance">
+<module name="guidance_rover_holonomic" dir="guidance" task="control">
   <doc>
     <description>
       Holonomic guidance for rover

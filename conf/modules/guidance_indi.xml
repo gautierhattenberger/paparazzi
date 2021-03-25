@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="guidance_indi" dir="guidance">
+<module name="guidance_indi" dir="guidance" task="control">
   <doc>
     <description>
       Guidance controller for rotorcraft using INDI

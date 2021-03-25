@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_flower" dir="nav">
+<module name="nav_flower" dir="nav" task="control">
   <doc>
     <description>
       Make a flower navigation pattern

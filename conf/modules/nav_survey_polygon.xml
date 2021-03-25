@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_survey_polygon" dir="nav">
+<module name="nav_survey_polygon" dir="nav" task="control">
   <doc>
     <description>
       Survey a polygon with a fixedwing.

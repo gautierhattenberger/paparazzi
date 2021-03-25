@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_spiral" dir="nav">
+<module name="nav_spiral" dir="nav" task="control">
   <doc>
     <description>
       Fixedwing navigation in a spiral/helix.

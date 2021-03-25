@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_survey_disc" dir="nav">
+<module name="nav_survey_disc" dir="nav" task="control">
   <doc>
     <description>
       Disc Survey.

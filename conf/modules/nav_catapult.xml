@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_catapult" dir="nav">
+<module name="nav_catapult" dir="nav" task="control">
   <doc>
     <description>
       Catapult launch timing system.

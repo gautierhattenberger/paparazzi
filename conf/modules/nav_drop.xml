@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_drop" dir="nav">
+<module name="nav_drop" dir="nav" task="control">
   <doc>
     <description>
       Compute the dropping point for a fixedwing aircraft.

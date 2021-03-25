@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_gls" dir="nav">
+<module name="nav_gls" dir="nav" task="control">
   <doc>
     <description>
       gps landing system

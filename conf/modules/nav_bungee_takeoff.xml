@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_bungee_takeoff" dir="nav">
+<module name="nav_bungee_takeoff" dir="nav" task="control">
   <doc>
     <description>
       Takeoff functions for bungee takeoff.

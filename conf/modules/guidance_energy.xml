@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="guidance_energy" dir="guidance">
+<module name="guidance_energy" dir="guidance" task="control">
   <doc>
     <description>
       Energy based vertical control for fixedwing aircraft.

@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_fish" dir="nav">
+<module name="nav_fish" dir="nav" task="control">
   <doc>
     <description>
       Bio-inspired swarm navigation

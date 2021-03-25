@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="nav_rover_base" dir="nav">
+<module name="nav_rover_base" dir="nav" task="control">
   <doc>
     <description>
       Basic navigation functions for Rovers
