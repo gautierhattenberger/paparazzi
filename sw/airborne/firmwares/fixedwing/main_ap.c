@@ -47,9 +47,6 @@
 #if USE_IMU
 #include "subsystems/imu.h"
 #endif
-#if USE_AHRS
-#include "subsystems/ahrs.h"
-#endif
 
 // autopilot
 #include "autopilot.h"
@@ -139,10 +136,6 @@ void init_ap(void)
   mcu_int_enable();
 
   /************* Sensors initialization ***************/
-
-#if USE_AHRS
-  ahrs_init();
-#endif
 
   /************* Links initialization ***************/
 #if defined MCU_SPI_LINK || defined MCU_UART_LINK || defined MCU_CAN_LINK
