@@ -49,18 +49,9 @@
 #include "subsystems/gps.h"
 #endif
 
-#if USE_BARO_BOARD
-#include "subsystems/sensors/baro.h"
-PRINT_CONFIG_MSG_VALUE("USE_BARO_BOARD is TRUE, reading onboard baro: ", BARO_BOARD)
-#endif
-
-#include "subsystems/electrical.h"
-
 #include "autopilot.h"
 
 #include "subsystems/radio_control.h"
-
-#include "subsystems/ahrs.h"
 
 #include "firmwares/rover/main_ap.h"
 
@@ -88,11 +79,6 @@ PRINT_CONFIG_VAR(TELEMETRY_FREQUENCY)
  */
 PRINT_CONFIG_VAR(MODULES_FREQUENCY)
 
-#ifndef BARO_PERIODIC_FREQUENCY
-#define BARO_PERIODIC_FREQUENCY 50
-#endif
-PRINT_CONFIG_VAR(BARO_PERIODIC_FREQUENCY)
-
 #if USE_AHRS && USE_IMU && (defined AHRS_PROPAGATE_FREQUENCY)
 #if (AHRS_PROPAGATE_FREQUENCY > PERIODIC_FREQUENCY)
 #warning "PERIODIC_FREQUENCY should be least equal or greater than AHRS_PROPAGATE_FREQUENCY"
@@ -104,14 +90,11 @@ tid_t main_periodic_tid; ///< id for main_periodic() timer
 tid_t modules_tid;       ///< id for modules_periodic_task() timer
 tid_t failsafe_tid;      ///< id for failsafe_check() timer
 tid_t radio_control_tid; ///< id for radio_control_periodic_task() timer
-tid_t electrical_tid;    ///< id for electrical_periodic() timer
 tid_t telemetry_tid;     ///< id for telemetry_periodic() timer
 
 void main_init(void)
 {
   mcu_init();
-
-  electrical_init();
 
   actuators_init();
 
@@ -120,14 +103,6 @@ void main_init(void)
 #endif
 
   radio_control_init();
-
-#if USE_BARO_BOARD
-  baro_init();
-#endif
-
-#if USE_AHRS
-  ahrs_init();
-#endif
 
   autopilot_init();
 
@@ -159,7 +134,6 @@ void main_init(void)
 #endif
   radio_control_tid = sys_time_register_timer((1. / 60.), NULL);
   failsafe_tid = sys_time_register_timer(0.05, NULL);
-  electrical_tid = sys_time_register_timer(0.1, NULL);
   telemetry_tid = sys_time_register_timer((1. / TELEMETRY_FREQUENCY), NULL);
 
 #if USE_IMU
@@ -193,9 +167,6 @@ void handle_periodic_tasks(void)
   }
   if (sys_time_check_and_ack_timer(failsafe_tid)) {
     failsafe_check();
-  }
-  if (sys_time_check_and_ack_timer(electrical_tid)) {
-    electrical_periodic();
   }
   if (sys_time_check_and_ack_timer(telemetry_tid)) {
     telemetry_periodic();
