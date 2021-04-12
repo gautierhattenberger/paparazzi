@@ -6,6 +6,7 @@
   </doc>
   <dep>
     <depends>system_core,electrical</depends>
+    <provides>no_settings</provides>
   </dep>
   <makefile target="fbw">
     <define name="FBW"/>

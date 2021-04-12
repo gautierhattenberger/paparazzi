@@ -16,7 +16,7 @@
     <depends>spi_master</depends>
     <provides>intermcu</provides>
   </dep>
-
+  <init fun="intermcu_init()"/>
   <makefile target="ap|fbw" firmware="fixedwing">
     <raw>
       ifeq (,$(findstring $(SEPARATE_FBW),1 TRUE))

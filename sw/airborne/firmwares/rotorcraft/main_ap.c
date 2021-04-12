@@ -38,10 +38,8 @@
 #include "subsystems/datalink/telemetry.h"
 #include "subsystems/datalink/datalink.h"
 #include "subsystems/datalink/downlink.h"
-#include "subsystems/settings.h"
 
 #include "subsystems/commands.h"
-#include "subsystems/actuators.h"
 
 #if USE_IMU
 #include "subsystems/imu.h"
@@ -49,8 +47,6 @@
 #if USE_GPS
 #include "subsystems/gps.h"
 #endif
-
-#include "subsystems/electrical.h"
 
 #include "autopilot.h"
 
@@ -108,12 +104,6 @@ void main_init(void)
   electrical_init();
 
 #ifndef INTER_MCU_AP
-  actuators_init();
-#else
-  intermcu_init();
-#endif
-
-#ifndef INTER_MCU_AP
   radio_control_init();
 #endif
 
@@ -136,16 +126,10 @@ void main_init(void)
    */
   waypoints_localize_all();
 
-  settings_init();
-
   mcu_int_enable();
 
 #if DOWNLINK
   downlink_init();
-#endif
-
-#ifdef INTER_MCU_AP
-  intermcu_init();
 #endif
 
   // register the timers for the periodic functions
@@ -196,11 +180,6 @@ void handle_periodic_tasks(void)
 
 void main_periodic(void)
 {
-#if INTER_MCU_AP
-  /* Inter-MCU watchdog */
-  intermcu_periodic();
-#endif
-
   /* run control loops */
   autopilot_periodic();
   /* set actuators     */

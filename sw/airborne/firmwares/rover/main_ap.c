@@ -37,10 +37,8 @@
 #include "subsystems/datalink/telemetry.h"
 #include "subsystems/datalink/datalink.h"
 #include "subsystems/datalink/downlink.h"
-#include "subsystems/settings.h"
 
 #include "subsystems/commands.h"
-#include "subsystems/actuators.h"
 
 #if USE_IMU
 #include "subsystems/imu.h"
@@ -98,10 +96,6 @@ void main_init(void)
 
   actuators_init();
 
-#if USE_MOTOR_MIXING
-  motor_mixing_init();
-#endif
-
   radio_control_init();
 
   autopilot_init();
@@ -118,8 +112,6 @@ void main_init(void)
    * so as a stop-gap measure we localize them all (again) here..
    */
   //waypoints_localize_all();
-
-  settings_init();
 
   mcu_int_enable();
 

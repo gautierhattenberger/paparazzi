@@ -14,7 +14,7 @@
   <header>
     <file name="ahrs.h" dir="subsystems"/>
   </header>
-  <periodic name="update_ahrs_from_sim()"/>
+  <periodic fun="update_ahrs_from_sim()"/>
   <makefile target="sim">
     <define name="AHRS_TYPE_H" value="subsystems/ahrs/ahrs_sim.h" type="string"/>
     <file name="ahrs_sim.c" dir="subsystems/ahrs"/>

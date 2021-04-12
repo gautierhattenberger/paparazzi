@@ -3,13 +3,13 @@
 <module name="system_core" dir="core" task="core">
   <doc>
     <description>
-      Core system components
+      Core system components meta module
 
-      Includes: sys_time, commands, actuators, settings interfaces
+      Includes: sys_time, commands interfaces
     </description>
   </doc>
   <dep>
-    <depends>mcu,math,state_interface</depends>
+    <depends>mcu,math,state_interface,@actuators|@intermcu,settings|@no_settings</depends>
     <provides>core</provides>
   </dep>
   <makefile>
@@ -32,25 +32,16 @@ $(TARGET).ARCHDIR = $(ARCH)
     <test/>
   </makefile>
   <makefile target="fbw" firmware="fixedwing">
-    <file name="actuators.c" dir="subsystems"/>
     <file name="commands.c" dir="subsystems"/>
   </makefile>
   <makefile target="ap|sim|nps|hitl" firmware="fixedwing">
-    <file name="actuators.c" dir="subsystems" cond="ifeq (,$(findstring $(SEPARATE_FBW),1 TRUE))"/>
     <file name="commands.c" dir="subsystems" cond="ifeq (,$(findstring $(SEPARATE_FBW),1 TRUE))"/>
   </makefile>
   <makefile firmware="rotorcraft">
-    <file name="actuators.c" dir="subsystems"/>
     <file name="commands.c" dir="subsystems"/>
   </makefile>
   <makefile firmware="rover">
-    <file name="actuators.c" dir="subsystems"/>
     <file name="commands.c" dir="subsystems"/>
-  </makefile>
-  <makefile target="!fbw">
-    <file name="settings.c" dir="subsystems"/>
-    <file_arch name="settings_arch.c" dir="subsystems"/>
-    <test/>
   </makefile>
 </module>
 
