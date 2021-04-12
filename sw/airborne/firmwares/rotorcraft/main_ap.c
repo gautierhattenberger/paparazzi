@@ -101,8 +101,6 @@ void main_init(void)
 {
   mcu_init();
 
-  electrical_init();
-
 #ifndef INTER_MCU_AP
   radio_control_init();
 #endif
