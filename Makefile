@@ -76,7 +76,8 @@ PPRZCENTER=sw/supervision
 MISC=sw/ground_segment/misc
 LOGALIZER=sw/logalizer
 
-SUBDIRS = $(PPRZCENTER) $(MISC) $(LOGALIZER) sw/tools
+SUBDIRS = $(PPRZCENTER) $(LOGALIZER) sw/tools
+SUBDIRS_EXTRA = $(MISC)
 
 #
 # Communication protocol version
@@ -107,7 +108,7 @@ MAVLINK_PROTOCOL_H=$(MAVLINK_DIR)protocol.h
 
 GEN_HEADERS = $(UBX_PROTOCOL_H) $(MTK_PROTOCOL_H) $(XSENS_PROTOCOL_H) $(ABI_MESSAGES_H) $(MAVLINK_PROTOCOL_H)
 
-all: ground_segment ext lpctools
+all: ground_segment ext subdirs_extra
 
 _print_building:
 	@echo "------------------------------------------------------------"
@@ -183,10 +184,14 @@ opencv_bebop:
 # make misc subdirs
 #
 subdirs: $(SUBDIRS)
+subdirs_extra: $(SUBDIRS_EXTRA)
 
 $(MISC): ext
 
 $(SUBDIRS): libpprz
+	$(MAKE) -C $@
+
+$(SUBDIRS_EXTRA): libpprz
 	$(MAKE) -C $@
 
 $(PPRZCENTER): libpprz
@@ -246,11 +251,6 @@ include Makefile.ac
 ac_h ac fbw ap: static conf generators ext
 
 sim: sim_static
-
-
-# stuff to build and upload the lpc bootloader ...
-include Makefile.lpctools
-lpctools: lpc21iap
 
 
 #
@@ -345,6 +345,6 @@ test_sim: all
 
 .PHONY: all print_build_version _print_building _save_build_version update_google_version init dox ground_segment ground_segment.opt \
 subdirs $(SUBDIRS) conf ext libpprz libpprzlink.update libpprzlink.install cockpit cockpit.opt tmtc tmtc.opt generators\
-static sim_static lpctools opencv_bebop\
+static sim_static opencv_bebop\
 clean cleanspaces ab_clean dist_clean distclean dist_clean_irreversible \
 test test_examples test_math test_sim test_all_confs

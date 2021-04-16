@@ -29,6 +29,7 @@
     <module name="control"/>
     <module name="navigation"/>
     <module name="nav" type="line"/>
+
     <module name="sys_mon"/>
   </firmware>
 
