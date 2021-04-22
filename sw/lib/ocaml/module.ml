@@ -186,10 +186,10 @@ let parse_periodic = fun xml ->
       | Some "LOCK" | Some "lock" -> Lock
       | Some _ -> failwith "Module.parse_periodic: unreachable" }
 
-type init = { f: string; cond: string option }
+type init = { iname: string; cond: string option }
 
 let make_init = fun f cond ->
-  { f = f;
+  { iname = f;
     cond = cond
   }
 

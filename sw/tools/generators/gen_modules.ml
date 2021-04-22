@@ -51,8 +51,7 @@ let print_headers = fun out modules ->
   ) modules
 
 let get_status_name = fun f n ->
-  let func = (Xml.attrib f "fun") in
-  n^"_"^String.sub func 0 (try String.index func '(' with _ -> (String.length func))^"_status"
+  n^"_"^String.sub f 0 (try String.index f '(' with _ -> (String.length f))^"_status"
 
 let get_status_shortname = fun f ->
   let func = (Xml.attrib f "fun") in
@@ -78,6 +77,10 @@ let get_cap_name = fun f ->
     | [Str.Text t; Str.Delim "("; Str.Text _ ; Str.Delim ")"] -> Compat.uppercase_ascii t
     | _ -> failwith "Gen_modules: not a valid function name"
 
+(* Encapsulate a condition attribute for function calls *)
+let lprintf_with_cond out s = function
+  | None -> lprintf out "%s;\n" s
+  | Some cond -> fprintf out "#if %s\n%s%s;\n#endif\n" cond (String.make !margin ' ') s
 
 (** Computes the required modulos *)
 let get_functions_modulos = fun modules ->
@@ -140,8 +143,7 @@ let print_function_prescalers = fun out functions_modulo ->
 
 
 let is_status_lock = fun p ->
-  let mode = ExtXml.attrib_or_default p "autorun" "LOCK" in
-  mode = "LOCK"
+  match p.Module.autorun with Lock -> true | _ -> false
 
 let print_status = fun out modules ->
   fprintf out "\n";
@@ -188,18 +190,16 @@ let print_init = fun out (task, modules) ->
   right ();
   List.iter (fun m ->
     let module_name = m.Module.name in
-    List.iter (fun i ->
-      match Xml.tag i with
-          "init" -> lprintf out "%s;\n" (Xml.attrib i "fun")
-        | "periodic" -> if not (is_status_lock i) then
-            lprintf out "%s = %s;\n" (get_status_name i module_name) (try match Xml.attrib i "autorun" with
-                "TRUE" | "true" -> "MODULES_START"
-              | "FALSE" | "false" | "LOCK" | "lock" -> "MODULES_IDLE"
-              | _ -> failwith "Error: Unknown autorun value (possible values are: TRUE, FALSE, LOCK(default))"
-              with _ -> "MODULES_IDLE" (* this should not be possible anyway *))
-        | _ -> ())
-      (Xml.children m.Module.xml))
-    modules;
+    List.iter (fun init ->
+      lprintf_with_cond out init.Module.iname init.Module.cond
+    ) m.Module.inits
+    List.iter (fun p ->
+      lprintf out "%s = %s;\n" (get_status_name p.Module.fname  module_name) (match p.Module.autorun with
+        | True -> "MODULES_START"
+        | False | Lock -> "MODULES_IDLE"
+      )
+    ) m.Module.periodics
+  ) modules;
   left ();
   lprintf out "}\n"
 
@@ -231,8 +231,10 @@ let print_periodic = fun out functions_modulo (task, modules) ->
   (** Print start and stop functions *)
   List.iter (fun m ->
     let module_name = m.Module.name in
-    let periodic = List.filter (fun i -> (String.compare (Xml.tag i) "periodic") == 0) (Xml.children m.Module.xml) in
-    List.iter (fun f ->
+    List.iter (fun p ->
+      match p.Module.autorun with
+      | Lock ->
+          (* TODO from here *)
       if (is_status_lock f) then begin
         try
           let start = (Xml.attrib f "start") in
@@ -257,7 +259,7 @@ let print_periodic = fun out functions_modulo (task, modules) ->
         left ();
         lprintf out "}\n";
       end
-    ) periodic
+    ) m.Module.periodics
   ) modules;
   (** Print periodic functions *)
   let functions = List.sort (fun (_,p) (_,p') -> compare p p') functions_modulo in
