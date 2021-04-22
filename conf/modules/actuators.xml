@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="actuators" dir="actuators" task="core">
+<module name="actuators" dir="actuators" task="actuators">
   <doc>
     <description>
       Common actuators interface

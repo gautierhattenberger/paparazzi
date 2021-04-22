@@ -26,6 +26,9 @@ open Printf
 open Xml2h
 module GC = Gen_common
 
+(** TODO make this a config file ?? *)
+let tasks_order = ["mcu"; "core"; "sensors"; "estimation"; "radio_control"; "control"; "actuators"; "datalink"; "default"]
+
 (** Formatting with a margin *)
 let margin = ref 0
 let step = 2
@@ -55,21 +58,6 @@ let get_status_shortname = fun f ->
   let func = (Xml.attrib f "fun") in
   String.sub func 0 (try String.index func '(' with _ -> (String.length func))
 
-(*let fprint_status = fun ch mod_name p ->
-  match p.autorun with
-  | True | False ->
-    Printf.fprintf ch "EXTERN_MODULES uint8_t %s;\n" (status_name mod_name p)
-  | Lock -> ()
-
-let fprint_periodic_init = fun ch mod_name p ->
-  match p.autorun with
-  | True -> Printf.fprintf ch "%s = %s;" (status_name mod_name p) "MODULES_START"
-  | False -> Printf.fprintf ch "%s = %s;" (status_name mod_name p) "MODULES_IDLE"
-  | Lock -> ()
-
-let fprint_init = fun ch init -> Printf.fprintf ch "%s;\n" init
-*)
-
 let get_period_and_freq = fun f ->
   let period = try Some (Xml.attrib f "period") with _ -> None
   and freq = try Some (Xml.attrib f "freq") with _ -> None in
@@ -80,14 +68,6 @@ let get_period_and_freq = fun f ->
     | Some _p, Some _ ->
       fprintf stderr "Warning: both period and freq are defined but only period is used for function %s\n" (ExtXml.attrib f "fun");
       ("("^_p^")", "(1. / ("^_p^"))")
-
-(*let fprint_period_freq = fun ch max_freq p ->
-  let period, freq = match p.period_freq with
-    | Unset -> 1. /. max_freq, max_freq
-    | Set (p, f) -> p, f in
-  let cap_fname = Compat.uppercase_ascii p.fname in
-  Printf.fprintf ch "#define %s_PERIOD %f\n" cap_fname period;
-  Printf.fprintf ch "#define %s_FREQ %f\n" cap_fname freq*)
 
 (* Extract function name and return in capital letters *)
 let get_cap_name = fun f ->
@@ -152,10 +132,10 @@ let print_function_prescalers = fun out functions_modulo ->
   fprintf out "\n";
   let found_modulos = Hashtbl.create 10 in
   List.iter (fun (_, (p, m)) ->
-    if not (Hashtbl.mem found_modulos m) then
-      lprintf out "#define PRESCALER_%d (uint32_t)(MODULES_FREQUENCY * %s)\n" m p
-    else
+    if not (Hashtbl.mem found_modulos m) then begin
+      if m > 1 then lprintf out "#define PRESCALER_%d (uint32_t)(MODULES_FREQUENCY * %s)\n" m p;
       Hashtbl.add found_modulos m p
+    end
   ) functions_modulo
 
 
@@ -177,6 +157,12 @@ let print_status = fun out modules ->
       (Xml.children m.Module.xml))
     modules
 
+(** Create an order list of pairs (task name, list of modules in task)
+  *
+  * FIXME for now it goes with a hashtbl first then a list with hard-coded order
+  * and finally add (and display warning) all extra tasks group
+  * This could be made more configurable
+  *)
 let modules_of_task = fun modules ->
   let h = Hashtbl.create 1 in
   List.iter (fun m ->
@@ -186,9 +172,18 @@ let modules_of_task = fun modules ->
     else
       Hashtbl.add h task [m]
   ) modules;
-  h
+  let mot = List.map (fun task_name ->
+    let task_list = try Hashtbl.find h task_name with Not_found -> [] in
+    Hashtbl.remove h task_name;
+    (task_name, task_list)
+  ) tasks_order in
+  let mot = Hashtbl.fold (fun key tasks l ->
+    Printf.eprintf "Warning: adding an unknown task '%s'\n" key;
+    l @ [(key, tasks)]
+  ) h mot in
+  mot
 
-let print_init = fun out task modules ->
+let print_init = fun out (task, modules) ->
   lprintf out "\nstatic inline void modules_%s_init(void) {\n" task;
   right ();
   List.iter (fun m ->
@@ -209,16 +204,16 @@ let print_init = fun out task modules ->
   lprintf out "}\n"
 
 let print_init_functions = fun out modules ->
-  let h = modules_of_task modules in
-  Hashtbl.iter (print_init out) h;
+  let mot = modules_of_task modules in
+  List.iter (print_init out) mot;
   lprintf out "\nstatic inline void modules_init(void) {\n";
   right ();
-  Hashtbl.iter (fun t _ -> lprintf out "modules_%s_init();\n" t) h;
+  List.iter (fun (t, _) -> lprintf out "modules_%s_init();\n" t) mot;
   left ();
   lprintf out "}\n"
 
 
-let print_periodic = fun out functions_modulo task modules ->
+let print_periodic = fun out functions_modulo (task, modules) ->
   (* filter for a given task *)
   let functions_modulo = List.filter (fun m ->
     let (_, name, _), _ = m in
@@ -231,7 +226,7 @@ let print_periodic = fun out functions_modulo task modules ->
   (** Print modulos *)
   List.iter (fun modulo ->
     let v = sprintf "i%d" modulo in
-    lprintf out "static uint32_t %s; %s++; if (%s>=PRESCALER_%d) %s=0;\n" v v v modulo v;)
+    if modulo > 1 then lprintf out "static uint32_t %s; %s++; if (%s>=PRESCALER_%d) %s=0;\n" v v v modulo v;)
     modulos;
   (** Print start and stop functions *)
   List.iter (fun m ->
@@ -300,16 +295,16 @@ let print_periodic = fun out functions_modulo task modules ->
   lprintf out "}\n"
 
 let print_periodic_functions = fun out functions_modulo modules ->
-  let h = modules_of_task modules in
-  Hashtbl.iter (print_periodic out functions_modulo) h;
+  let mot = modules_of_task modules in
+  List.iter (print_periodic out functions_modulo) mot;
   lprintf out "\nstatic inline void modules_periodic_task(void) {\n";
   right ();
-  Hashtbl.iter (fun t _ -> lprintf out "modules_%s_periodic_task();\n" t) h;
+  List.iter (fun (t, _) -> lprintf out "modules_%s_periodic_task();\n" t) mot;
   left ();
   lprintf out "}\n"
 
 
-let print_event = fun out task modules ->
+let print_event = fun out (task, modules) ->
   lprintf out "\nstatic inline void modules_%s_event_task(void) {\n" task;
   right ();
   List.iter (fun m ->
@@ -323,11 +318,11 @@ let print_event = fun out task modules ->
   lprintf out "}\n"
 
 let print_event_functions = fun out modules ->
-  let h = modules_of_task modules in
-  Hashtbl.iter (print_event out) h;
+  let mot = modules_of_task modules in
+  List.iter (print_event out) mot;
   lprintf out "\nstatic inline void modules_event_task(void) {\n";
   right ();
-  Hashtbl.iter (fun t _ -> lprintf out "modules_%s_event_task();\n" t) h;
+  List.iter (fun (t, _) -> lprintf out "modules_%s_event_task();\n" t) mot;
   left ();
   lprintf out "}\n"
 
