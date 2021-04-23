@@ -184,7 +184,7 @@ let parse_periodic = fun xml ->
       | Some "TRUE" | Some "true" -> True
       | Some "FALSE" | Some "false" -> False
       | Some "LOCK" | Some "lock" -> Lock
-      | Some _ -> failwith "Module.parse_periodic: unreachable" }
+      | Some a -> failwith ("Module.parse_periodic: unknown autorun: " ^ a) }
 
 type init = { iname: string; cond: string option }
 

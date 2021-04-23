@@ -23,7 +23,6 @@
  *)
 
 open Printf
-open Xml2h
 module GC = Gen_common
 
 (** TODO make this a config file ?? *)
@@ -53,20 +52,11 @@ let print_headers = fun out modules ->
 let get_status_name = fun f n ->
   n^"_"^String.sub f 0 (try String.index f '(' with _ -> (String.length f))^"_status"
 
-let get_status_shortname = fun f ->
-  let func = (Xml.attrib f "fun") in
-  String.sub func 0 (try String.index func '(' with _ -> (String.length func))
-
-let get_period_and_freq = fun f ->
-  let period = try Some (Xml.attrib f "period") with _ -> None
-  and freq = try Some (Xml.attrib f "freq") with _ -> None in
-  match period, freq with
-    | None, None -> ("(1.f / MODULES_FREQUENCY)", "(MODULES_FREQUENCY)")
-    | Some _p, None -> ("("^_p^")", "(1. / ("^_p^"))")
-    | None, Some _f -> ("(1. / ("^_f^"))", "("^_f^")")
-    | Some _p, Some _ ->
-      fprintf stderr "Warning: both period and freq are defined but only period is used for function %s\n" (ExtXml.attrib f "fun");
-      ("("^_p^")", "(1. / ("^_p^"))")
+let get_period_and_freq = function
+  | Module.Unset -> ("(1.f / MODULES_FREQUENCY)", "(MODULES_FREQUENCY)")
+  | Freq _f -> ("(1.f / ("^_f^"))", "("^_f^")")
+  | Period _p -> ("("^_p^")", "(1.f / ("^_p^"))")
+  | Set (_p, _f) -> (Printf.sprintf "(%ff)" _p, Printf.sprintf "(%ff)" _f)
 
 (* Extract function name and return in capital letters *)
 let get_cap_name = fun f ->
@@ -88,23 +78,21 @@ let get_functions_modulos = fun modules ->
   let idx = ref 0 in
   let delay = ref 0. in (** Basic balancing: increment with a step of 0.1 *)
   let functions_modulo = List.map (fun m ->
-    let periodic = List.filter (fun i -> (String.compare (Xml.tag i) "periodic") == 0) (Xml.children m.Module.xml) in
     let module_name = m.Module.name in
     List.map (fun x ->
-      let p, _ = get_period_and_freq x in
-      let d = begin try
-        let _d = float_of_string (Xml.attrib x "delay") in
-        if _d > 0.99 then
-          begin
-            fprintf stderr "Warning: 'delay' attribute should be a float value between 0. and 1.\n";
-            _d /. 65536.
-          end
-        else _d (* try to keep some backward compatibility *)
-        with _ ->
-          delay := !delay +. 0.1;
-          if !delay > 0.9 then delay := 0.;
-          !delay
-        end
+      let p, _ = get_period_and_freq x.Module.period_freq in
+      let d = match x.Module.delay with
+        | Some _d ->
+            if _d > 0.99 then
+              begin
+                fprintf stderr "Warning: 'delay' attribute should be a float value between 0. and 1.\n";
+                _d /. 65536.
+              end
+            else _d (* try to keep some backward compatibility *)
+        | None ->
+            delay := !delay +. 0.1;
+            if !delay > 0.9 then delay := 0.;
+            !delay
       in
       try
         ((x, module_name, d), (p, Hashtbl.find found_modulos p))
@@ -112,7 +100,7 @@ let get_functions_modulos = fun modules ->
         incr idx; (* create new modulo *)
         Hashtbl.add found_modulos p !idx;
         ((x, module_name, d), (p, !idx))
-    ) periodic
+    ) m.Module.periodics
   ) modules in
   List.flatten functions_modulo
 
@@ -121,15 +109,12 @@ let print_function_freq = fun out modules ->
   fprintf out "\n";
   List.iter (fun m ->
     List.iter (fun i ->
-      match Xml.tag i with
-          "periodic" ->
-            let fname = get_cap_name (Xml.attrib i "fun") in
-            let p, f = get_period_and_freq i in
-            lprintf out "#define %s_PERIOD %s\n" fname p;
-            lprintf out "#define %s_FREQ %s\n" fname f;
-        | _ -> ())
-      (Xml.children m.Module.xml))
-    modules
+      let fname = Compat.uppercase_ascii i.Module.fname in
+      let p, f = get_period_and_freq i.Module.period_freq in
+      lprintf out "#define %s_PERIOD %s\n" fname p;
+      lprintf out "#define %s_FREQ %s\n" fname f;
+    ) m.Module.periodics
+  ) modules
 
 let print_function_prescalers = fun out functions_modulo ->
   fprintf out "\n";
@@ -149,15 +134,11 @@ let print_status = fun out modules ->
   fprintf out "\n";
   List.iter (fun m ->
     let module_name = m.Module.name in
-    List.iter (fun i ->
-      match Xml.tag i with
-          "periodic" ->
-            if not (is_status_lock i) then begin
-              lprintf out "EXTERN_MODULES uint8_t %s;\n" (get_status_name i module_name);
-            end
-        | _ -> ())
-      (Xml.children m.Module.xml))
-    modules
+    List.iter (fun p ->
+      if not (is_status_lock p) then
+        lprintf out "EXTERN_MODULES uint8_t %s;\n" (get_status_name p.Module.fname module_name)
+    ) m.Module.periodics
+  ) modules
 
 (** Create an order list of pairs (task name, list of modules in task)
   *
@@ -192,12 +173,12 @@ let print_init = fun out (task, modules) ->
     let module_name = m.Module.name in
     List.iter (fun init ->
       lprintf_with_cond out init.Module.iname init.Module.cond
-    ) m.Module.inits
+    ) m.Module.inits;
     List.iter (fun p ->
-      lprintf out "%s = %s;\n" (get_status_name p.Module.fname  module_name) (match p.Module.autorun with
-        | True -> "MODULES_START"
-        | False | Lock -> "MODULES_IDLE"
-      )
+      match p.Module.autorun with
+      | True -> lprintf out "%s = MODULES_START;\n" (get_status_name p.Module.fname  module_name)
+      | False -> lprintf out "%s = MODULES_STOP;\n" (get_status_name p.Module.fname  module_name)
+      | _ -> ()
     ) m.Module.periodics
   ) modules;
   left ();
@@ -229,65 +210,62 @@ let print_periodic = fun out functions_modulo (task, modules) ->
     if modulo > 1 then lprintf out "static uint32_t %s; %s++; if (%s>=PRESCALER_%d) %s=0;\n" v v v modulo v;)
     modulos;
   (** Print start and stop functions *)
+  let lprint_opt = fun f cond ->
+    match f with Some s -> lprintf_with_cond out s cond | None -> ()
+  in
   List.iter (fun m ->
     let module_name = m.Module.name in
     List.iter (fun p ->
       match p.Module.autorun with
       | Lock ->
-          (* TODO from here *)
-      if (is_status_lock f) then begin
-        try
-          let start = (Xml.attrib f "start") in
+          lprint_opt p.Module.start p.Module.cond;
+          begin match p.Module.stop with
+          | Some stop -> fprintf stderr "Warning: stop %s function will not be called\n" stop
+          | _ -> () end
+      | _ -> (* not locked *)
+          let status = get_status_name p.Module.fname module_name in
           fprintf out "\n";
-          lprintf out "%s;\n" start
-        with _ -> ();
-        try let stop = Xml.attrib f "stop" in fprintf stderr "Warning: stop %s function will not be called\n" stop with _ -> ();
-      end
-      else begin
-        let status = get_status_name f module_name in
-        fprintf out "\n";
-        lprintf out "if (%s == MODULES_START) {\n" status;
-        right ();
-        ignore(try lprintf out "%s;\n" (Xml.attrib f "start") with _ -> ());
-        lprintf out "%s = MODULES_RUN;\n" status;
-        left ();
-        lprintf out "}\n";
-        lprintf out "if (%s == MODULES_STOP) {\n" status;
-        right ();
-        ignore(try lprintf out "%s;\n" (Xml.attrib f "stop") with _ -> ());
-        lprintf out "%s = MODULES_IDLE;\n" status;
-        left ();
-        lprintf out "}\n";
-      end
+          lprintf out "if (%s == MODULES_START) {\n" status;
+          right ();
+          lprint_opt p.Module.start p.Module.cond; 
+          lprintf out "%s = MODULES_RUN;\n" status;
+          left ();
+          lprintf out "}\n";
+          lprintf out "if (%s == MODULES_STOP) {\n" status;
+          right ();
+          lprint_opt p.Module.stop p.Module.cond; 
+          lprintf out "%s = MODULES_IDLE;\n" status;
+          left ();
+          lprintf out "}\n"
     ) m.Module.periodics
   ) modules;
   (** Print periodic functions *)
   let functions = List.sort (fun (_,p) (_,p') -> compare p p') functions_modulo in
   fprintf out "\n";
-  List.iter (fun ((func, name, delay), (p, m)) ->
+  List.iter (fun ((periodic, name, delay), (p, m)) ->
     if (List.exists (fun _module -> _module.Module.name = name) modules) then begin
-      let function_name = ExtXml.attrib func "fun" in
-      let p, f = get_period_and_freq func in
+      let p, f = get_period_and_freq periodic.Module.period_freq in
       if f = "(MODULES_FREQUENCY)" then
         begin
-          if (is_status_lock func) then
-            lprintf out "%s;\n" function_name
-          else begin
-            lprintf out "if (%s == MODULES_RUN) {\n" (get_status_name func name);
-            right ();
-            lprintf out "%s;\n" function_name;
-            left ();
-            lprintf out "}\n";
-          end
+          match periodic.Module.autorun with
+          | Lock ->
+              lprintf_with_cond out periodic.Module.call periodic.Module.cond
+          | _ ->
+              lprintf out "if (%s == MODULES_RUN) {\n" (get_status_name periodic.Module.fname name);
+              right ();
+              lprintf_with_cond out periodic.Module.call periodic.Module.cond;
+              left ();
+              lprintf out "}\n"
         end
       else
         begin
-          let run = if not (is_status_lock func) then sprintf " && %s == MODULES_RUN" (get_status_name func name)
-            else ""
+          let run = match periodic.Module.autorun with
+            | Lock -> ""
+            | _ -> sprintf " && %s == MODULES_RUN" (get_status_name periodic.Module.fname name)
           in
           lprintf out "if (i%d == (uint32_t)(%ff * PRESCALER_%d)%s) {\n" m delay m run;
           right ();
-          lprintf out "%s;\n" function_name;
+          lprintf_with_cond out periodic.Module.call periodic.Module.cond;
           left ();
           lprintf out "}\n"
         end;
@@ -311,11 +289,9 @@ let print_event = fun out (task, modules) ->
   right ();
   List.iter (fun m ->
     List.iter (fun i ->
-      match Xml.tag i with
-          "event" -> lprintf out "%s;\n" (Xml.attrib i "fun")
-        | _ -> ())
-      (Xml.children m.Module.xml))
-    modules;
+      lprintf_with_cond out i.Module.ev i.Module.cond
+    ) m.Module.events
+  ) modules;
   left ();
   lprintf out "}\n"
 
@@ -339,14 +315,11 @@ let print_datalink_functions = fun out modules ->
   right ();
   let else_ = ref "" in
   List.iter (fun m ->
-    List.iter (fun i ->
-      match Xml.tag i with
-          "datalink" ->
-            lprintf out "%sif (msg_id == DL_%s) { %s; }\n" !else_ (ExtXml.attrib i "message") (ExtXml.attrib i "fun");
-            else_ := "else "
-        | _ -> ())
-      (Xml.children m.Module.xml))
-    modules;
+    List.iter (fun d ->
+      lprintf out "%sif (msg_id == DL_%s) { %s; }\n" !else_ d.Module.message d.Module.func;
+      else_ := "else "
+    ) m.Module.datalinks
+  ) modules;
   left ();
   lprintf out "}\n"
 
@@ -366,9 +339,6 @@ let parse_modules out modules =
   fprintf out "\n";
   fprintf out "#endif // MODULES_DATALINK_C\n"
 
-let test_section_modules = fun xml ->
-  List.fold_right (fun x r -> ExtXml.tag_is x "modules" || r) (Xml.children xml) false
-
 (** create list of dependencies from string
  * returns a nested list, where the second level consists of OR dependencies
  *)
@@ -385,52 +355,16 @@ let deps_of_string = fun s ->
   with
       _ -> [[]]
 
-let get_pcdata = fun xml tag ->
-  try
-    Xml.pcdata (ExtXml.child (ExtXml.child xml tag) "0")
-  with
-      Not_found -> ""
-
-(** Check dependencies *)
-let check_dependencies = fun modules names ->
-  List.iter (fun m ->
-    try
-      let module_name = m.Module.name in
-      let dep_string = get_pcdata m.Module.xml "depends" in
-      (*fprintf stderr "\n\nWARNING: parsing dep string: %s\n\n" dep_string;
-      fprintf stderr "\n\nWARNING: names: %s" (String.concat "," names);*)
-      let require = deps_of_string dep_string in
-      List.iter (fun deps ->
-        (* iterate over all dependencies, where the second level contains the OR dependencies *)
-        let find_common satisfied d = if List.mem d names then d::satisfied else satisfied in
-        let satisfied = List.fold_left find_common [] deps in
-        if List.length satisfied == 0 then
-          begin
-            fprintf stderr "\nDEPENDENCY Error: Module %s requires %s\n" module_name (String.concat " or " deps);
-            fprintf stderr "Available loaded modules are:\n    %s\n\n" (String.concat "\n    " names);
-            exit 1
-          end)
-        require;
-      let conflict_string = get_pcdata m.Module.xml "conflicts" in
-      let conflict_l = List.flatten (deps_of_string conflict_string) in
-      List.iter (fun con ->
-        if List.exists (fun c -> String.compare c con == 0) names then
-          fprintf stderr "\nDEPENDENCY WARNING: Module %s conflicts with %s\n" module_name con)
-        conflict_l
-    with _ -> ()
-  ) modules
-
-
 let h_name = "MODULES_H"
 
 let generate = fun modules xml_file out_file ->
   let out = open_out out_file in
 
-  begin_out out xml_file h_name;
-  define_out out "MODULES_IDLE " "0";
-  define_out out "MODULES_RUN  " "1";
-  define_out out "MODULES_START" "2";
-  define_out out "MODULES_STOP " "3";
+  Xml2h.begin_out out xml_file h_name;
+  Xml2h.define_out out "MODULES_IDLE " "0";
+  Xml2h.define_out out "MODULES_RUN  " "1";
+  Xml2h.define_out out "MODULES_START" "2";
+  Xml2h.define_out out "MODULES_STOP " "3";
   fprintf out "\n";
 
   fprintf out "#ifndef MODULES_FREQUENCY\n";
@@ -449,5 +383,5 @@ let generate = fun modules xml_file out_file ->
 
   parse_modules out modules;
 
-  finish_out out h_name
+  Xml2h.finish_out out h_name
 
