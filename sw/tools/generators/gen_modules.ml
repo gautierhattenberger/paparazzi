@@ -121,7 +121,7 @@ let print_function_prescalers = fun out functions_modulo ->
   let found_modulos = Hashtbl.create 10 in
   List.iter (fun (_, (p, m)) ->
     if not (Hashtbl.mem found_modulos m) then begin
-      if m > 1 then lprintf out "#define PRESCALER_%d (uint32_t)(MODULES_FREQUENCY * %s)\n" m p;
+      lprintf out "#define PRESCALER_%d (uint32_t)(MODULES_FREQUENCY * %s)\n" m p;
       Hashtbl.add found_modulos m p
     end
   ) functions_modulo
@@ -207,7 +207,7 @@ let print_periodic = fun out functions_modulo (task, modules) ->
   (** Print modulos *)
   List.iter (fun modulo ->
     let v = sprintf "i%d" modulo in
-    if modulo > 1 then lprintf out "static uint32_t %s; %s++; if (%s>=PRESCALER_%d) %s=0;\n" v v v modulo v;)
+    lprintf out "static uint32_t %s; %s++; if (%s>=PRESCALER_%d) %s=0;\n" v v v modulo v;)
     modulos;
   (** Print start and stop functions *)
   let lprint_opt = fun f cond ->
