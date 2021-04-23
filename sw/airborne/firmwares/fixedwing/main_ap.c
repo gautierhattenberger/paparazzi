@@ -132,9 +132,6 @@ void init_ap(void)
   mcu_init();
 #endif /* SINGLE_MCU */
 
-  /** - start interrupt task */
-  mcu_int_enable();
-
   /************* Sensors initialization ***************/
 
   /************* Links initialization ***************/

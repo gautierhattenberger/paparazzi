@@ -85,10 +85,8 @@ void sys_time_cancel_timer(tid_t id)
 // FIXME: race condition ??
 void sys_time_update_timer(tid_t id, float duration)
 {
-  mcu_int_disable();
   sys_time.timer[id].end_time -= (sys_time.timer[id].duration - sys_time_ticks_of_sec(duration));
   sys_time.timer[id].duration = sys_time_ticks_of_sec(duration);
-  mcu_int_enable();
 }
 
 void sys_time_init(void)

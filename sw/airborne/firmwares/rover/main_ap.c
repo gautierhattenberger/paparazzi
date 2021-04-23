@@ -113,7 +113,6 @@ void main_init(void)
    */
   //waypoints_localize_all();
 
-  mcu_int_enable();
 
 #if DOWNLINK
   downlink_init();
