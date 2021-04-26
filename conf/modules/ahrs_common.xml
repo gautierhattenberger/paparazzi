@@ -26,5 +26,9 @@
       <define name="AHRS_TYPE_H" value="subsystems/ahrs/ahrs_float_dcm_wrapper.h" type="string"/>
     </test>
   </makefile>
+  <makefile target="sim">
+    <define name="USE_AHRS"/>
+    <file name="ahrs.c" dir="subsystems"/>
+  </makefile>
 </module>
 

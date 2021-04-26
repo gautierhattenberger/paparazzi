@@ -15,7 +15,7 @@
   </header>
   <init fun="electrical_init()"/>
   <periodic fun="electrical_periodic()" freq="10"/>
-  <makefile target="fbw" firmware="fixedwing">
+  <makefile target="fbw|sim|nps" firmware="fixedwing">
     <file name="electrical.c" dir="subsystems"/>
     <test/>
   </makefile>
