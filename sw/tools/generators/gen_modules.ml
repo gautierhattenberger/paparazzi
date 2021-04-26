@@ -128,7 +128,7 @@ let print_function_prescalers = fun out functions_modulo ->
 
 
 let is_status_lock = fun p ->
-  match p.Module.autorun with Lock -> true | _ -> false
+  match p.Module.autorun with Module.Lock -> true | _ -> false
 
 let print_status = fun out modules ->
   fprintf out "\n";
@@ -176,8 +176,8 @@ let print_init = fun out (task, modules) ->
     ) m.Module.inits;
     List.iter (fun p ->
       match p.Module.autorun with
-      | True -> lprintf out "%s = MODULES_START;\n" (get_status_name p.Module.fname  module_name)
-      | False -> lprintf out "%s = MODULES_STOP;\n" (get_status_name p.Module.fname  module_name)
+      | Module.True -> lprintf out "%s = MODULES_START;\n" (get_status_name p.Module.fname  module_name)
+      | Module.False -> lprintf out "%s = MODULES_STOP;\n" (get_status_name p.Module.fname  module_name)
       | _ -> ()
     ) m.Module.periodics
   ) modules;
@@ -217,7 +217,7 @@ let print_periodic = fun out functions_modulo (task, modules) ->
     let module_name = m.Module.name in
     List.iter (fun p ->
       match p.Module.autorun with
-      | Lock ->
+      | Module.Lock ->
           lprint_opt p.Module.start p.Module.cond;
           begin match p.Module.stop with
           | Some stop -> fprintf stderr "Warning: stop %s function will not be called\n" stop
@@ -248,7 +248,7 @@ let print_periodic = fun out functions_modulo (task, modules) ->
       if f = "(MODULES_FREQUENCY)" then
         begin
           match periodic.Module.autorun with
-          | Lock ->
+          | Module.Lock ->
               lprintf_with_cond out periodic.Module.call periodic.Module.cond
           | _ ->
               lprintf out "if (%s == MODULES_RUN) {\n" (get_status_name periodic.Module.fname name);
@@ -260,7 +260,7 @@ let print_periodic = fun out functions_modulo (task, modules) ->
       else
         begin
           let run = match periodic.Module.autorun with
-            | Lock -> ""
+            | Module.Lock -> ""
             | _ -> sprintf " && %s == MODULES_RUN" (get_status_name periodic.Module.fname name)
           in
           lprintf out "if (i%d == (uint32_t)(%ff * PRESCALER_%d)%s) {\n" m delay m run;
