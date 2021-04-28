@@ -1,6 +1,6 @@
 <!DOCTYPE module SYSTEM "module.dtd">
 
-<module name="electrical" dir="fbw">
+<module name="electrical" dir="fbw" task="core">
   <doc>
     <description>
       General electrical interface

@@ -14,6 +14,8 @@
     <file name="mcu.h" dir="."/>
     <file name="gpio.h" dir="mcu_periph"/>
   </header>
+  <init fun="mcu_init()"/>
+  <event fun="mcu_event()"/>
   <makefile>
     <define name="PERIPHERALS_AUTO_INIT"/>
     <file name="mcu.c" dir="."/>

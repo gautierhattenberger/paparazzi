@@ -8,7 +8,7 @@
     <configure name="WIND_INFO" value="FALSE|TRUE" description="parse WIND_INFO message (default TRUE)"/>
   </doc>
   <dep>
-    <depends>system_core</depends>
+    <depends>system_core,autopilot_gnc</depends>
   </dep>
   <makefile>
     <configure name="PERIODIC_FREQUENCY" default="60"/>
@@ -30,12 +30,6 @@
   </makefile>
   <makefile target="!fbw">
     <file name="main_ap.c" dir="$(SRC_FIRMWARE)"/>
-    <file name="autopilot.c" dir="."/>
-    <file name="autopilot_firmware.c" dir="$(SRC_FIRMWARE)"/>
-    <file name="autopilot_utils.c" dir="$(SRC_FIRMWARE)"/>
-    <file name="autopilot_static.c" dir="$(SRC_FIRMWARE)" cond="ifneq ($(USE_GENERATED_AUTOPILOT), TRUE)"/>
-    <file name="autopilot_generated.c" dir="$(SRC_FIRMWARE)" cond="ifeq ($(USE_GENERATED_AUTOPILOT), TRUE)"/>
-    <define name="USE_GENERATED_AUTOPILOT" value="1" cond="ifeq ($(USE_GENERATED_AUTOPILOT), TRUE)"/>
   </makefile>
   <makefile target="ap|nps|hitl">
     <define name="FBW" cond="ifeq (,$(findstring $(SEPARATE_FBW),1 TRUE))"/>
