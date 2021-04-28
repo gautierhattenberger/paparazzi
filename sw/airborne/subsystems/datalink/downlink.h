@@ -31,7 +31,6 @@
 #include <inttypes.h>
 
 #include "generated/airframe.h"
-#include "generated/modules.h"
 #include "pprzlink/messages.h"
 #include "subsystems/datalink/datalink.h"
 

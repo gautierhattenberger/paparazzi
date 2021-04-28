@@ -7,7 +7,7 @@
     </description>
   </doc>
   <dep>
-    <depends>telemetry_secure_common,rng,haclc</depends>
+    <depends>telemetry_secure_common,rng,haclc,datalink_common</depends>
     <provides>datalink,telemetry</provides>
   </dep>
   <header>
