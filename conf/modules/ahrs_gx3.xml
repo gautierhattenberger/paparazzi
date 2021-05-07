@@ -16,7 +16,7 @@
   <header>
     <file name="ahrs.h" dir="subsystems"/>
   </header>
-
+  <init fun="ahrs_init()"/>
   <makefile target="ap">
     <configure name="GX3_PORT" default="UART3" case="upper|lower"/>
     <configure name="GX3_BAUD" default="B921600"/>

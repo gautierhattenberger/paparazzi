@@ -16,6 +16,7 @@
   <header>
     <file name="ahrs.h" dir="subsystems"/>
   </header>
+  <init fun="ahrs_init()"/>
   <event fun="ahrs_vectornav_event()"/>
   <makefile target="ap">
     <configure name="VN_PORT" default="uart3" case="upper|lower"/>
