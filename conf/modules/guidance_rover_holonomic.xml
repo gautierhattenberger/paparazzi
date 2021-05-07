@@ -20,7 +20,7 @@
   </settings>
   <dep>
     <depends>@navigation</depends>
-    <provides>guidance</provides>
+    <provides>guidance,commands</provides>
   </dep>
   <header>
     <file name="rover_guidance_holonomic.h"/>
