@@ -36,7 +36,7 @@
   </header>
   <init fun="air_data_init()"/>
   <periodic fun="air_data_periodic()" freq="10"/>
-  <makefile>
+  <makefile target="!fbw">
     <file name="air_data.c"/>
   </makefile>
 </module>

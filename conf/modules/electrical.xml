@@ -19,8 +19,8 @@
     <file name="electrical.c" dir="subsystems"/>
     <test/>
   </makefile>
-  <makefile target="ap" firmware="fixedwing">
-    <file name="electrical.c" dir="subsystems" cond="ifeq (,$(findstring $(SEPARATE_FBW),1 TRUE))"/>
+  <makefile target="ap" firmware="fixedwing" cond="ifeq (,$(findstring $(SEPARATE_FBW),0 FALSE))">
+    <file name="electrical.c" dir="subsystems"/>
     <test/>
   </makefile>
   <makefile firmware="rotorcraft">
