@@ -33,8 +33,6 @@
 #include <inttypes.h>
 #include "led.h"
 
-#include "subsystems/commands.h"
-
 #include "subsystems/radio_control.h"
 
 #include "firmwares/rotorcraft/main_ap.h"
@@ -45,10 +43,6 @@
 
 #include "generated/modules.h"
 #include "subsystems/abi.h"
-
-// needed for stop-gap measure waypoints_localize_all()
-#include "subsystems/navigation/waypoints.h"
-
 
 /* if PRINT_CONFIG is defined, print some config options */
 PRINT_CONFIG_VAR(PERIODIC_FREQUENCY)
