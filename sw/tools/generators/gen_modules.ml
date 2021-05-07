@@ -54,9 +54,9 @@ let get_status_name = fun f n ->
 
 let get_period_and_freq = function
   | Module.Unset -> ("(1.f / MODULES_FREQUENCY)", "(MODULES_FREQUENCY)")
-  | Freq _f -> ("(1.f / ("^_f^"))", "("^_f^")")
-  | Period _p -> ("("^_p^")", "(1.f / ("^_p^"))")
-  | Set (_p, _f) -> (Printf.sprintf "(%ff)" _p, Printf.sprintf "(%ff)" _f)
+  | Module.Freq _f -> ("(1.f / ("^_f^"))", "("^_f^")")
+  | Module.Period _p -> ("("^_p^")", "(1.f / ("^_p^"))")
+  | Module.Set (_p, _f) -> (Printf.sprintf "(%ff)" _p, Printf.sprintf "(%ff)" _f)
 
 (* Extract function name and return in capital letters *)
 let get_cap_name = fun f ->
