@@ -5,6 +5,8 @@
     <description>
       Dummy actuators driver
       This module prevents autoloading of actuators by fixedwing firmware
+
+      FIXME: this as no effect anymore
     </description>
   </doc>
   <dep>

@@ -7,7 +7,7 @@
     <configure name="ACTUATORS_OSTRICH_BAUD" value="B115200" description="UART baudrate (default 115200)"/>
   </doc>
   <dep>
-    <depends>uart</depends>
+    <depends>uart,actuators</depends>
     <provides>actuators</provides>
   </dep>
   <header>

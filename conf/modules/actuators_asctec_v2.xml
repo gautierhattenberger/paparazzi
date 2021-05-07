@@ -12,7 +12,7 @@
     <configure name="ACTUATORS_ASCTEC_V2_I2C_DEV" value="i2cX" description="I2C port (default i2c1)"/>
   </doc>
   <dep>
-    <depends>i2c</depends>
+    <depends>i2c,actuators</depends>
     <provides>actuators</provides>
   </dep>
   <header>
@@ -21,7 +21,6 @@
   <makefile target="!sim|nps">
     <configure name="ACTUATORS_ASCTEC_V2_I2C_DEV" default="i2c1" case="upper|lower"/>
     <configure name="ACTUATORS_ASCTEC_V2_I2C_SCL_TIME" default="150"/>
-    <define name="ACTUATORS"/>
     <define name="ACTUATORS_ASCTEC_V2_I2C_DEV" value="$(ACTUATORS_ASCTEC_V2_I2C_DEV_LOWER)"/>
     <define name="USE_$(ACTUATORS_ASCTEC_V2_I2C_DEV_UPPER)"/>
     <file name="actuators_asctec_v2.c" dir="subsystems/actuators"/>
