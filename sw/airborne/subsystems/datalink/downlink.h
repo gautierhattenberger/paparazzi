@@ -48,4 +48,6 @@
 // Init function
 extern void downlink_init(void);
 
+#include "generated/modules.h" // include at the end to avoid circular dependency FIXME
+
 #endif /* DOWNLINK_H */
