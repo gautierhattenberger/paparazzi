@@ -24,8 +24,9 @@
     <file_arch name="led_hw.c" dir="." cond="ifeq ($(ARCH), stm32)"/>
     <file_arch name="led_hw.c" dir="." cond="ifeq ($(TARGET), sim)"/>
     <file_arch name="gpio_arch.c" dir="mcu_periph" cond="ifeq ($(ARCH), chibios)"/>
-    <file name="gpio_ardrone.c" dir="boards/ardrone" cond="ifeq ($(BOARD), ardrone)"/>
-    <test/>
+    <test>
+      <define name="PERIPHERALS_AUTO_INIT"/>
+    </test>
   </makefile>
   <makefile target="!nps|sim">
     <define name="USE_LED"/>
