@@ -49,50 +49,73 @@ void perf_profil_log_time(char * msg, uint32_t t)
 #ifndef PERF_PROFIL_EVENT_MAX
 #define PERF_PROFIL_EVENT_MAX 1000
 #endif
-static uint32_t nb_event = 0;
-static uint32_t nb_over = 0;
-static uint32_t t_start = 0;
-static uint32_t dt_start = 0;
-static uint32_t dt_end = 0;
-static uint32_t dt_min = 0xFFFFFFFF;
-static uint32_t dt_max = 0;
-static double dt_acc = 0.;
 
-void perf_profil_event_start(void)
+struct perf_struct {
+  uint32_t nb_event;
+  uint32_t nb_over;
+  uint32_t t_start;
+  uint32_t dt_start;
+  uint32_t dt_end;
+  uint32_t dt_min;
+  uint32_t dt_max;
+  double dt_acc;
+};
+
+#define PERF_STRUCT_INIT(_s) {  \
+  _s.nb_event = 0;              \
+  _s.nb_over = 0;               \
+  _s.t_start = 0;               \
+  _s.dt_start = 0;              \
+  _s.dt_end = 0;                \
+  _s.dt_min = 0xFFFFFFFF;       \
+  _s.dt_max = 0;                \
+  _s.dt_acc = 0.;               \
+}
+
+static struct perf_struct perf_array[PERF_STRUCT_NB];
+
+void perf_profil_init(void)
 {
-  dt_start = chSysGetRealtimeCounterX();
-  if (nb_event == 0) {
-    t_start = dt_start;
+  for (int i = 0; i < PERF_STRUCT_NB; i++) {
+    PERF_STRUCT_INIT(perf_array[i]);
   }
 }
 
-void perf_profil_event_end(void)
+void perf_profil_event_start(int idx)
 {
-  dt_end = chSysGetRealtimeCounterX();
-  nb_event++;
-  uint32_t dt = dt_end - dt_start;
-  dt_acc += (double)(RTC2US(STM32_SYSCLK, dt));
-  if (dt < dt_min) {
-    dt_min = dt;
+  perf_array[idx].dt_start = chSysGetRealtimeCounterX();
+  if (perf_array[idx].nb_event == 0) {
+    perf_array[idx].t_start = perf_array[idx].dt_start;
   }
-  if (dt > dt_max) {
-    dt_max = dt;
+}
+
+void perf_profil_event_end(int idx, char * msg)
+{
+  perf_array[idx].dt_end = chSysGetRealtimeCounterX();
+  perf_array[idx].nb_event++;
+  uint32_t dt = perf_array[idx].dt_end - perf_array[idx].dt_start;
+  perf_array[idx].dt_acc += (double)(RTC2US(STM32_SYSCLK, dt));
+  if (dt < perf_array[idx].dt_min) {
+    perf_array[idx].dt_min = dt;
+  }
+  if (dt > perf_array[idx].dt_max) {
+    perf_array[idx].dt_max = dt;
   }
   if (dt > US2RTC(STM32_SYSCLK, (1000000U/CH_CFG_ST_FREQUENCY))) {
-    nb_over++; // dt is over the polling inverval (1/CH_CFG_ST_FREQUENCY sec)
+    perf_array[idx].nb_over++; // dt is over the polling inverval (1/CH_CFG_ST_FREQUENCY sec)
   }
-  if (nb_event >= PERF_PROFIL_EVENT_MAX) {
-    sdLogWriteLog(pprzLogFile, "PPTE event %lu %lu %lu %lu %lu %.2f\n",
-        nb_event, nb_over,
-        dt_end - t_start,
-        dt_min,
-        dt_max,
-        dt_acc);
-    nb_event = 0;
-    nb_over = 0;
-    dt_min = 0xFFFFFFFF;
-    dt_max = 0;
-    dt_acc = 0.;
+  if (perf_array[idx].nb_event >= PERF_PROFIL_EVENT_MAX) {
+    sdLogWriteLog(pprzLogFile, "PPTE %s %lu %lu %lu %lu %lu %.2f\n", msg,
+        perf_array[idx].nb_event, perf_array[idx].nb_over,
+        perf_array[idx].dt_end - perf_array[idx].t_start,
+        perf_array[idx].dt_min,
+        perf_array[idx].dt_max,
+        perf_array[idx].dt_acc);
+    perf_array[idx].nb_event = 0;
+    perf_array[idx].nb_over = 0;
+    perf_array[idx].dt_min = 0xFFFFFFFF;
+    perf_array[idx].dt_max = 0;
+    perf_array[idx].dt_acc = 0.;
   }
 }
 

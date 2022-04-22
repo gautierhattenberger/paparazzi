@@ -73,6 +73,14 @@ tid_t modules_datalink_tid;
 #define SENSORS_PERIOD (1.f / PERIODIC_FREQUENCY)
 #define DATALINK_PERIOD (1.f / TELEMETRY_FREQUENCY)
 
+// dummy perf defines
+#ifndef PPRZ_PERF_EVENT_START
+#define PPRZ_PERF_EVENT_START(_x) {}
+#endif
+#ifndef PPRZ_PERF_EVENT_END
+#define PPRZ_PERF_EVENT_END(_x, _y) {}
+#endif
+
 void main_ap_init(void)
 {
   // mcu init done in main
@@ -121,32 +129,43 @@ void main_ap_init(void)
 void main_ap_periodic(void)
 {
   if (sys_time_check_and_ack_timer(modules_sensors_tid)) {
+    PPRZ_PERF_EVENT_START(PP_SENSORS);
     modules_sensors_periodic_task();
+    PPRZ_PERF_EVENT_END(PP_SENSORS, "sensors");
   }
 
   if (sys_time_check_and_ack_timer(modules_radio_control_tid)) {
+    PPRZ_PERF_EVENT_START(PP_RC);
     modules_radio_control_periodic_task();
+    PPRZ_PERF_EVENT_END(PP_RC, "radio");
   }
 
   if (sys_time_check_and_ack_timer(modules_gnc_tid)) {
+    PPRZ_PERF_EVENT_START(PP_GNC);
     modules_estimation_periodic_task();
     modules_control_periodic_task();
     modules_default_periodic_task();
     modules_actuators_periodic_task();
+    PPRZ_PERF_EVENT_END(PP_GNC, "gnc");
   }
 
   if (sys_time_check_and_ack_timer(modules_mcu_core_tid)) {
+    PPRZ_PERF_EVENT_START(PP_MCU_CORE);
     modules_mcu_periodic_task();
     modules_core_periodic_task();
+    PPRZ_PERF_EVENT_END(PP_MCU_CORE, "core");
   }
 
   if (sys_time_check_and_ack_timer(modules_datalink_tid)) {
+    PPRZ_PERF_EVENT_START(PP_DATALINK);
     modules_datalink_periodic_task();
+    PPRZ_PERF_EVENT_END(PP_DATALINK, "telemetry");
   }
 }
 
 void main_ap_event(void)
 {
+  PPRZ_PERF_EVENT_START(PP_EVENT);
   modules_mcu_event_task();
   modules_core_event_task();
   modules_sensors_event_task();
@@ -156,5 +175,6 @@ void main_ap_event(void)
   modules_actuators_event_task();
   modules_datalink_event_task();
   modules_default_event_task();
+  PPRZ_PERF_EVENT_END(PP_EVENT, "event");
 }
 

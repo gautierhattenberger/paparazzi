@@ -10,6 +10,7 @@
   <header>
     <file name="perf_profil.h"/>
   </header>
+  <init fun="perf_profil_init()"/>
   <makefile>
     <file name="perf_profil.c"/>
   </makefile>
