@@ -7,6 +7,9 @@
       Redefine the PPRZ_PERF_TRACE macro and log data on SD card
     </description>
   </doc>
+  <dep>
+    <depends>logger_sd_chibios</depends>
+  </dep>
   <header>
     <file name="perf_profil.h"/>
   </header>

@@ -50,7 +50,14 @@ time_vector = {
 last_time = None
 last_data = None
 
-event_vector = None
+event_vector = {
+        "event":        None,
+        "sensors":      None,
+        "radio":        None,
+        "gnc":          None,
+        "core":         None,
+        "telemetry":    None
+        }
 
 with open(data_file) as f:
     for line in f:
@@ -116,32 +123,32 @@ with open(data_file) as f:
         elif len(data) == 8 and data[0] == 'PPTE':
             try:
                 name = data[1]
-                if name == 'event':
-                    nb_sample = int(data[2])
-                    nb_over = int(data[3])
-                    dt = rtc2us(data[4])
-                    duty = float(data[7])
-                    dt_min = rtc2us(data[5])
-                    dt_max = rtc2us(data[6])
-                    if event_vector is None:
-                        event_vector = (np.array(nb_sample), np.array(nb_over),
-                                        np.array(dt / float(nb_sample)),
-                                        np.array(duty / float(nb_sample)),
-                                        np.array(dt_min), np.array(dt_max))
-                    else:
-                        event_vector = (
-                                np.append(event_vector[0], nb_sample),
-                                np.append(event_vector[1], nb_over),
-                                np.append(event_vector[2], dt / float(nb_sample)),
-                                np.append(event_vector[3], duty / float(nb_sample)),
-                                np.append(event_vector[4], dt_min),
-                                np.append(event_vector[5], dt_max)
-                                )
+                nb_sample = int(data[2])
+                nb_over = int(data[3])
+                dt = rtc2us(data[4])
+                duty = float(data[7])
+                dt_min = rtc2us(data[5])
+                dt_max = rtc2us(data[6])
+                if event_vector[name] is None:
+                    event_vector[name] = (
+                            np.array(nb_sample), np.array(nb_over),
+                            np.array(dt / float(nb_sample)),
+                            np.array(duty / float(nb_sample)),
+                            np.array(dt_min), np.array(dt_max))
+                else:
+                    event_vector[name] = (
+                            np.append(event_vector[name][0], nb_sample),
+                            np.append(event_vector[name][1], nb_over),
+                            np.append(event_vector[name][2], dt / float(nb_sample)),
+                            np.append(event_vector[name][3], duty / float(nb_sample)),
+                            np.append(event_vector[name][4], dt_min),
+                            np.append(event_vector[name][5], dt_max)
+                            )
             except KeyboardInterrupt:
                 print("stop loop by hand")
                 break
-            except:
-                print("invalid event at line", line)
+            #except:
+            #    print("invalid event at line", line)
         else:
             print("invalid data at line:", line)
 
@@ -170,47 +177,49 @@ for key in time_vector:
             plt.title('{} duty'.format(key))
             plt.show()
 
-if event_vector is not None:
-    print("{:<20}({}*{})\t| {:.2f} \t[{:<8.3f}] | {:<8.3f}\t| {:.3f} \t[{:<8}] [{:<8.3f}] [{:<8.3f}] [{:<8d}] [{:<8}]".format('event',
-        len(event_vector[0]), event_vector[0][0],
-        np.mean(event_vector[2]), np.std(event_vector[2]), 1e6/np.mean(event_vector[2]),
-        np.mean(event_vector[3]), 'N/A', np.min(event_vector[4]), np.max(event_vector[5]),
-        np.sum(event_vector[1]), 'N/A'))
+for key in event_vector:
+    data = event_vector[key]
+    if data is not None:
+        print("{:<20}({}*{})\t| {:.2f} \t[{:<8.3f}] | {:<8.3f}\t| {:.3f} \t[{:<8}] [{:<8.3f}] [{:<8.3f}] [{:<8d}] [{:<8}]".format(key,
+            len(data[0]), data[0][0],
+            np.mean(data[2]), np.std(data[2]), 1e6/np.mean(data[2]),
+            np.mean(data[3]), 'N/A', np.min(data[4]), np.max(data[5]),
+            np.sum(data[1]), 'N/A'))
 
-    if False:
-        i = np.arange(0, len(event_vector[0]))
-        plt.figure()
-        plt.plot(i, event_vector[2])
-        plt.xlabel('sample')
-        plt.ylabel('usec')
-        plt.title('event period')
-        plt.figure()
-        plt.plot(i, event_vector[3])
-        plt.xlabel('sample')
-        plt.ylabel('usec')
-        plt.title('event duty')
-        plt.figure()
-        plt.plot(i, event_vector[4])
-        plt.xlabel('sample')
-        plt.ylabel('usec')
-        plt.title('event min')
-        plt.figure()
-        plt.plot(i, event_vector[5])
-        plt.xlabel('sample')
-        plt.ylabel('usec')
-        plt.title('event max')
-        plt.show()
+        if False:
+            i = np.arange(0, len(data[0]))
+            plt.figure()
+            plt.plot(i, data[2])
+            plt.xlabel('sample')
+            plt.ylabel('usec')
+            plt.title('{} period'.format(key))
+            plt.figure()
+            plt.plot(i, data[3])
+            plt.xlabel('sample')
+            plt.ylabel('usec')
+            plt.title('{} duty'.format(key))
+            plt.figure()
+            plt.plot(i, data[4])
+            plt.xlabel('sample')
+            plt.ylabel('usec')
+            plt.title('{} min'.format(key))
+            plt.figure()
+            plt.plot(i, data[5])
+            plt.xlabel('sample')
+            plt.ylabel('usec')
+            plt.title('{} max'.format(key))
+            plt.show()
 
 # DT
 time_sensor = time_vector['sensors'][2]
 time_estimation = time_vector['estimation'][2]
 time_control = time_vector['control'][2]
-print(len(time_sensor), len(time_estimation), len(time_control))
+#print(len(time_sensor), len(time_estimation), len(time_control))
 #print((time_sensor), (time_estimation), time_control)
 #print(time_estimation - time_sensor)
 #print(time_control - time_sensor)
-size = np.min(np.array([len(time_sensor), len(time_estimation), len(time_control)]))
-if True:
+#size = np.min(np.array([len(time_sensor), len(time_estimation), len(time_control)]))
+if False:
     i = np.arange(0, size)
     plt.figure()
     plt.plot(i, time_estimation[:size] - time_sensor[:size])
