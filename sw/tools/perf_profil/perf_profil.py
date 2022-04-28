@@ -186,6 +186,27 @@ for key in event_vector:
             np.mean(data[3]), 'N/A', np.min(data[4]), np.max(data[5]),
             np.sum(data[1]), 'N/A'))
 
+        if True:
+            t_end = len(data[0])*data[0][0]*np.mean(data[2])/1e6
+            i = np.linspace(0, t_end, len(data[0]))
+            plt.figure()
+            if key == "gnc":
+                # only for Niquad_voliere_2.LOG
+                plt.axvspan(0,120, facecolor='red', alpha=0.1)
+                plt.axvspan(120,210, facecolor='orange', alpha=0.1)
+                plt.axvspan(130,140, facecolor='orange', alpha=0.1)
+                plt.axvspan(153,195, facecolor='orange', alpha=0.1)
+                plt.axvspan(210,320, facecolor='green', alpha=0.1)
+                plt.axvspan(228,300, facecolor='green', alpha=0.1)
+                plt.axvspan(320,335, facecolor='red', alpha=0.1)
+            #print(len(i),t_end,len(data[0]),len(data[4]), len(data[5]))
+            plt.fill_between(i, data[4], data[5], alpha=0.5, linewidth=0)
+            plt.plot(i, data[3])
+            plt.xlabel('time (sec)')
+            plt.ylabel('min, max, average (usec)')
+            plt.title('{} duty'.format(key))
+            plt.show()
+
         if False:
             i = np.arange(0, len(data[0]))
             plt.figure()
