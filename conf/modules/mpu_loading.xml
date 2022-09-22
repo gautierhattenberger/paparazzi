@@ -1,0 +1,26 @@
+<!DOCTYPE module SYSTEM "module.dtd">
+<module name="mpu_loading" dir="benchmark" task="default">
+  <doc>
+    <description>Simulate MCU loading with periodic active wait</description>
+  </doc>
+  <dep>
+    <depends>perf_profil</depends>
+  </dep>
+  <header>
+    <file name="mpu_loading.h"/>
+  </header>
+  <periodic fun="mcu_load_0_1Hz()" freq="0.1" autorun="TRUE"/>
+  <periodic fun="mcu_load_1Hz()" freq="1.0" autorun="TRUE"/>
+  <periodic fun="mcu_load_5Hz()" freq="5.0" autorun="TRUE"/>
+  <periodic fun="mcu_load_10Hz()" freq="10.0" autorun="TRUE"/>
+  <periodic fun="mcu_load_25Hz()" freq="25.0" autorun="TRUE"/>
+  <!--periodic fun="mcu_load_0_1Hz()" freq="0.1" autorun="TRUE" delay="0"/>
+  <periodic fun="mcu_load_1Hz()" freq="1.0" autorun="TRUE" delay="0"/>
+  <periodic fun="mcu_load_5Hz()" freq="5.0" autorun="TRUE" delay="0"/>
+  <periodic fun="mcu_load_10Hz()" freq="10.0" autorun="TRUE" delay="0"/>
+  <periodic fun="mcu_load_25Hz()" freq="25.0" autorun="TRUE" delay="0"/-->
+  <makefile>
+    <file name="mpu_loading.c"/>
+    <test/>
+  </makefile>
+</module>
