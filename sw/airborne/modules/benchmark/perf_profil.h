@@ -34,6 +34,7 @@ enum PerfProfilEvent {
   PP_GNC,
   PP_MCU_CORE,
   PP_DATALINK,
+  PP_PERIODIC,
   PP_EVENT,
   PERF_STRUCT_NB
 };
@@ -42,7 +43,7 @@ extern void perf_profil_init(void);
 extern void perf_profil_log(char * msg);
 extern void perf_profil_log_time(char * msg, uint32_t t);
 extern void perf_profil_event_start(int idx);
-extern void perf_profil_event_end(int idx, char * msg);
+extern void perf_profil_event_end(int idx, char * msg, uint32_t freq);
 
 #ifdef PPRZ_PERF_TRACE
 #error "PPRZ_PERF_TRACE already defined when loading perf_profil module"
@@ -51,7 +52,7 @@ extern void perf_profil_event_end(int idx, char * msg);
 #define PPRZ_PERF_TRACE(_x) perf_profil_log(_x)
 #define PPRZ_PERF_TRACE_TIME(_x, _t) perf_profil_log_time(_x, _t)
 #define PPRZ_PERF_EVENT_START(_i) perf_profil_event_start(_i)
-#define PPRZ_PERF_EVENT_END(_i, _m) perf_profil_event_end(_i, _m)
+#define PPRZ_PERF_EVENT_END(_i, _m, _f) perf_profil_event_end(_i, _m, _f)
 #define PPRZ_PERF_TIME() chSysGetRealtimeCounterX()
 
 #endif  // PERF_PROFIL_H

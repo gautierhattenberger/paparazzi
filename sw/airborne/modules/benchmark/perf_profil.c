@@ -89,7 +89,7 @@ void perf_profil_event_start(int idx)
   }
 }
 
-void perf_profil_event_end(int idx, char * msg)
+void perf_profil_event_end(int idx, char * msg, uint32_t freq)
 {
   perf_array[idx].dt_end = chSysGetRealtimeCounterX();
   perf_array[idx].nb_event++;
@@ -101,7 +101,7 @@ void perf_profil_event_end(int idx, char * msg)
   if (dt > perf_array[idx].dt_max) {
     perf_array[idx].dt_max = dt;
   }
-  if (dt > US2RTC(STM32_SYSCLK, (1000000U/CH_CFG_ST_FREQUENCY))) {
+  if (dt > US2RTC(STM32_SYSCLK, (1000000U/freq))) {
     perf_array[idx].nb_over++; // dt is over the polling inverval (1/CH_CFG_ST_FREQUENCY sec)
   }
   if (perf_array[idx].nb_event >= PERF_PROFIL_EVENT_MAX) {

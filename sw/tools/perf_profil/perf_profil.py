@@ -52,6 +52,7 @@ last_data = None
 
 event_vector = {
         "event":        None,
+        "periodic":     None,
         "sensors":      None,
         "radio":        None,
         "gnc":          None,
@@ -131,7 +132,7 @@ with open(data_file) as f:
                 dt_max = rtc2us(data[6])
                 if event_vector[name] is None:
                     event_vector[name] = (
-                            np.array(nb_sample), np.array(nb_over),
+                            [np.array(nb_sample)], np.array(nb_over),
                             np.array(dt / float(nb_sample)),
                             np.array(duty / float(nb_sample)),
                             np.array(dt_min), np.array(dt_max))
@@ -190,15 +191,15 @@ for key in event_vector:
             t_end = len(data[0])*data[0][0]*np.mean(data[2])/1e6
             i = np.linspace(0, t_end, len(data[0]))
             plt.figure()
-            if key == "gnc":
-                # only for Niquad_voliere_2.LOG
-                plt.axvspan(0,120, facecolor='red', alpha=0.1)
-                plt.axvspan(120,210, facecolor='orange', alpha=0.1)
-                plt.axvspan(130,140, facecolor='orange', alpha=0.1)
-                plt.axvspan(153,195, facecolor='orange', alpha=0.1)
-                plt.axvspan(210,320, facecolor='green', alpha=0.1)
-                plt.axvspan(228,300, facecolor='green', alpha=0.1)
-                plt.axvspan(320,335, facecolor='red', alpha=0.1)
+            #if key == "gnc":
+            #    # only for Niquad_voliere_2.LOG
+            #    plt.axvspan(0,120, facecolor='red', alpha=0.1)
+            #    plt.axvspan(120,210, facecolor='orange', alpha=0.1)
+            #    plt.axvspan(130,140, facecolor='orange', alpha=0.1)
+            #    plt.axvspan(153,195, facecolor='orange', alpha=0.1)
+            #    plt.axvspan(210,320, facecolor='green', alpha=0.1)
+            #    plt.axvspan(228,300, facecolor='green', alpha=0.1)
+            #    plt.axvspan(320,335, facecolor='red', alpha=0.1)
             #print(len(i),t_end,len(data[0]),len(data[4]), len(data[5]))
             plt.fill_between(i, data[4], data[5], alpha=0.5, linewidth=0)
             plt.plot(i, data[3])

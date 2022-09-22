@@ -78,7 +78,7 @@ tid_t modules_datalink_tid;
 #define PPRZ_PERF_EVENT_START(_x) {}
 #endif
 #ifndef PPRZ_PERF_EVENT_END
-#define PPRZ_PERF_EVENT_END(_x, _y) {}
+#define PPRZ_PERF_EVENT_END(_x, _y, _z) {}
 #endif
 
 void main_ap_init(void)
@@ -128,16 +128,21 @@ void main_ap_init(void)
 
 void main_ap_periodic(void)
 {
+  bool periodic_called = false;
+  PPRZ_PERF_EVENT_START(PP_PERIODIC);
+
   if (sys_time_check_and_ack_timer(modules_sensors_tid)) {
     PPRZ_PERF_EVENT_START(PP_SENSORS);
     modules_sensors_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_SENSORS, "sensors");
+    PPRZ_PERF_EVENT_END(PP_SENSORS, "sensors", PERIODIC_FREQUENCY);
+    periodic_called = true;
   }
 
   if (sys_time_check_and_ack_timer(modules_radio_control_tid)) {
     PPRZ_PERF_EVENT_START(PP_RC);
     modules_radio_control_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_RC, "radio");
+    PPRZ_PERF_EVENT_END(PP_RC, "radio", 60);
+    periodic_called = true;
   }
 
   if (sys_time_check_and_ack_timer(modules_gnc_tid)) {
@@ -146,20 +151,27 @@ void main_ap_periodic(void)
     modules_control_periodic_task();
     modules_default_periodic_task();
     modules_actuators_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_GNC, "gnc");
+    PPRZ_PERF_EVENT_END(PP_GNC, "gnc", PERIODIC_FREQUENCY);
+    periodic_called = true;
   }
 
   if (sys_time_check_and_ack_timer(modules_mcu_core_tid)) {
     PPRZ_PERF_EVENT_START(PP_MCU_CORE);
     modules_mcu_periodic_task();
     modules_core_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_MCU_CORE, "core");
+    PPRZ_PERF_EVENT_END(PP_MCU_CORE, "core", PERIODIC_FREQUENCY);
+    periodic_called = true;
   }
 
   if (sys_time_check_and_ack_timer(modules_datalink_tid)) {
     PPRZ_PERF_EVENT_START(PP_DATALINK);
     modules_datalink_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_DATALINK, "telemetry");
+    PPRZ_PERF_EVENT_END(PP_DATALINK, "telemetry", PERIODIC_FREQUENCY);
+    periodic_called = true;
+  }
+
+  if (periodic_called) {
+    PPRZ_PERF_EVENT_END(PP_PERIODIC, "periodic", PERIODIC_FREQUENCY);
   }
 }
 
@@ -175,6 +187,6 @@ void main_ap_event(void)
   modules_actuators_event_task();
   modules_datalink_event_task();
   modules_default_event_task();
-  PPRZ_PERF_EVENT_END(PP_EVENT, "event");
+  PPRZ_PERF_EVENT_END(PP_EVENT, "event", CH_CFG_ST_FREQUENCY);
 }
 
