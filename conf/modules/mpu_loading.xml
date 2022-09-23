@@ -21,6 +21,7 @@
   <periodic fun="mcu_load_25Hz()" freq="25.0" autorun="TRUE" delay="0"/-->
   <makefile>
     <file name="mpu_loading.c"/>
+    <flag name="CFLAGS" value="fdump-tree-all"/>
     <test/>
   </makefile>
 </module>

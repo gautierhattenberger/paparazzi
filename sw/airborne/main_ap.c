@@ -134,14 +134,14 @@ void main_ap_periodic(void)
   if (sys_time_check_and_ack_timer(modules_sensors_tid)) {
     PPRZ_PERF_EVENT_START(PP_SENSORS);
     modules_sensors_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_SENSORS, "sensors", PERIODIC_FREQUENCY);
+    PPRZ_PERF_EVENT_END(PP_SENSORS, "sensors", SYS_TIME_FREQUENCY);
     periodic_called = true;
   }
 
   if (sys_time_check_and_ack_timer(modules_radio_control_tid)) {
     PPRZ_PERF_EVENT_START(PP_RC);
     modules_radio_control_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_RC, "radio", 60);
+    PPRZ_PERF_EVENT_END(PP_RC, "radio", SYS_TIME_FREQUENCY);
     periodic_called = true;
   }
 
@@ -151,7 +151,7 @@ void main_ap_periodic(void)
     modules_control_periodic_task();
     modules_default_periodic_task();
     modules_actuators_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_GNC, "gnc", PERIODIC_FREQUENCY);
+    PPRZ_PERF_EVENT_END(PP_GNC, "gnc", SYS_TIME_FREQUENCY);
     periodic_called = true;
   }
 
@@ -159,19 +159,19 @@ void main_ap_periodic(void)
     PPRZ_PERF_EVENT_START(PP_MCU_CORE);
     modules_mcu_periodic_task();
     modules_core_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_MCU_CORE, "core", PERIODIC_FREQUENCY);
+    PPRZ_PERF_EVENT_END(PP_MCU_CORE, "core", SYS_TIME_FREQUENCY);
     periodic_called = true;
   }
 
   if (sys_time_check_and_ack_timer(modules_datalink_tid)) {
     PPRZ_PERF_EVENT_START(PP_DATALINK);
     modules_datalink_periodic_task();
-    PPRZ_PERF_EVENT_END(PP_DATALINK, "telemetry", PERIODIC_FREQUENCY);
+    PPRZ_PERF_EVENT_END(PP_DATALINK, "telemetry", SYS_TIME_FREQUENCY);
     periodic_called = true;
   }
 
   if (periodic_called) {
-    PPRZ_PERF_EVENT_END(PP_PERIODIC, "periodic", PERIODIC_FREQUENCY);
+    PPRZ_PERF_EVENT_END(PP_PERIODIC, "periodic", SYS_TIME_FREQUENCY);
   }
 }
 

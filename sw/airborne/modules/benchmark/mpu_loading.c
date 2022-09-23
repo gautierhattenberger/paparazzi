@@ -30,35 +30,35 @@ void mcu_load_0_1Hz(void)
 {
   // your periodic code here.
   // freq = 0.1 Hz
-  sys_time_usleep(500);
+  sys_time_usleep(400);
 }
 
 void mcu_load_1Hz(void)
 {
   // your periodic code here.
   // freq = 1.0 Hz
-  sys_time_usleep(500);
+  sys_time_usleep(400);
 }
 
 void mcu_load_5Hz(void)
 {
   // your periodic code here.
   // freq = 5.0 Hz
-  sys_time_usleep(500);
+  sys_time_usleep(400);
 }
 
 void mcu_load_10Hz(void)
 {
   // your periodic code here.
   // freq = 10.0 Hz
-  sys_time_usleep(500);
+  sys_time_usleep(400);
 }
 
 void mcu_load_25Hz(void)
 {
   // your periodic code here.
   // freq = 25.0 Hz
-  sys_time_usleep(500);
+  sys_time_usleep(400);
 }
 
 
