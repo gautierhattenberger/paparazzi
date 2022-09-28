@@ -4,23 +4,39 @@
     <description>Simulate MCU loading with periodic active wait</description>
   </doc>
   <dep>
-    <depends>perf_profil</depends>
+    <depends>perf_profil,sys_time</depends>
   </dep>
   <header>
     <file name="mpu_loading.h"/>
   </header>
-  <periodic fun="mcu_load_0_1Hz()" freq="0.1" autorun="TRUE"/>
-  <periodic fun="mcu_load_1Hz()" freq="1.0" autorun="TRUE"/>
-  <periodic fun="mcu_load_5Hz()" freq="5.0" autorun="TRUE"/>
-  <periodic fun="mcu_load_10Hz()" freq="10.0" autorun="TRUE"/>
-  <periodic fun="mcu_load_25Hz()" freq="25.0" autorun="TRUE"/>
-  <!--periodic fun="mcu_load_0_1Hz()" freq="0.1" autorun="TRUE" delay="0"/>
-  <periodic fun="mcu_load_1Hz()" freq="1.0" autorun="TRUE" delay="0"/>
-  <periodic fun="mcu_load_5Hz()" freq="5.0" autorun="TRUE" delay="0"/>
-  <periodic fun="mcu_load_10Hz()" freq="10.0" autorun="TRUE" delay="0"/>
-  <periodic fun="mcu_load_25Hz()" freq="25.0" autorun="TRUE" delay="0"/-->
+  <!-- case 1 -->
+  <!--periodic fun="sys_time_usleep(600)" freq="10.0"/>
+  <periodic fun="sys_time_usleep(600)" freq="10.2"/-->
+  <!-- case 2 -->
+  <!--periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
+  <periodic fun="sys_time_usleep(600)" freq="0.1"/-->
+  <!-- case 3 -->
+  <!--periodic fun="sys_time_usleep(600)" period="0.006"/>
+  <periodic fun="sys_time_usleep(600)" period="0.060"/>
+  <periodic fun="sys_time_usleep(600)" period="0.066"/-->
+  <!-- case 4 -->
+  <!--periodic fun="sys_time_usleep(600)" period="0.02"/>
+  <periodic fun="sys_time_usleep(600)" period="0.11"/>
+  <periodic fun="sys_time_usleep(600)" period="0.2"/-->
+  <!-- case 5 -->
+  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0"/>
+  <periodic fun="sys_time_usleep(600)" freq="1.0" delay="0"/>
   <makefile>
-    <file name="mpu_loading.c"/>
+    <!--file name="mpu_loading.c"/-->
     <flag name="CFLAGS" value="fdump-tree-all"/>
     <test/>
   </makefile>

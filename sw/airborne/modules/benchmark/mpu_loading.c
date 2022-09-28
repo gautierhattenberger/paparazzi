@@ -26,39 +26,8 @@
 #include "modules/benchmark/mpu_loading.h"
 #include "mcu_periph/sys_time.h"
 
-void mcu_load_0_1Hz(void)
+void mcu_load_400us(void)
 {
-  // your periodic code here.
-  // freq = 0.1 Hz
   sys_time_usleep(400);
 }
-
-void mcu_load_1Hz(void)
-{
-  // your periodic code here.
-  // freq = 1.0 Hz
-  sys_time_usleep(400);
-}
-
-void mcu_load_5Hz(void)
-{
-  // your periodic code here.
-  // freq = 5.0 Hz
-  sys_time_usleep(400);
-}
-
-void mcu_load_10Hz(void)
-{
-  // your periodic code here.
-  // freq = 10.0 Hz
-  sys_time_usleep(400);
-}
-
-void mcu_load_25Hz(void)
-{
-  // your periodic code here.
-  // freq = 25.0 Hz
-  sys_time_usleep(400);
-}
-
 
