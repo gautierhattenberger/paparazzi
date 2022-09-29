@@ -26,10 +26,6 @@
 #ifndef MPU_LOADING_H
 #define MPU_LOADING_H
 
-extern void mcu_load_0_1Hz(void);
-extern void mcu_load_1Hz(void);
-extern void mcu_load_5Hz(void);
-extern void mcu_load_10Hz(void);
-extern void mcu_load_25Hz(void);
+extern void mcu_load_400us(void);
 
 #endif  // MPU_LOADING_H
