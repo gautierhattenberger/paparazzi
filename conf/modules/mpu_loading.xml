@@ -28,13 +28,13 @@
   <!--periodic fun="sys_time_usleep(600)" period="0.006"/>
   <periodic fun="sys_time_usleep(600)" period="0.060"/>
   <periodic fun="sys_time_usleep(600)" period="0.066"/-->
-  <!-- case 4 -->
+  <!-- case 4 (not good) -->
   <!--periodic fun="sys_time_usleep(600)" period="0.02"/>
   <periodic fun="sys_time_usleep(600)" period="0.11"/>
   <periodic fun="sys_time_usleep(600)" period="0.2"/-->
   <!-- case 5 -->
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0"/>
-  <periodic fun="sys_time_usleep(600)" freq="1.0" delay="0"/>
+  <!--periodic fun="sys_time_usleep(600)" freq="0.1" delay="0"/>
+  <periodic fun="sys_time_usleep(600)" freq="1.0" delay="0"/-->
   <makefile>
     <!--file name="mpu_loading.c"/-->
     <flag name="CFLAGS" value="fdump-tree-all"/>
