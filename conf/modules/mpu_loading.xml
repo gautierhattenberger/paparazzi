@@ -10,52 +10,52 @@
     <file name="mpu_loading.h"/>
   </header>
   <!-- case 1 -->
-  <!--periodic fun="sys_time_usleep(600)" freq="10.0"/>
-  <periodic fun="sys_time_usleep(600)" freq="10.2"/-->
+  <!--periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1"/-->
   <!-- case 2 -->
-  <!--periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1"/-->
+  <!--periodic fun="mcu_load_us(600)" period="0.006"/>
+  <periodic fun="mcu_load_us(600)" period="0.060"/>
+  <periodic fun="mcu_load_us(600)" period="0.066"/-->
   <!-- case 3 -->
-  <!--periodic fun="sys_time_usleep(600)" period="0.006"/>
-  <periodic fun="sys_time_usleep(600)" period="0.060"/>
-  <periodic fun="sys_time_usleep(600)" period="0.066"/-->
+  <!--periodic fun="mcu_load_us(600)" freq="0.1" delay="0"/>
+  <periodic fun="mcu_load_us(600)" freq="1.0" delay="0"/-->
   <!-- case 4 (not good) -->
-  <!--periodic fun="sys_time_usleep(600)" period="0.02"/>
-  <periodic fun="sys_time_usleep(600)" period="0.11"/>
-  <periodic fun="sys_time_usleep(600)" period="0.2"/-->
-  <!-- case 5 -->
-  <!--periodic fun="sys_time_usleep(600)" freq="0.1" delay="0"/>
-  <periodic fun="sys_time_usleep(600)" freq="1.0" delay="0"/-->
+  <!--periodic fun="mcu_load_us(600)" period="0.02"/>
+  <periodic fun="mcu_load_us(600)" period="0.11"/>
+  <periodic fun="mcu_load_us(600)" period="0.2"/-->
+  <!-- case 1 GCD+ -->
+  <!--periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0000"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0004"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0008"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0012"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0016"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0020"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0024"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0028"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0032"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0034"/>
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0.0036"/-->
   <!-- case 2 GCD+ -->
-  <!--periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0000"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0004"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0008"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0012"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0016"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0020"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0024"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0028"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0032"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0034"/>
-  <periodic fun="sys_time_usleep(600)" freq="0.1" delay="0.0036"/-->
+  <!--periodic fun="mcu_load_us(600)" period="0.006" delay="0.0"/>
+  <periodic fun="mcu_load_us(600)" period="0.060" delay="0.0334"/>
+  <periodic fun="mcu_load_us(600)" period="0.066" delay="0.0607"/-->
   <!-- case 3 GCD+ -->
-  <periodic fun="sys_time_usleep(600)" period="0.006" delay="0.0"/>
-  <periodic fun="sys_time_usleep(600)" period="0.060" delay="0.0334"/>
-  <periodic fun="sys_time_usleep(600)" period="0.066" delay="0.0607"/>
-  <!-- case 5 GCD+ -->
-  <!--periodic fun="sys_time_usleep(600)" freq="0.1" delay="0"/>
-  <periodic fun="sys_time_usleep(600)" freq="1.0" delay="0.002"/-->
+  <periodic fun="mcu_load_us(600)" freq="0.1" delay="0"/>
+  <periodic fun="mcu_load_us(600)" freq="1.0" delay="0.002"/>
+  <!-- case no solution -->
+  <!--periodic fun="mcu_load_us(600)" freq="10.0"/>
+  <periodic fun="mcu_load_us(600)" freq="10.2"/-->
   <makefile>
-    <!--file name="mpu_loading.c"/-->
+    <file name="mpu_loading.c"/>
     <flag name="CFLAGS" value="fdump-tree-all"/>
     <test/>
   </makefile>

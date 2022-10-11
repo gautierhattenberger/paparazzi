@@ -26,6 +26,8 @@
 #ifndef MPU_LOADING_H
 #define MPU_LOADING_H
 
-extern void mcu_load_400us(void);
+#include "std.h"
+
+extern void mcu_load_us(uint32_t us);
 
 #endif  // MPU_LOADING_H

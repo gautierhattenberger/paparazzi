@@ -26,8 +26,10 @@
 #include "modules/benchmark/mpu_loading.h"
 #include "mcu_periph/sys_time.h"
 
-void mcu_load_400us(void)
+void mcu_load_us(uint32_t us)
 {
-  sys_time_usleep(400);
+  uint32_t t = 0;
+  SysTimeTimerStart(t);
+  while (SysTimeTimer(t) < us) ;
 }
 
