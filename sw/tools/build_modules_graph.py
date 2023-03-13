@@ -63,11 +63,14 @@ if __name__ == '__main__':
     edges_m_req = []
     edges_f_req = []
     edges_provide = []
+    edges_reco = []
     for m in modules:
         #print('Module '+m)
         dep = get_module_dependency(m)
         if len(dep.depends) > 0:
             mod_dep.append(m)
+        else:
+            print("Modules without dep: ", m)
         for p in dep.provides:
             if p not in func:
                 func.append(p)
@@ -84,6 +87,15 @@ if __name__ == '__main__':
                     edges_m_req.append((m, d))
                 else:
                     print("not a valid module", m, d)
+        for r in dep.recommends:
+            if r[0] == '@':
+                edges_reco.append((m, r[1:]))
+            else:
+                if r in modules:
+                    edges_reco.append((m, r))
+                else:
+                    print("not a valid recommends", m, r)
+
 
     g.attr('node', shape='doublecircle')
     for f in func:
@@ -98,6 +110,9 @@ if __name__ == '__main__':
         g.edge(e[0], e[1])
     g.attr('edge', color='red')
     for e in edges_provide:
+        g.edge(e[0], e[1])
+    g.attr('edge', color='green')
+    for e in edges_reco:
         g.edge(e[0], e[1])
 
     g.view()
